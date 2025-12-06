@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mobile App Mockups - SWE Mentor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwindcss.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f5f3ff', 100: '#ede9fe', 200: '#ddd6fe', 300: '#c4b5fd',
+                            400: '#a78bfa', 500: '#8b5cf6', 600: '#7c3aed', 700: '#6d28d9',
+                            800: '#5b21b6', 900: '#4c1d95',
+                        },
+                        accent: {
+                            50: '#fdf4ff', 100: '#fae8ff', 200: '#f5d0fe', 300: '#f0abfc',
+                            400: '#e879f9', 500: '#d946ef', 600: '#c026d3', 700: '#a21caf',
+                            800: '#86198f', 900: '#701a75',
+                        }
+                    },
+                    animation: {
+                        'gradient': 'gradient 8s linear infinite',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        gradient: {
+                            '0%, 100%': { backgroundPosition: '0% 50%' },
+                            '50%': { backgroundPosition: '100% 50%' },
+                        },
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(-45deg, #4c1d95, #7c3aed, #8b5cf6, #a78bfa);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+        .phone-frame {
+            width: 375px;
+            height: 812px;
+            border-radius: 40px;
+            border: 8px solid #1f2937;
+            overflow: hidden;
+            position: relative;
+        }
+        .phone-frame::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 30px;
+            background: #1f2937;
+            border-radius: 0 0 20px 20px;
+            z-index: 50;
+        }
+        .screen-content {
+            height: 100%;
+            overflow-y: auto;
+            padding-top: 44px;
+            padding-bottom: 90px;
+        }
+        .bottom-nav {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(17, 24, 39, 0.95);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding: 12px 0 24px;
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .swipe-card {
+            transition: transform 0.3s ease, opacity 0.3s ease;
+        }
+    </style>
+</head>
+<body class="bg-gray-950 text-white min-h-screen p-8">
+    <!-- Header -->
+    <div class="max-w-7xl mx-auto mb-12">
+        <a href="../index.html" class="text-primary-400 hover:text-primary-300 mb-4 inline-flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            Back to Overview
+        </a>
+        <h1 class="text-4xl font-bold mb-4">Mobile App Flows</h1>
+        <p class="text-gray-400">Complete user journey mockups for the Expo React Native app</p>
+    </div>
+
+    <!-- Flow Navigation -->
+    <div class="max-w-7xl mx-auto mb-12 flex flex-wrap gap-3">
+        <a href="#onboarding" class="px-4 py-2 rounded-xl glass hover:bg-white/20 transition text-sm">A. Onboarding</a>
+        <a href="#checkin" class="px-4 py-2 rounded-xl glass hover:bg-white/20 transition text-sm">B. Daily Check-In</a>
+        <a href="#capture" class="px-4 py-2 rounded-xl glass hover:bg-white/20 transition text-sm">C. Quick Capture</a>
+        <a href="#mentor" class="px-4 py-2 rounded-xl glass hover:bg-white/20 transition text-sm">D. Mentor Chat</a>
+        <a href="#review" class="px-4 py-2 rounded-xl glass hover:bg-white/20 transition text-sm">E. Weekly Review</a>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- FLOW A: ONBOARDING -->
+    <!-- ============================================== -->
+    <section id="onboarding" class="max-w-7xl mx-auto mb-24">
+        <h2 class="text-2xl font-bold mb-2 flex items-center gap-3">
+            <span class="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center text-sm">A</span>
+            Onboarding & Setup
+        </h2>
+        <p class="text-gray-400 mb-8">Welcome → Sign In → Profile → Reminders → Walkthrough</p>
+
+        <div class="flex gap-8 overflow-x-auto pb-4">
+            <!-- Screen 1: Welcome -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">1. Welcome Screen</p>
+                <div class="phone-frame bg-gray-900">
+                    <div class="screen-content flex flex-col items-center justify-center px-8 text-center" style="padding-bottom: 0;">
+                        <!-- Animated Logo -->
+                        <div class="w-24 h-24 rounded-3xl gradient-bg mb-8 flex items-center justify-center animate-pulse-slow">
+                            <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                        </div>
+                        <h1 class="text-3xl font-bold mb-4">SWE Mentor</h1>
+                        <p class="text-gray-400 mb-12">Your AI-powered career companion for software engineering growth</p>
+
+                        <button class="w-full py-4 rounded-2xl gradient-bg font-semibold text-lg mb-4">
+                            Get Started
+                        </button>
+                        <button class="w-full py-4 rounded-2xl glass text-gray-300">
+                            I already have an account
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Screen 2: Sign In -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">2. Sign In</p>
+                <div class="phone-frame bg-gray-900">
+                    <div class="screen-content px-6 pt-12">
+                        <h2 class="text-2xl font-bold mb-2">Welcome back</h2>
+                        <p class="text-gray-400 mb-8">Sign in to continue your journey</p>
+
+                        <!-- Google Sign In -->
+                        <button class="w-full py-4 rounded-2xl bg-white text-gray-900 font-semibold flex items-center justify-center gap-3 mb-4">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24">
+                                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                            </svg>
+                            Continue with Google
+                        </button>
+
+                        <div class="flex items-center gap-4 my-6">
+                            <div class="flex-1 h-px bg-gray-700"></div>
+                            <span class="text-gray-500 text-sm">or</span>
+                            <div class="flex-1 h-px bg-gray-700"></div>
+                        </div>
+
+                        <!-- Email Input -->
+                        <div class="mb-4">
+                            <label class="text-sm text-gray-400 mb-2 block">Email</label>
+                            <input type="email" placeholder="you@company.com" class="w-full px-4 py-3.5 rounded-xl bg-gray-800 border border-gray-700 focus:border-primary-500 focus:outline-none">
+                        </div>
+
+                        <button class="w-full py-4 rounded-2xl bg-primary-600 font-semibold mb-4">
+                            Send Magic Link
+                        </button>
+
+                        <p class="text-center text-gray-500 text-sm">
+                            We'll send you a link to sign in
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Screen 3: Create Profile -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">3. Create Profile</p>
+                <div class="phone-frame bg-gray-900">
+                    <div class="screen-content px-6 pt-8">
+                        <!-- Progress -->
+                        <div class="flex gap-2 mb-8">
+                            <div class="flex-1 h-1 rounded-full bg-primary-500"></div>
+                            <div class="flex-1 h-1 rounded-full bg-gray-700"></div>
+                            <div class="flex-1 h-1 rounded-full bg-gray-700"></div>
+                        </div>
+
+                        <h2 class="text-2xl font-bold mb-2">Set up your profile</h2>
+                        <p class="text-gray-400 mb-8">Tell us a bit about yourself</p>
+
+                        <!-- Avatar -->
+                        <div class="flex justify-center mb-8">
+                            <div class="w-24 h-24 rounded-full gradient-bg flex items-center justify-center text-3xl font-bold">
+                                JD
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div>
+                                <label class="text-sm text-gray-400 mb-2 block">Full Name</label>
+                                <input type="text" value="John Doe" class="w-full px-4 py-3.5 rounded-xl bg-gray-800 border border-gray-700">
+                            </div>
+                            <div>
+                                <label class="text-sm text-gray-400 mb-2 block">Email</label>
+                                <input type="email" value="john@company.com" disabled class="w-full px-4 py-3.5 rounded-xl bg-gray-800/50 border border-gray-700 text-gray-500">
+                            </div>
+                            <div>
+                                <label class="text-sm text-gray-400 mb-2 block">Timezone</label>
+                                <select class="w-full px-4 py-3.5 rounded-xl bg-gray-800 border border-gray-700">
+                                    <option>America/Los_Angeles (PST)</option>
+                                    <option>America/New_York (EST)</option>
+                                    <option>Europe/London (GMT)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="text-sm text-gray-400 mb-2 block">Current Role</label>
+                                <select class="w-full px-4 py-3.5 rounded-xl bg-gray-800 border border-gray-700">
+                                    <option>Software Engineer I</option>
+                                    <option>Software Engineer II</option>
+                                    <option selected>Senior Software Engineer</option>
+                                    <option>Staff Engineer</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button class="w-full py-4 rounded-2xl gradient-bg font-semibold mt-8">
+                            Continue
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Screen 4: Reminder Setup -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">4. Reminder Setup</p>
+                <div class="phone-frame bg-gray-900">
+                    <div class="screen-content px-6 pt-8">
+                        <!-- Progress -->
+                        <div class="flex gap-2 mb-8">
+                            <div class="flex-1 h-1 rounded-full bg-primary-500"></div>
+                            <div class="flex-1 h-1 rounded-full bg-primary-500"></div>
+                            <div class="flex-1 h-1 rounded-full bg-gray-700"></div>
+                        </div>
+
+                        <h2 class="text-2xl font-bold mb-2">Set your reminders</h2>
+                        <p class="text-gray-400 mb-8">When should we check in with you?</p>
+
+                        <!-- Daily Reminder -->
+                        <div class="rounded-2xl glass p-4 mb-4">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-primary-600 flex items-center justify-center">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold">Daily Check-in</p>
+                                        <p class="text-sm text-gray-400">End of work day</p>
+                                    </div>
+                                </div>
+                                <div class="w-12 h-7 rounded-full bg-primary-600 flex items-center px-1">
+                                    <div class="w-5 h-5 rounded-full bg-white ml-auto"></div>
+                                </div>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="flex-1 py-2 rounded-xl bg-gray-800 text-sm">5:00 PM</button>
+                                <button class="flex-1 py-2 rounded-xl bg-primary-600 text-sm">6:00 PM</button>
+                                <button class="flex-1 py-2 rounded-xl bg-gray-800 text-sm">7:00 PM</button>
+                            </div>
+                        </div>
+
+                        <!-- Weekly Reminder -->
+                        <div class="rounded-2xl glass p-4 mb-4">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-accent-600 flex items-center justify-center">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="font-semibold">Weekly Reflection</p>
+                                        <p class="text-sm text-gray-400">Friday afternoon</p>
+                                    </div>
+                                </div>
+                                <div class="w-12 h-7 rounded-full bg-primary-600 flex items-center px-1">
+                                    <div class="w-5 h-5 rounded-full bg-white ml-auto"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Notification Channel -->
+                        <div class="rounded-2xl glass p-4 mb-8">
+                            <p class="text-sm text-gray-400 mb-3">Notification channel</p>
+                            <div class="flex gap-2">
+                                <button class="flex-1 py-3 rounded-xl bg-primary-600 text-sm font-medium">
+                                    Push
+                                </button>
+                                <button class="flex-1 py-3 rounded-xl bg-gray-800 text-sm font-medium">
+                                    SMS
+                                </button>
+                                <button class="flex-1 py-3 rounded-xl bg-gray-800 text-sm font-medium">
+                                    Both
+                                </button>
+                            </div>
+                        </div>
+
+                        <button class="w-full py-4 rounded-2xl gradient-bg font-semibold">
+                            Continue
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Screen 5: Walkthrough -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">5. How It Works</p>
+                <div class="phone-frame bg-gray-900">
+                    <div class="screen-content px-6 pt-8">
+                        <!-- Progress -->
+                        <div class="flex gap-2 mb-8">
+                            <div class="flex-1 h-1 rounded-full bg-primary-500"></div>
+                            <div class="flex-1 h-1 rounded-full bg-primary-500"></div>
+                            <div class="flex-1 h-1 rounded-full bg-primary-500"></div>
+                        </div>
+
+                        <h2 class="text-2xl font-bold mb-8 text-center">How SWE Mentor Works</h2>
+
+                        <div class="space-y-6">
+                            <div class="flex gap-4">
+                                <div class="w-12 h-12 rounded-2xl bg-green-500/20 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="font-semibold">Daily Check-in</p>
+                                    <p class="text-sm text-gray-400">Answer 5 quick questions about your day</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-4">
+                                <div class="w-12 h-12 rounded-2xl bg-blue-500/20 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="font-semibold">Weekly Summary</p>
+                                    <p class="text-sm text-gray-400">AI-generated insights on your progress</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-4">
+                                <div class="w-12 h-12 rounded-2xl bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="font-semibold">AI Mentor</p>
+                                    <p class="text-sm text-gray-400">Get career advice and guidance anytime</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-4">
+                                <div class="w-12 h-12 rounded-2xl bg-orange-500/20 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-6 h-6 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="font-semibold">Career Ladder</p>
+                                    <p class="text-sm text-gray-400">Track progress toward your next level</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button class="w-full py-4 rounded-2xl gradient-bg font-semibold mt-12">
+                            Let's Go!
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- FLOW B: DAILY CHECK-IN -->
+    <!-- ============================================== -->
+    <section id="checkin" class="max-w-7xl mx-auto mb-24">
+        <h2 class="text-2xl font-bold mb-2 flex items-center gap-3">
+            <span class="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center text-sm">B</span>
+            Daily Check-In
+        </h2>
+        <p class="text-gray-400 mb-8">5 structured questions → swipe through → submit</p>
+
+        <div class="flex gap-8 overflow-x-auto pb-4">
+            <!-- Question 1 -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">Question 1 of 5</p>
+                <div class="phone-frame bg-gray-900">
+                    <div class="screen-content px-6 pt-8">
+                        <!-- Progress dots -->
+                        <div class="flex justify-center gap-2 mb-8">
+                            <div class="w-8 h-2 rounded-full bg-primary-500"></div>
+                            <div class="w-2 h-2 rounded-full bg-gray-700"></div>
+                            <div class="w-2 h-2 rounded-full bg-gray-700"></div>
+                            <div class="w-2 h-2 rounded-full bg-gray-700"></div>
+                            <div class="w-2 h-2 rounded-full bg-gray-700"></div>
+                        </div>
+
+                        <div class="rounded-3xl glass p-6 swipe-card">
+                            <div class="w-12 h-12 rounded-2xl bg-blue-500/20 flex items-center justify-center mb-6">
+                                <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                                </svg>
+                            </div>
+                            <h3 class="text-xl font-bold mb-4">What did you work on today?</h3>
+                            <textarea class="w-full h-40 px-4 py-3 rounded-xl bg-gray-800/50 border border-gray-700 resize-none focus:border-primary-500 focus:outline-none" placeholder="I worked on the authentication system..."></textarea>
+
+                            <!-- Tags -->
+                            <div class="flex flex-wrap gap-2 mt-4">
+                                <span class="px-3 py-1 rounded-full bg-gray-800 text-sm text-gray-400">+ Add tag</span>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center mt-8">
+                            <button class="text-gray-500">Skip</button>
+                            <button class="px-8 py-3 rounded-xl gradient-bg font-semibold">
+                                Next
+                            </button>
+                        </div>
+
+                        <p class="text-center text-gray-500 text-sm mt-4">Swipe right to continue</p>
+                    </div>
+                    <!-- Bottom Nav -->
+                    <div class="bottom-nav">
+                        <div class="flex justify-around">
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Home</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-primary-600 mb-1"></div><span class="text-xs text-primary-400">Journal</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Mentor</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Insights</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question 2 -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">Question 2 of 5</p>
+                <div class="phone-frame bg-gray-900">
+                    <div class="screen-content px-6 pt-8">
+                        <div class="flex justify-center gap-2 mb-8">
+                            <div class="w-2 h-2 rounded-full bg-primary-500"></div>
+                            <div class="w-8 h-2 rounded-full bg-primary-500"></div>
+                            <div class="w-2 h-2 rounded-full bg-gray-700"></div>
+                            <div class="w-2 h-2 rounded-full bg-gray-700"></div>
+                            <div class="w-2 h-2 rounded-full bg-gray-700"></div>
+                        </div>
+
+                        <div class="rounded-3xl glass p-6 swipe-card">
+                            <div class="w-12 h-12 rounded-2xl bg-green-500/20 flex items-center justify-center mb-6">
+                                <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            </div>
+                            <h3 class="text-xl font-bold mb-4">What did you ship or move forward?</h3>
+                            <textarea class="w-full h-40 px-4 py-3 rounded-xl bg-gray-800/50 border border-gray-700 resize-none focus:border-primary-500 focus:outline-none" placeholder="Merged the PR for user settings..."></textarea>
+
+                            <div class="flex flex-wrap gap-2 mt-4">
+                                <span class="px-3 py-1 rounded-full bg-green-500/20 text-green-400 text-sm">#win</span>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center mt-8">
+                            <button class="text-gray-400">← Back</button>
+                            <button class="px-8 py-3 rounded-xl gradient-bg font-semibold">
+                                Next
+                            </button>
+                        </div>
+                    </div>
+                    <div class="bottom-nav">
+                        <div class="flex justify-around">
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Home</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-primary-600 mb-1"></div><span class="text-xs text-primary-400">Journal</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Mentor</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Insights</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question 3 -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">Question 3 of 5</p>
+                <div class="phone-frame bg-gray-900">
+                    <div class="screen-content px-6 pt-8">
+                        <div class="flex justify-center gap-2 mb-8">
+                            <div class="w-2 h-2 rounded-full bg-primary-500"></div>
+                            <div class="w-2 h-2 rounded-full bg-primary-500"></div>
+                            <div class="w-8 h-2 rounded-full bg-primary-500"></div>
+                            <div class="w-2 h-2 rounded-full bg-gray-700"></div>
+                            <div class="w-2 h-2 rounded-full bg-gray-700"></div>
+                        </div>
+
+                        <div class="rounded-3xl glass p-6 swipe-card">
+                            <div class="w-12 h-12 rounded-2xl bg-red-500/20 flex items-center justify-center mb-6">
+                                <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                                </svg>
+                            </div>
+                            <h3 class="text-xl font-bold mb-4">What blocked you?</h3>
+                            <textarea class="w-full h-40 px-4 py-3 rounded-xl bg-gray-800/50 border border-gray-700 resize-none focus:border-primary-500 focus:outline-none" placeholder="Waiting on code review from team lead..."></textarea>
+
+                            <div class="flex flex-wrap gap-2 mt-4">
+                                <span class="px-3 py-1 rounded-full bg-red-500/20 text-red-400 text-sm">#blocker</span>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center mt-8">
+                            <button class="text-gray-400">← Back</button>
+                            <button class="px-8 py-3 rounded-xl gradient-bg font-semibold">
+                                Next
+                            </button>
+                        </div>
+                    </div>
+                    <div class="bottom-nav">
+                        <div class="flex justify-around">
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Home</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-primary-600 mb-1"></div><span class="text-xs text-primary-400">Journal</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Mentor</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Insights</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question 4 -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">Question 4 of 5</p>
+                <div class="phone-frame bg-gray-900">
+                    <div class="screen-content px-6 pt-8">
+                        <div class="flex justify-center gap-2 mb-8">
+                            <div class="w-2 h-2 rounded-full bg-primary-500"></div>
+                            <div class="w-2 h-2 rounded-full bg-primary-500"></div>
+                            <div class="w-2 h-2 rounded-full bg-primary-500"></div>
+                            <div class="w-8 h-2 rounded-full bg-primary-500"></div>
+                            <div class="w-2 h-2 rounded-full bg-gray-700"></div>
+                        </div>
+
+                        <div class="rounded-3xl glass p-6 swipe-card">
+                            <div class="w-12 h-12 rounded-2xl bg-yellow-500/20 flex items-center justify-center mb-6">
+                                <svg class="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                                </svg>
+                            </div>
+                            <h3 class="text-xl font-bold mb-4">Who helped you?</h3>
+                            <textarea class="w-full h-40 px-4 py-3 rounded-xl bg-gray-800/50 border border-gray-700 resize-none focus:border-primary-500 focus:outline-none" placeholder="Sarah helped debug the API issue..."></textarea>
+
+                            <div class="flex flex-wrap gap-2 mt-4">
+                                <span class="px-3 py-1 rounded-full bg-yellow-500/20 text-yellow-400 text-sm">#feedback</span>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center mt-8">
+                            <button class="text-gray-400">← Back</button>
+                            <button class="px-8 py-3 rounded-xl gradient-bg font-semibold">
+                                Next
+                            </button>
+                        </div>
+                    </div>
+                    <div class="bottom-nav">
+                        <div class="flex justify-around">
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Home</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-primary-600 mb-1"></div><span class="text-xs text-primary-400">Journal</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Mentor</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Insights</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question 5 -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">Question 5 of 5</p>
+                <div class="phone-frame bg-gray-900">
+                    <div class="screen-content px-6 pt-8">
+                        <div class="flex justify-center gap-2 mb-8">
+                            <div class="w-2 h-2 rounded-full bg-primary-500"></div>
+                            <div class="w-2 h-2 rounded-full bg-primary-500"></div>
+                            <div class="w-2 h-2 rounded-full bg-primary-500"></div>
+                            <div class="w-2 h-2 rounded-full bg-primary-500"></div>
+                            <div class="w-8 h-2 rounded-full bg-primary-500"></div>
+                        </div>
+
+                        <div class="rounded-3xl glass p-6 swipe-card">
+                            <div class="w-12 h-12 rounded-2xl bg-purple-500/20 flex items-center justify-center mb-6">
+                                <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                                </svg>
+                            </div>
+                            <h3 class="text-xl font-bold mb-4">Any learning or insight?</h3>
+                            <textarea class="w-full h-40 px-4 py-3 rounded-xl bg-gray-800/50 border border-gray-700 resize-none focus:border-primary-500 focus:outline-none" placeholder="Learned about Redis caching patterns..."></textarea>
+
+                            <div class="flex flex-wrap gap-2 mt-4">
+                                <span class="px-3 py-1 rounded-full bg-blue-500/20 text-blue-400 text-sm">#learning</span>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center mt-8">
+                            <button class="text-gray-400">← Back</button>
+                            <button class="px-8 py-3 rounded-xl gradient-bg font-semibold">
+                                Submit Day
+                            </button>
+                        </div>
+                    </div>
+                    <div class="bottom-nav">
+                        <div class="flex justify-around">
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Home</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-primary-600 mb-1"></div><span class="text-xs text-primary-400">Journal</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Mentor</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Insights</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Success Screen -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">Success!</p>
+                <div class="phone-frame bg-gray-900">
+                    <div class="screen-content flex flex-col items-center justify-center px-6 text-center" style="padding-bottom: 0;">
+                        <div class="w-24 h-24 rounded-full bg-green-500/20 flex items-center justify-center mb-6">
+                            <svg class="w-12 h-12 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                        <h2 class="text-2xl font-bold mb-2">Day Logged!</h2>
+                        <p class="text-gray-400 mb-8">Great work keeping track of your progress</p>
+
+                        <div class="w-full rounded-2xl glass p-4 mb-6">
+                            <div class="flex items-center justify-between">
+                                <span class="text-gray-400">Current streak</span>
+                                <span class="text-2xl font-bold">7 days</span>
+                            </div>
+                        </div>
+
+                        <button class="w-full py-4 rounded-2xl gradient-bg font-semibold mb-4">
+                            View Summary
+                        </button>
+                        <button class="w-full py-4 rounded-2xl glass">
+                            Back to Home
+                        </button>
+                    </div>
+                    <div class="bottom-nav">
+                        <div class="flex justify-around">
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Home</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-primary-600 mb-1"></div><span class="text-xs text-primary-400">Journal</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Mentor</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Insights</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- FLOW C: QUICK CAPTURE -->
+    <!-- ============================================== -->
+    <section id="capture" class="max-w-7xl mx-auto mb-24">
+        <h2 class="text-2xl font-bold mb-2 flex items-center gap-3">
+            <span class="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center text-sm">C</span>
+            Quick Capture
+        </h2>
+        <p class="text-gray-400 mb-8">Text Note → Voice Note → Rant to Mentor</p>
+
+        <div class="flex gap-8 overflow-x-auto pb-4">
+            <!-- Home with Quick Actions -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">Home - Quick Actions</p>
+                <div class="phone-frame bg-gray-900">
+                    <div class="screen-content px-6 pt-4">
+                        <!-- Header -->
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <p class="text-gray-400">Good evening,</p>
+                                <h2 class="text-xl font-bold">John</h2>
+                            </div>
+                            <div class="w-10 h-10 rounded-full gradient-bg"></div>
+                        </div>
+
+                        <!-- Check-in Card -->
+                        <div class="rounded-2xl gradient-bg p-5 mb-6">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="font-semibold">Daily Check-in</p>
+                                    <p class="text-sm text-white/70">5 questions • ~3 min</p>
+                                </div>
+                            </div>
+                            <button class="w-full py-3 rounded-xl bg-white text-primary-700 font-semibold">
+                                Start Check-in
+                            </button>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <h3 class="text-sm font-semibold text-gray-400 mb-3">QUICK CAPTURE</h3>
+                        <div class="grid grid-cols-3 gap-3 mb-6">
+                            <button class="rounded-2xl glass p-4 flex flex-col items-center">
+                                <div class="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center mb-2">
+                                    <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                    </svg>
+                                </div>
+                                <span class="text-xs">Note</span>
+                            </button>
+                            <button class="rounded-2xl glass p-4 flex flex-col items-center">
+                                <div class="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center mb-2">
+                                    <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+                                    </svg>
+                                </div>
+                                <span class="text-xs">Voice</span>
+                            </button>
+                            <button class="rounded-2xl glass p-4 flex flex-col items-center">
+                                <div class="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center mb-2">
+                                    <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                                    </svg>
+                                </div>
+                                <span class="text-xs">Rant</span>
+                            </button>
+                        </div>
+
+                        <!-- Recent -->
+                        <h3 class="text-sm font-semibold text-gray-400 mb-3">RECENT ENTRIES</h3>
+                        <div class="space-y-3">
+                            <div class="rounded-xl bg-gray-800/50 p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-sm text-gray-400">Today</span>
+                                    <span class="px-2 py-0.5 rounded-full bg-green-500/20 text-green-400 text-xs">#win</span>
+                                </div>
+                                <p class="text-sm">Merged the auth PR after 3 rounds of review</p>
+                            </div>
+                            <div class="rounded-xl bg-gray-800/50 p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-sm text-gray-400">Yesterday</span>
+                                    <span class="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 text-xs">#blocker</span>
+                                </div>
+                                <p class="text-sm">Still waiting on design review for settings page</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bottom-nav">
+                        <div class="flex justify-around">
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-primary-600 mb-1"></div><span class="text-xs text-primary-400">Home</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Journal</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Mentor</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Insights</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Text Note -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">Quick Note</p>
+                <div class="phone-frame bg-gray-900">
+                    <div class="screen-content px-6 pt-4">
+                        <div class="flex items-center justify-between mb-6">
+                            <button class="text-gray-400">Cancel</button>
+                            <h2 class="font-semibold">Quick Note</h2>
+                            <button class="text-primary-400 font-semibold">Save</button>
+                        </div>
+
+                        <textarea class="w-full h-64 px-4 py-3 rounded-xl bg-gray-800/50 border border-gray-700 resize-none focus:border-primary-500 focus:outline-none text-lg" placeholder="What's on your mind?"></textarea>
+
+                        <!-- Tags -->
+                        <div class="mt-6">
+                            <p class="text-sm text-gray-400 mb-3">Add tags</p>
+                            <div class="flex flex-wrap gap-2">
+                                <button class="px-4 py-2 rounded-full bg-green-500/20 text-green-400 text-sm">#win</button>
+                                <button class="px-4 py-2 rounded-full bg-gray-800 text-gray-400 text-sm">#blocker</button>
+                                <button class="px-4 py-2 rounded-full bg-gray-800 text-gray-400 text-sm">#learning</button>
+                                <button class="px-4 py-2 rounded-full bg-gray-800 text-gray-400 text-sm">#feedback</button>
+                                <button class="px-4 py-2 rounded-full bg-gray-800 text-gray-400 text-sm">#design</button>
+                                <button class="px-4 py-2 rounded-full bg-gray-800 text-gray-400 text-sm">#oncall</button>
+                            </div>
+                        </div>
+
+                        <!-- Link -->
+                        <div class="mt-6">
+                            <p class="text-sm text-gray-400 mb-3">Add link (optional)</p>
+                            <input type="url" placeholder="https://github.com/..." class="w-full px-4 py-3 rounded-xl bg-gray-800/50 border border-gray-700">
+                        </div>
+                    </div>
+                    <div class="bottom-nav">
+                        <div class="flex justify-around">
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Home</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-primary-600 mb-1"></div><span class="text-xs text-primary-400">Journal</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Mentor</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Insights</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Voice Note -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">Voice Note</p>
+                <div class="phone-frame bg-gray-900">
+                    <div class="screen-content flex flex-col items-center justify-center px-6" style="padding-bottom: 0;">
+                        <div class="w-32 h-32 rounded-full bg-green-500/20 flex items-center justify-center mb-8 animate-pulse">
+                            <div class="w-24 h-24 rounded-full bg-green-500/30 flex items-center justify-center">
+                                <svg class="w-12 h-12 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z"></path>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <h2 class="text-2xl font-bold mb-2">Recording...</h2>
+                        <p class="text-gray-400 mb-8">00:23</p>
+
+                        <!-- Waveform visualization -->
+                        <div class="flex items-center justify-center gap-1 mb-12 h-16">
+                            <div class="w-1 h-4 bg-green-400 rounded-full animate-pulse"></div>
+                            <div class="w-1 h-8 bg-green-400 rounded-full animate-pulse" style="animation-delay: 0.1s"></div>
+                            <div class="w-1 h-12 bg-green-400 rounded-full animate-pulse" style="animation-delay: 0.2s"></div>
+                            <div class="w-1 h-6 bg-green-400 rounded-full animate-pulse" style="animation-delay: 0.3s"></div>
+                            <div class="w-1 h-16 bg-green-400 rounded-full animate-pulse" style="animation-delay: 0.4s"></div>
+                            <div class="w-1 h-8 bg-green-400 rounded-full animate-pulse" style="animation-delay: 0.5s"></div>
+                            <div class="w-1 h-10 bg-green-400 rounded-full animate-pulse" style="animation-delay: 0.6s"></div>
+                            <div class="w-1 h-4 bg-green-400 rounded-full animate-pulse" style="animation-delay: 0.7s"></div>
+                        </div>
+
+                        <div class="flex gap-6">
+                            <button class="w-16 h-16 rounded-full bg-gray-800 flex items-center justify-center">
+                                <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                            <button class="w-16 h-16 rounded-full bg-red-500 flex items-center justify-center">
+                                <div class="w-6 h-6 bg-white rounded-sm"></div>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="bottom-nav">
+                        <div class="flex justify-around">
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Home</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-primary-600 mb-1"></div><span class="text-xs text-primary-400">Journal</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Mentor</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Insights</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rant to Mentor -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">Rant to Mentor</p>
+                <div class="phone-frame bg-gray-900">
+                    <div class="screen-content px-4 pt-4">
+                        <div class="flex items-center gap-3 mb-6">
+                            <button class="w-10 h-10 rounded-xl bg-gray-800 flex items-center justify-center">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                </svg>
+                            </button>
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full gradient-bg flex items-center justify-center">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="font-semibold">Rant Mode</p>
+                                    <p class="text-xs text-gray-400">Let it out, I'll help</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chat -->
+                        <div class="space-y-4 mb-4">
+                            <!-- User message -->
+                            <div class="flex justify-end">
+                                <div class="max-w-[80%] rounded-2xl rounded-br-md bg-primary-600 px-4 py-3">
+                                    <p class="text-sm">I feel stuck because the design doc keeps getting rejected and I don't know what they want from me...</p>
+                                </div>
+                            </div>
+
+                            <!-- Mentor response -->
+                            <div class="flex gap-2">
+                                <div class="w-8 h-8 rounded-full gradient-bg flex-shrink-0 flex items-center justify-center">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                    </svg>
+                                </div>
+                                <div class="max-w-[80%] rounded-2xl rounded-bl-md bg-gray-800 px-4 py-3">
+                                    <p class="text-sm">That sounds frustrating. What specific feedback are you getting that feels unclear or confusing?</p>
+                                </div>
+                            </div>
+
+                            <!-- User response -->
+                            <div class="flex justify-end">
+                                <div class="max-w-[80%] rounded-2xl rounded-br-md bg-primary-600 px-4 py-3">
+                                    <p class="text-sm">They say it's "not detailed enough" but when I add details they say it's "too long"</p>
+                                </div>
+                            </div>
+
+                            <!-- Mentor response -->
+                            <div class="flex gap-2">
+                                <div class="w-8 h-8 rounded-full gradient-bg flex-shrink-0 flex items-center justify-center">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                    </svg>
+                                </div>
+                                <div class="max-w-[80%] rounded-2xl rounded-bl-md bg-gray-800 px-4 py-3">
+                                    <p class="text-sm">I hear conflicting feedback. Have you tried asking them which sections need more depth vs. which could be shorter?</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Input -->
+                        <div class="flex gap-2">
+                            <input type="text" placeholder="Keep venting..." class="flex-1 px-4 py-3 rounded-xl bg-gray-800 border border-gray-700">
+                            <button class="w-12 h-12 rounded-xl gradient-bg flex items-center justify-center">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="bottom-nav">
+                        <div class="flex justify-around">
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Home</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Journal</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-primary-600 mb-1"></div><span class="text-xs text-primary-400">Mentor</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Insights</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- FLOW D: MENTOR CHAT -->
+    <!-- ============================================== -->
+    <section id="mentor" class="max-w-7xl mx-auto mb-24">
+        <h2 class="text-2xl font-bold mb-2 flex items-center gap-3">
+            <span class="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center text-sm">D</span>
+            Mentor Chat
+        </h2>
+        <p class="text-gray-400 mb-8">Career questions → Technical help → Emotional support → Planning</p>
+
+        <div class="flex gap-8 overflow-x-auto pb-4">
+            <!-- Mentor Home -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">Mentor Home</p>
+                <div class="phone-frame bg-gray-900">
+                    <div class="screen-content px-6 pt-4">
+                        <h2 class="text-2xl font-bold mb-2">AI Mentor</h2>
+                        <p class="text-gray-400 mb-6">I'm here to help with your career</p>
+
+                        <!-- Quick prompts -->
+                        <div class="space-y-3 mb-8">
+                            <button class="w-full rounded-xl glass p-4 text-left">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium">Ask a career question</p>
+                                        <p class="text-sm text-gray-400">"How do I communicate better?"</p>
+                                    </div>
+                                </div>
+                            </button>
+                            <button class="w-full rounded-xl glass p-4 text-left">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium">Plan a project</p>
+                                        <p class="text-sm text-gray-400">"Break this down for me"</p>
+                                    </div>
+                                </div>
+                            </button>
+                            <button class="w-full rounded-xl glass p-4 text-left">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium">Review my week</p>
+                                        <p class="text-sm text-gray-400">"Summarize my progress"</p>
+                                    </div>
+                                </div>
+                            </button>
+                            <button class="w-full rounded-xl glass p-4 text-left">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-red-500/20 flex items-center justify-center">
+                                        <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium">Work through a feeling</p>
+                                        <p class="text-sm text-gray-400">"I feel stuck on..."</p>
+                                    </div>
+                                </div>
+                            </button>
+                        </div>
+
+                        <!-- Input -->
+                        <div class="flex gap-2">
+                            <input type="text" placeholder="Ask me anything..." class="flex-1 px-4 py-3 rounded-xl bg-gray-800 border border-gray-700">
+                            <button class="w-12 h-12 rounded-xl gradient-bg flex items-center justify-center">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="bottom-nav">
+                        <div class="flex justify-around">
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Home</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Journal</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-primary-600 mb-1"></div><span class="text-xs text-primary-400">Mentor</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Insights</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Active Chat -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">Career Guidance Chat</p>
+                <div class="phone-frame bg-gray-900">
+                    <div class="screen-content px-4 pt-4">
+                        <div class="flex items-center gap-3 mb-6">
+                            <button class="w-10 h-10 rounded-xl bg-gray-800 flex items-center justify-center">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                </svg>
+                            </button>
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full gradient-bg flex items-center justify-center">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="font-semibold">SWE Mentor</p>
+                                    <p class="text-xs text-green-400">Online</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chat messages -->
+                        <div class="space-y-4 mb-4">
+                            <div class="flex justify-end">
+                                <div class="max-w-[80%] rounded-2xl rounded-br-md bg-primary-600 px-4 py-3">
+                                    <p class="text-sm">How do I get better at system design interviews?</p>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-2">
+                                <div class="w-8 h-8 rounded-full gradient-bg flex-shrink-0 flex items-center justify-center">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                    </svg>
+                                </div>
+                                <div class="max-w-[80%] rounded-2xl rounded-bl-md bg-gray-800 px-4 py-3">
+                                    <p class="text-sm mb-3">Great question! Based on your journal entries, I see you've been working on distributed systems. Let me suggest a structured approach:</p>
+                                    <div class="space-y-2 text-sm">
+                                        <p>1. Study common patterns (load balancing, caching, sharding)</p>
+                                        <p>2. Practice with real-world case studies</p>
+                                        <p>3. Learn to articulate trade-offs clearly</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-2">
+                                <div class="w-8 h-8 rounded-full gradient-bg flex-shrink-0 flex items-center justify-center">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                    </svg>
+                                </div>
+                                <div class="max-w-[80%] rounded-2xl rounded-bl-md bg-gray-800 px-4 py-3">
+                                    <p class="text-sm">Would you like me to create a study plan based on your upcoming interviews?</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Input -->
+                        <div class="flex gap-2">
+                            <input type="text" placeholder="Type a message..." class="flex-1 px-4 py-3 rounded-xl bg-gray-800 border border-gray-700">
+                            <button class="w-12 h-12 rounded-xl gradient-bg flex items-center justify-center">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="bottom-nav">
+                        <div class="flex justify-around">
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Home</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Journal</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-primary-600 mb-1"></div><span class="text-xs text-primary-400">Mentor</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Insights</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- FLOW E: WEEKLY REVIEW -->
+    <!-- ============================================== -->
+    <section id="review" class="max-w-7xl mx-auto mb-24">
+        <h2 class="text-2xl font-bold mb-2 flex items-center gap-3">
+            <span class="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center text-sm">E</span>
+            Weekly Review
+        </h2>
+        <p class="text-gray-400 mb-8">AI-generated summary → Wins → Blockers → Patterns → Next steps</p>
+
+        <div class="flex gap-8 overflow-x-auto pb-4">
+            <!-- Notification -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">Push Notification</p>
+                <div class="phone-frame bg-gray-900">
+                    <div class="screen-content flex flex-col items-center justify-center px-6" style="padding-bottom: 0;">
+                        <!-- Lock screen notification -->
+                        <div class="w-full rounded-2xl glass p-4">
+                            <div class="flex items-center gap-3 mb-2">
+                                <div class="w-8 h-8 rounded-lg gradient-bg"></div>
+                                <div class="flex-1">
+                                    <p class="font-semibold text-sm">SWE Mentor</p>
+                                    <p class="text-xs text-gray-400">now</p>
+                                </div>
+                            </div>
+                            <p class="text-sm">Your weekly reflection is ready! See your wins, patterns, and suggested next steps.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Weekly Summary -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">Weekly Summary</p>
+                <div class="phone-frame bg-gray-900">
+                    <div class="screen-content px-6 pt-4">
+                        <div class="flex items-center justify-between mb-6">
+                            <h2 class="text-xl font-bold">Week of Dec 2</h2>
+                            <button class="text-primary-400 text-sm">Edit</button>
+                        </div>
+
+                        <!-- Stats -->
+                        <div class="grid grid-cols-3 gap-3 mb-6">
+                            <div class="rounded-xl glass p-3 text-center">
+                                <p class="text-2xl font-bold text-green-400">5</p>
+                                <p class="text-xs text-gray-400">Wins</p>
+                            </div>
+                            <div class="rounded-xl glass p-3 text-center">
+                                <p class="text-2xl font-bold text-red-400">2</p>
+                                <p class="text-xs text-gray-400">Blockers</p>
+                            </div>
+                            <div class="rounded-xl glass p-3 text-center">
+                                <p class="text-2xl font-bold text-blue-400">3</p>
+                                <p class="text-xs text-gray-400">Learnings</p>
+                            </div>
+                        </div>
+
+                        <!-- AI Summary -->
+                        <div class="rounded-2xl glass p-4 mb-6">
+                            <div class="flex items-center gap-2 mb-3">
+                                <div class="w-6 h-6 rounded-lg gradient-bg"></div>
+                                <span class="text-sm font-semibold">AI Summary</span>
+                            </div>
+                            <p class="text-sm text-gray-300">Strong week on shipping! You merged 3 PRs and made significant progress on the auth system. Main blocker was waiting for design reviews. Consider syncing with the design team earlier next week.</p>
+                        </div>
+
+                        <!-- Wins -->
+                        <h3 class="text-sm font-semibold text-gray-400 mb-3">WINS</h3>
+                        <div class="space-y-2 mb-6">
+                            <div class="flex items-start gap-2">
+                                <span class="text-green-400">+</span>
+                                <p class="text-sm">Merged auth PR after 3 review rounds</p>
+                            </div>
+                            <div class="flex items-start gap-2">
+                                <span class="text-green-400">+</span>
+                                <p class="text-sm">Led the incident review meeting</p>
+                            </div>
+                            <div class="flex items-start gap-2">
+                                <span class="text-green-400">+</span>
+                                <p class="text-sm">Helped 2 junior devs with onboarding</p>
+                            </div>
+                        </div>
+
+                        <!-- Patterns -->
+                        <h3 class="text-sm font-semibold text-gray-400 mb-3">PATTERNS NOTICED</h3>
+                        <div class="rounded-xl bg-purple-500/10 border border-purple-500/30 p-4 mb-6">
+                            <p class="text-sm text-purple-300">You consistently ship more when you have morning focus blocks. Consider protecting those times.</p>
+                        </div>
+
+                        <!-- Next Steps -->
+                        <h3 class="text-sm font-semibold text-gray-400 mb-3">SUGGESTED NEXT STEPS</h3>
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-2">
+                                <div class="w-5 h-5 rounded border border-gray-600"></div>
+                                <p class="text-sm">Write design doc for API refactor</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <div class="w-5 h-5 rounded border border-gray-600"></div>
+                                <p class="text-sm">Schedule 1:1 with design lead</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bottom-nav">
+                        <div class="flex justify-around">
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Home</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Journal</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Mentor</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-primary-600 mb-1"></div><span class="text-xs text-primary-400">Insights</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Insights Tab -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">Insights Dashboard</p>
+                <div class="phone-frame bg-gray-900">
+                    <div class="screen-content px-6 pt-4">
+                        <h2 class="text-xl font-bold mb-6">Insights</h2>
+
+                        <!-- Progress to Senior -->
+                        <div class="rounded-2xl gradient-bg p-4 mb-6">
+                            <p class="text-sm opacity-80 mb-2">Progress to Senior</p>
+                            <div class="flex items-end gap-4">
+                                <p class="text-4xl font-bold">73%</p>
+                                <p class="text-sm opacity-80 mb-1">+5% this month</p>
+                            </div>
+                            <div class="w-full h-2 bg-white/20 rounded-full mt-3">
+                                <div class="w-3/4 h-full bg-white rounded-full"></div>
+                            </div>
+                        </div>
+
+                        <!-- Competency Breakdown -->
+                        <h3 class="text-sm font-semibold text-gray-400 mb-3">COMPETENCIES</h3>
+                        <div class="space-y-3 mb-6">
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span>Technical Execution</span>
+                                    <span class="text-green-400">85%</span>
+                                </div>
+                                <div class="w-full h-2 bg-gray-700 rounded-full">
+                                    <div class="w-[85%] h-full bg-green-500 rounded-full"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span>System Design</span>
+                                    <span class="text-yellow-400">65%</span>
+                                </div>
+                                <div class="w-full h-2 bg-gray-700 rounded-full">
+                                    <div class="w-[65%] h-full bg-yellow-500 rounded-full"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span>Communication</span>
+                                    <span class="text-blue-400">72%</span>
+                                </div>
+                                <div class="w-full h-2 bg-gray-700 rounded-full">
+                                    <div class="w-[72%] h-full bg-blue-500 rounded-full"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span>Leadership</span>
+                                    <span class="text-red-400">58%</span>
+                                </div>
+                                <div class="w-full h-2 bg-gray-700 rounded-full">
+                                    <div class="w-[58%] h-full bg-red-500 rounded-full"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Focus Area -->
+                        <div class="rounded-xl bg-orange-500/10 border border-orange-500/30 p-4">
+                            <p class="text-sm font-semibold text-orange-300 mb-1">Suggested Focus</p>
+                            <p class="text-sm text-orange-200">Leadership is your biggest gap. Try leading a project or mentoring a junior engineer.</p>
+                        </div>
+                    </div>
+                    <div class="bottom-nav">
+                        <div class="flex justify-around">
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Home</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Journal</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-gray-700 mb-1"></div><span class="text-xs text-gray-500">Mentor</span></div>
+                            <div class="text-center"><div class="w-8 h-8 mx-auto rounded-xl bg-primary-600 mb-1"></div><span class="text-xs text-primary-400">Insights</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="max-w-7xl mx-auto py-12 border-t border-gray-800 text-center text-gray-500">
+        <p>Mobile App Mockups - SWE Mentor</p>
+        <p class="text-sm mt-2">Using shadcn/ui Violet Theme</p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Mobile App Mockups - SWE Mentor (DaisyUI)</title>
+    <!-- DaisyUI + Tailwind CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.14.1/dist/full.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f5f3ff', 100: '#ede9fe', 200: '#ddd6fe', 300: '#c4b5fd',
+                            400: '#a78bfa', 500: '#8b5cf6', 600: '#7c3aed', 700: '#6d28d9',
+                            800: '#5b21b6', 900: '#4c1d95',
+                        },
+                        accent: {
+                            50: '#fdf4ff', 100: '#fae8ff', 200: '#f5d0fe', 300: '#f0abfc',
+                            400: '#e879f9', 500: '#d946ef', 600: '#c026d3', 700: '#a21caf',
+                            800: '#86198f', 900: '#701a75',
+                        }
+                    },
+                    animation: {
+                        'gradient': 'gradient 8s linear infinite',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        gradient: {
+                            '0%, 100%': { backgroundPosition: '0% 50%' },
+                            '50%': { backgroundPosition: '100% 50%' },
+                        },
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(-45deg, #4c1d95, #7c3aed, #8b5cf6, #a78bfa);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+        .phone-frame {
+            width: 375px;
+            height: 812px;
+            border-radius: 40px;
+            border: 8px solid #1f2937;
+            overflow: hidden;
+            position: relative;
+        }
+        .phone-frame::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 150px;
+            height: 30px;
+            background: #1f2937;
+            border-radius: 0 0 20px 20px;
+            z-index: 50;
+        }
+        .screen-content {
+            height: 100%;
+            overflow-y: auto;
+            padding-top: 44px;
+            padding-bottom: 100px;
+        }
+
+        /* Bubble Navbar Styles */
+        .bubble-nav {
+            position: absolute;
+            bottom: 16px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            padding: 0 16px;
+        }
+
+        .bubble-container {
+            display: flex;
+            align-items: center;
+            background: rgba(31, 41, 55, 0.95);
+            backdrop-filter: blur(16px);
+            border-radius: 9999px;
+            padding: 8px;
+            gap: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .bubble-container {
+            position: relative;
+        }
+
+        /* Sliding indicator background */
+        .bubble-indicator {
+            position: absolute;
+            height: calc(100% - 16px);
+            top: 8px;
+            background: rgba(55, 65, 81, 0.9);
+            border-radius: 9999px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 0;
+        }
+
+        .bubble-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 16px;
+            border-radius: 9999px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            color: #9ca3af;
+            z-index: 1;
+            cursor: pointer;
+        }
+
+        .bubble-item:hover {
+            color: #d1d5db;
+        }
+
+        .bubble-item.active {
+            color: #f9a8d4;
+        }
+
+        /* Icon animation */
+        .bubble-item .icon {
+            width: 20px;
+            height: 20px;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .bubble-item.active .icon {
+            transform: scale(1.1);
+        }
+
+        /* Pop animation on click */
+        @keyframes iconPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+            100% { transform: scale(1.1); }
+        }
+
+        .bubble-item.pop .icon {
+            animation: iconPop 0.3s ease-out;
+        }
+
+        .bubble-item .label {
+            font-size: 10px;
+            margin-top: 2px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .bubble-item.active .label {
+            font-weight: 600;
+        }
+
+        /* Content fade animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .screen-panel {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .screen-panel.hidden {
+            display: none;
+        }
+
+        .notification-dot {
+            position: absolute;
+            top: 6px;
+            right: 12px;
+            width: 8px;
+            height: 8px;
+            background: #ec4899;
+            border-radius: 9999px;
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+        }
+
+        .search-btn {
+            width: 48px;
+            height: 48px;
+            background: rgba(31, 41, 55, 0.95);
+            backdrop-filter: blur(16px);
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #9ca3af;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .search-btn:hover {
+            color: #d1d5db;
+            background: rgba(55, 65, 81, 0.95);
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+    </style>
+</head>
+<body class="bg-gray-950 text-white min-h-screen p-8">
+    <!-- Header -->
+    <div class="max-w-7xl mx-auto mb-12">
+        <a href="../index.html" class="text-primary-400 hover:text-primary-300 mb-4 inline-flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            Back to Overview
+        </a>
+        <div class="flex items-center gap-4 mb-4">
+            <h1 class="text-4xl font-bold">Mobile App Flows</h1>
+            <span class="badge badge-primary badge-lg">DaisyUI Version</span>
+        </div>
+        <p class="text-gray-400">Bubble navbar comparison using DaisyUI - Compare with <a href="index.html" class="text-primary-400 underline">original version</a></p>
+    </div>
+
+    <!-- Flow Navigation -->
+    <div class="max-w-7xl mx-auto mb-12 flex flex-wrap gap-3">
+        <a href="#interactive" class="px-4 py-2 rounded-xl bg-primary-600 hover:bg-primary-500 transition text-sm font-semibold">Interactive Demo</a>
+        <a href="#onboarding" class="px-4 py-2 rounded-xl glass hover:bg-white/20 transition text-sm">A. Onboarding</a>
+        <a href="#home" class="px-4 py-2 rounded-xl glass hover:bg-white/20 transition text-sm">B. Home Dashboard</a>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- INTERACTIVE DEMO -->
+    <!-- ============================================== -->
+    <section id="interactive" class="max-w-7xl mx-auto mb-24">
+        <h2 class="text-2xl font-bold mb-2 flex items-center gap-3">
+            <span class="w-8 h-8 rounded-lg gradient-bg flex items-center justify-center text-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </span>
+            Interactive Demo
+            <span class="badge badge-secondary">Click to animate!</span>
+        </h2>
+        <p class="text-gray-400 mb-8">Click the navbar items to see the sliding animation and screen transitions</p>
+
+        <div class="flex justify-center">
+            <div class="phone-frame bg-gray-900" id="demo-phone">
+                <!-- Screen Panels -->
+                <div class="screen-content" id="demo-screens">
+                    <!-- Home Panel -->
+                    <div class="screen-panel px-6 pt-8" data-screen="home">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <p class="text-gray-400 text-sm">Good morning,</p>
+                                <h1 class="text-2xl font-bold">John</h1>
+                            </div>
+                            <div class="w-12 h-12 rounded-full gradient-bg flex items-center justify-center font-bold">JD</div>
+                        </div>
+                        <div class="rounded-2xl gradient-bg p-6 mb-6">
+                            <p class="text-white/80 text-sm mb-1">Today's Focus</p>
+                            <h3 class="text-xl font-bold mb-4">Ship auth feature</h3>
+                            <div class="flex items-center gap-2 text-white/80 text-sm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span>3 blockers resolved</span>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="rounded-xl bg-gray-800/50 p-4">
+                                <p class="text-gray-400 text-xs mb-1">Streak</p>
+                                <p class="text-2xl font-bold text-primary-400">12 days</p>
+                            </div>
+                            <div class="rounded-xl bg-gray-800/50 p-4">
+                                <p class="text-gray-400 text-xs mb-1">This week</p>
+                                <p class="text-2xl font-bold text-green-400">5/5</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Journal Panel -->
+                    <div class="screen-panel hidden px-6 pt-8" data-screen="journal">
+                        <h1 class="text-2xl font-bold mb-6">Journal</h1>
+                        <div class="rounded-2xl bg-gray-800/50 p-4 mb-6 border border-dashed border-gray-700">
+                            <div class="flex items-center gap-3 text-gray-400">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                                <span>What did you work on today?</span>
+                            </div>
+                        </div>
+                        <h3 class="font-semibold mb-4 text-gray-400 text-sm uppercase tracking-wide">This Week</h3>
+                        <div class="space-y-3">
+                            <div class="rounded-xl bg-gray-800/30 p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-xs text-gray-500">Today</span>
+                                    <span class="badge badge-primary badge-sm">Coding</span>
+                                </div>
+                                <p class="font-medium mb-1">Shipped auth feature</p>
+                                <p class="text-sm text-gray-500">Fixed edge cases in OAuth flow</p>
+                            </div>
+                            <div class="rounded-xl bg-gray-800/30 p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-xs text-gray-500">Yesterday</span>
+                                    <span class="badge badge-secondary badge-sm">Review</span>
+                                </div>
+                                <p class="font-medium mb-1">Code review marathon</p>
+                                <p class="text-sm text-gray-500">Reviewed 3 PRs from junior devs</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mentor Panel -->
+                    <div class="screen-panel hidden px-6 pt-8" data-screen="mentor">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-12 h-12 rounded-full gradient-bg flex items-center justify-center">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h1 class="text-xl font-bold">AI Mentor</h1>
+                                <p class="text-green-400 text-sm">Online</p>
+                            </div>
+                        </div>
+                        <div class="space-y-4">
+                            <div class="flex gap-3">
+                                <div class="w-8 h-8 rounded-full gradient-bg flex-shrink-0"></div>
+                                <div class="rounded-2xl rounded-tl-none bg-gray-800 p-4 max-w-[80%]">
+                                    <p class="text-sm">Hey! I noticed you shipped the auth feature. Great work!</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-3 justify-end">
+                                <div class="rounded-2xl rounded-tr-none bg-primary-600 p-4 max-w-[80%]">
+                                    <p class="text-sm">Thanks! Got some good feedback on error handling.</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-3">
+                                <div class="w-8 h-8 rounded-full gradient-bg flex-shrink-0"></div>
+                                <div class="rounded-2xl rounded-tl-none bg-gray-800 p-4 max-w-[80%]">
+                                    <p class="text-sm">Would you like to discuss some error handling patterns?</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Insights Panel -->
+                    <div class="screen-panel hidden px-6 pt-8" data-screen="insights">
+                        <h1 class="text-2xl font-bold mb-6">Insights</h1>
+                        <div class="rounded-2xl bg-gradient-to-br from-primary-600/20 to-accent-600/20 border border-primary-500/30 p-6 mb-6">
+                            <p class="text-primary-300 text-sm mb-2">Weekly Summary</p>
+                            <h3 class="text-xl font-bold mb-2">Strong week!</h3>
+                            <p class="text-gray-400 text-sm">You completed 8 tasks and had 2 mentor sessions</p>
+                        </div>
+                        <h3 class="font-semibold mb-4">Skill Progress</h3>
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between text-sm mb-2">
+                                    <span>Technical Leadership</span>
+                                    <span class="text-primary-400">72%</span>
+                                </div>
+                                <div class="h-2 bg-gray-800 rounded-full">
+                                    <div class="h-2 bg-primary-500 rounded-full" style="width: 72%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-2">
+                                    <span>System Design</span>
+                                    <span class="text-green-400">85%</span>
+                                </div>
+                                <div class="h-2 bg-gray-800 rounded-full">
+                                    <div class="h-2 bg-green-500 rounded-full" style="width: 85%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-2">
+                                    <span>Code Quality</span>
+                                    <span class="text-accent-400">68%</span>
+                                </div>
+                                <div class="h-2 bg-gray-800 rounded-full">
+                                    <div class="h-2 bg-accent-500 rounded-full" style="width: 68%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ANIMATED BUBBLE NAVBAR -->
+                <div class="bubble-nav">
+                    <div class="bubble-container" id="demo-navbar">
+                        <!-- Sliding indicator -->
+                        <div class="bubble-indicator" id="bubble-indicator"></div>
+
+                        <!-- Home -->
+                        <button class="bubble-item active" data-tab="home">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                            </svg>
+                            <span class="label">Home</span>
+                        </button>
+
+                        <!-- Journal -->
+                        <button class="bubble-item" data-tab="journal">
+                            <span class="notification-dot"></span>
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                            </svg>
+                            <span class="label">Journal</span>
+                        </button>
+
+                        <!-- Mentor -->
+                        <button class="bubble-item" data-tab="mentor">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                            </svg>
+                            <span class="label">Mentor</span>
+                        </button>
+
+                        <!-- Insights -->
+                        <button class="bubble-item" data-tab="insights">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                            <span class="label">Insights</span>
+                        </button>
+                    </div>
+
+                    <!-- Search Button -->
+                    <button class="search-btn">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Animation Info -->
+        <div class="mt-8 flex justify-center">
+            <div class="rounded-2xl bg-gray-800/30 border border-gray-700 p-6 max-w-md">
+                <h3 class="font-bold mb-3 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                    Animation Features
+                </h3>
+                <ul class="space-y-2 text-gray-400 text-sm">
+                    <li>Sliding pill indicator follows active tab</li>
+                    <li>Icon pop/scale effect on selection</li>
+                    <li>Smooth color transitions</li>
+                    <li>Content fade-in animation</li>
+                    <li>Pulsing notification dots</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- FLOW A: ONBOARDING -->
+    <!-- ============================================== -->
+    <section id="onboarding" class="max-w-7xl mx-auto mb-24">
+        <h2 class="text-2xl font-bold mb-2 flex items-center gap-3">
+            <span class="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center text-sm">A</span>
+            Onboarding & Setup
+        </h2>
+        <p class="text-gray-400 mb-8">Welcome → Sign In → Profile → Reminders → Walkthrough</p>
+
+        <div class="flex gap-8 overflow-x-auto pb-4">
+            <!-- Screen 1: Welcome -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">1. Welcome Screen</p>
+                <div class="phone-frame bg-gray-900">
+                    <div class="screen-content flex flex-col items-center justify-center px-8 text-center" style="padding-bottom: 0;">
+                        <!-- Animated Logo -->
+                        <div class="w-24 h-24 rounded-3xl gradient-bg mb-8 flex items-center justify-center animate-pulse-slow">
+                            <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                        </div>
+                        <h1 class="text-3xl font-bold mb-4">SWE Mentor</h1>
+                        <p class="text-gray-400 mb-12">Your AI-powered career companion for software engineering growth</p>
+
+                        <button class="w-full py-4 rounded-2xl gradient-bg font-semibold text-lg mb-4">
+                            Get Started
+                        </button>
+                        <button class="w-full py-4 rounded-2xl glass text-gray-300">
+                            I already have an account
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Screen 2: Sign In -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">2. Sign In</p>
+                <div class="phone-frame bg-gray-900">
+                    <div class="screen-content px-6 pt-12">
+                        <h2 class="text-2xl font-bold mb-2">Welcome back</h2>
+                        <p class="text-gray-400 mb-8">Sign in to continue your journey</p>
+
+                        <!-- Google Sign In -->
+                        <button class="w-full py-4 rounded-2xl bg-white text-gray-900 font-semibold flex items-center justify-center gap-3 mb-4">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24">
+                                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                            </svg>
+                            Continue with Google
+                        </button>
+
+                        <div class="flex items-center gap-4 my-6">
+                            <div class="flex-1 h-px bg-gray-700"></div>
+                            <span class="text-gray-500 text-sm">or</span>
+                            <div class="flex-1 h-px bg-gray-700"></div>
+                        </div>
+
+                        <!-- Email Input -->
+                        <div class="mb-4">
+                            <label class="text-sm text-gray-400 mb-2 block">Email</label>
+                            <input type="email" placeholder="you@company.com" class="w-full px-4 py-3.5 rounded-xl bg-gray-800 border border-gray-700 focus:border-primary-500 focus:outline-none">
+                        </div>
+
+                        <button class="w-full py-4 rounded-2xl bg-primary-600 font-semibold mb-4">
+                            Send Magic Link
+                        </button>
+
+                        <p class="text-center text-gray-500 text-sm">
+                            We'll send you a link to sign in
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Screen 3: Create Profile -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">3. Create Profile</p>
+                <div class="phone-frame bg-gray-900">
+                    <div class="screen-content px-6 pt-8">
+                        <!-- Progress -->
+                        <div class="flex gap-2 mb-8">
+                            <div class="flex-1 h-1 rounded-full bg-primary-500"></div>
+                            <div class="flex-1 h-1 rounded-full bg-gray-700"></div>
+                            <div class="flex-1 h-1 rounded-full bg-gray-700"></div>
+                        </div>
+
+                        <h2 class="text-2xl font-bold mb-2">Set up your profile</h2>
+                        <p class="text-gray-400 mb-8">Tell us a bit about yourself</p>
+
+                        <!-- Avatar -->
+                        <div class="flex justify-center mb-8">
+                            <div class="w-24 h-24 rounded-full gradient-bg flex items-center justify-center text-3xl font-bold">
+                                JD
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div>
+                                <label class="text-sm text-gray-400 mb-2 block">Full Name</label>
+                                <input type="text" value="John Doe" class="w-full px-4 py-3.5 rounded-xl bg-gray-800 border border-gray-700">
+                            </div>
+                            <div>
+                                <label class="text-sm text-gray-400 mb-2 block">Current Role</label>
+                                <select class="w-full px-4 py-3.5 rounded-xl bg-gray-800 border border-gray-700">
+                                    <option>Software Engineer I</option>
+                                    <option>Software Engineer II</option>
+                                    <option selected>Senior Software Engineer</option>
+                                    <option>Staff Engineer</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <button class="w-full py-4 rounded-2xl gradient-bg font-semibold mt-8">
+                            Continue
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- FLOW B: HOME WITH BUBBLE NAV -->
+    <!-- ============================================== -->
+    <section id="home" class="max-w-7xl mx-auto mb-24">
+        <h2 class="text-2xl font-bold mb-2 flex items-center gap-3">
+            <span class="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center text-sm">B</span>
+            Home Dashboard
+            <span class="badge badge-secondary">Bubble Nav Demo</span>
+        </h2>
+        <p class="text-gray-400 mb-8">Discord-style floating bubble navigation</p>
+
+        <div class="flex gap-8 overflow-x-auto pb-4">
+            <!-- Screen: Home with Bubble Nav -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">Home Screen - Bubble Navbar</p>
+                <div class="phone-frame bg-gray-900">
+                    <div class="screen-content px-6 pt-8">
+                        <!-- Header -->
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <p class="text-gray-400 text-sm">Good morning,</p>
+                                <h1 class="text-2xl font-bold">John</h1>
+                            </div>
+                            <div class="w-12 h-12 rounded-full gradient-bg flex items-center justify-center font-bold">
+                                JD
+                            </div>
+                        </div>
+
+                        <!-- Today's Card -->
+                        <div class="rounded-2xl gradient-bg p-6 mb-6">
+                            <p class="text-white/80 text-sm mb-1">Today's Focus</p>
+                            <h3 class="text-xl font-bold mb-4">Ship auth feature</h3>
+                            <div class="flex items-center gap-2 text-white/80 text-sm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                <span>3 blockers resolved</span>
+                            </div>
+                        </div>
+
+                        <!-- Stats -->
+                        <div class="grid grid-cols-2 gap-4 mb-6">
+                            <div class="rounded-xl bg-gray-800/50 p-4">
+                                <p class="text-gray-400 text-xs mb-1">Streak</p>
+                                <p class="text-2xl font-bold text-primary-400">12 days</p>
+                            </div>
+                            <div class="rounded-xl bg-gray-800/50 p-4">
+                                <p class="text-gray-400 text-xs mb-1">This week</p>
+                                <p class="text-2xl font-bold text-green-400">5/5</p>
+                            </div>
+                        </div>
+
+                        <!-- Recent Activity -->
+                        <h3 class="font-semibold mb-4">Recent Activity</h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-800/30">
+                                <div class="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-sm">Completed code review</p>
+                                    <p class="text-gray-500 text-xs">2 hours ago</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 rounded-xl bg-gray-800/30">
+                                <div class="w-10 h-10 rounded-xl bg-primary-500/20 flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-sm">Chat with mentor</p>
+                                    <p class="text-gray-500 text-xs">Yesterday</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BUBBLE NAVBAR -->
+                    <div class="bubble-nav">
+                        <div class="bubble-container">
+                            <!-- Home - Active -->
+                            <button class="bubble-item active">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                                </svg>
+                                <span class="label">Home</span>
+                            </button>
+
+                            <!-- Journal -->
+                            <button class="bubble-item">
+                                <span class="notification-dot"></span>
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                                <span class="label">Journal</span>
+                            </button>
+
+                            <!-- Mentor -->
+                            <button class="bubble-item">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                                </svg>
+                                <span class="label">Mentor</span>
+                            </button>
+
+                            <!-- More -->
+                            <button class="bubble-item">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"></path>
+                                </svg>
+                                <span class="label">More</span>
+                            </button>
+                        </div>
+
+                        <!-- Search Button -->
+                        <button class="search-btn">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Screen: Journal Tab Active -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">Journal Screen - Tab Active</p>
+                <div class="phone-frame bg-gray-900">
+                    <div class="screen-content px-6 pt-8">
+                        <h1 class="text-2xl font-bold mb-6">Journal</h1>
+
+                        <!-- Quick Add -->
+                        <div class="rounded-2xl bg-gray-800/50 p-4 mb-6 border border-dashed border-gray-700">
+                            <div class="flex items-center gap-3 text-gray-400">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                                <span>What did you work on today?</span>
+                            </div>
+                        </div>
+
+                        <!-- Recent Entries -->
+                        <h3 class="font-semibold mb-4 text-gray-400 text-sm uppercase tracking-wide">This Week</h3>
+                        <div class="space-y-3">
+                            <div class="rounded-xl bg-gray-800/30 p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-xs text-gray-500">Today</span>
+                                    <span class="badge badge-primary badge-sm">Coding</span>
+                                </div>
+                                <p class="font-medium mb-1">Shipped auth feature</p>
+                                <p class="text-sm text-gray-500">Fixed edge cases in OAuth flow and added tests</p>
+                            </div>
+                            <div class="rounded-xl bg-gray-800/30 p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-xs text-gray-500">Yesterday</span>
+                                    <span class="badge badge-secondary badge-sm">Review</span>
+                                </div>
+                                <p class="font-medium mb-1">Code review marathon</p>
+                                <p class="text-sm text-gray-500">Reviewed 3 PRs from junior devs</p>
+                            </div>
+                            <div class="rounded-xl bg-gray-800/30 p-4">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-xs text-gray-500">2 days ago</span>
+                                    <span class="badge badge-accent badge-sm">Meeting</span>
+                                </div>
+                                <p class="font-medium mb-1">Sprint planning</p>
+                                <p class="text-sm text-gray-500">Scoped Q1 roadmap items</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BUBBLE NAVBAR - Journal Active -->
+                    <div class="bubble-nav">
+                        <div class="bubble-container">
+                            <button class="bubble-item">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                                </svg>
+                                <span class="label">Home</span>
+                            </button>
+
+                            <button class="bubble-item active">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                                <span class="label">Journal</span>
+                            </button>
+
+                            <button class="bubble-item">
+                                <span class="notification-dot"></span>
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                                </svg>
+                                <span class="label">Mentor</span>
+                            </button>
+
+                            <button class="bubble-item">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"></path>
+                                </svg>
+                                <span class="label">More</span>
+                            </button>
+                        </div>
+
+                        <button class="search-btn">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Screen: Mentor Chat -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">Mentor Chat - Tab Active</p>
+                <div class="phone-frame bg-gray-900">
+                    <div class="screen-content px-6 pt-8">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-12 h-12 rounded-full gradient-bg flex items-center justify-center">
+                                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h1 class="text-xl font-bold">AI Mentor</h1>
+                                <p class="text-green-400 text-sm">Online</p>
+                            </div>
+                        </div>
+
+                        <!-- Chat Messages -->
+                        <div class="space-y-4">
+                            <div class="flex gap-3">
+                                <div class="w-8 h-8 rounded-full gradient-bg flex-shrink-0"></div>
+                                <div class="rounded-2xl rounded-tl-none bg-gray-800 p-4 max-w-[80%]">
+                                    <p class="text-sm">Hey! I noticed you shipped the auth feature. Great work! How did the code review go?</p>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-3 justify-end">
+                                <div class="rounded-2xl rounded-tr-none bg-primary-600 p-4 max-w-[80%]">
+                                    <p class="text-sm">Thanks! It went well. Got some good feedback on error handling.</p>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-3">
+                                <div class="w-8 h-8 rounded-full gradient-bg flex-shrink-0"></div>
+                                <div class="rounded-2xl rounded-tl-none bg-gray-800 p-4 max-w-[80%]">
+                                    <p class="text-sm">That's great to hear! Error handling is a key skill at the senior level. Would you like to discuss some patterns that work well?</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BUBBLE NAVBAR - Mentor Active -->
+                    <div class="bubble-nav">
+                        <div class="bubble-container">
+                            <button class="bubble-item">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                                </svg>
+                                <span class="label">Home</span>
+                            </button>
+
+                            <button class="bubble-item">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                                </svg>
+                                <span class="label">Journal</span>
+                            </button>
+
+                            <button class="bubble-item active">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                                </svg>
+                                <span class="label">Mentor</span>
+                            </button>
+
+                            <button class="bubble-item">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h.01M12 12h.01M19 12h.01M6 12a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0zm7 0a1 1 0 11-2 0 1 1 0 012 0z"></path>
+                                </svg>
+                                <span class="label">More</span>
+                            </button>
+                        </div>
+
+                        <button class="search-btn">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparison Notes -->
+    <section class="max-w-7xl mx-auto mb-24">
+        <div class="rounded-2xl bg-gray-800/30 border border-gray-700 p-6">
+            <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Bubble Navbar Features
+            </h3>
+            <ul class="space-y-2 text-gray-400">
+                <li class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-primary-500"></span>
+                    Floating pill container with blur backdrop
+                </li>
+                <li class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-primary-500"></span>
+                    Active state with subtle background highlight (pink accent)
+                </li>
+                <li class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-primary-500"></span>
+                    Notification dots for unread items
+                </li>
+                <li class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-primary-500"></span>
+                    Separate search button outside the bubble
+                </li>
+                <li class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-primary-500"></span>
+                    Smooth hover transitions
+                </li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- Interactive Demo JavaScript -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const navbar = document.getElementById('demo-navbar');
+            const indicator = document.getElementById('bubble-indicator');
+            const tabs = navbar.querySelectorAll('.bubble-item');
+            const screens = document.querySelectorAll('#demo-screens .screen-panel');
+
+            // Initialize indicator position
+            function updateIndicator(activeTab) {
+                const rect = activeTab.getBoundingClientRect();
+                const navRect = navbar.getBoundingClientRect();
+
+                indicator.style.left = (activeTab.offsetLeft) + 'px';
+                indicator.style.width = rect.width + 'px';
+            }
+
+            // Set initial position
+            const initialActive = navbar.querySelector('.bubble-item.active');
+            if (initialActive) {
+                updateIndicator(initialActive);
+            }
+
+            // Handle tab clicks
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const targetScreen = this.dataset.tab;
+
+                    // Update active states
+                    tabs.forEach(t => t.classList.remove('active', 'pop'));
+                    this.classList.add('active', 'pop');
+
+                    // Move indicator
+                    updateIndicator(this);
+
+                    // Switch screens with animation
+                    screens.forEach(screen => {
+                        if (screen.dataset.screen === targetScreen) {
+                            screen.classList.remove('hidden');
+                            // Re-trigger animation
+                            screen.style.animation = 'none';
+                            screen.offsetHeight; // Trigger reflow
+                            screen.style.animation = null;
+                        } else {
+                            screen.classList.add('hidden');
+                        }
+                    });
+
+                    // Remove pop class after animation
+                    setTimeout(() => {
+                        this.classList.remove('pop');
+                    }, 300);
+                });
+            });
+
+            // Update indicator on window resize
+            window.addEventListener('resize', function() {
+                const activeTab = navbar.querySelector('.bubble-item.active');
+                if (activeTab) {
+                    updateIndicator(activeTab);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
