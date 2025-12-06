@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Mobile App - Liquid Glass UI</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.14.1/dist/full.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f5f3ff', 100: '#ede9fe', 200: '#ddd6fe', 300: '#c4b5fd',
+                            400: '#a78bfa', 500: '#8b5cf6', 600: '#7c3aed', 700: '#6d28d9',
+                            800: '#5b21b6', 900: '#4c1d95',
+                        },
+                        accent: {
+                            50: '#fdf4ff', 100: '#fae8ff', 200: '#f5d0fe', 300: '#f0abfc',
+                            400: '#e879f9', 500: '#d946ef', 600: '#c026d3', 700: '#a21caf',
+                            800: '#86198f', 900: '#701a75',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* ========================================
+           LIQUID GLASS DESIGN SYSTEM
+           Based on iOS 26 & Material 3 Expressive
+           ======================================== */
+
+        :root {
+            --glass-blur: 40px;
+            --glass-saturation: 180%;
+            --glass-bg-light: rgba(255, 255, 255, 0.12);
+            --glass-bg-dark: rgba(0, 0, 0, 0.2);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --glass-shadow: rgba(0, 0, 0, 0.25);
+            --spring-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+            --spring-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f0f1a 0%, #1a1025 50%, #0d1520 100%);
+        }
+
+        /* Animated gradient background */
+        .gradient-mesh {
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse at 20% 30%, rgba(124, 58, 237, 0.3) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 70%, rgba(236, 72, 153, 0.25) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(59, 130, 246, 0.2) 0%, transparent 60%);
+            animation: meshMove 20s ease-in-out infinite;
+            z-index: 0;
+        }
+
+        @keyframes meshMove {
+            0%, 100% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(2%, -2%) scale(1.02); }
+            66% { transform: translate(-2%, 2%) scale(0.98); }
+        }
+
+        /* Phone Frame */
+        .phone-frame {
+            width: 375px;
+            height: 812px;
+            border-radius: 44px;
+            border: 6px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            position: relative;
+            background: linear-gradient(180deg, #12121a 0%, #1a1a2e 100%);
+            box-shadow:
+                0 50px 100px -20px rgba(0, 0, 0, 0.5),
+                0 0 0 1px rgba(255, 255, 255, 0.05),
+                inset 0 0 60px rgba(124, 58, 237, 0.1);
+        }
+
+        .phone-frame::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 34px;
+            background: #0a0a0f;
+            border-radius: 0 0 20px 20px;
+            z-index: 100;
+        }
+
+        /* Dynamic Island style */
+        .phone-frame::after {
+            content: '';
+            position: absolute;
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90px;
+            height: 24px;
+            background: #000;
+            border-radius: 20px;
+            z-index: 101;
+        }
+
+        .screen-content {
+            height: 100%;
+            overflow-y: auto;
+            padding-top: 50px;
+            padding-bottom: 110px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Screen background with blur layers */
+        .screen-bg {
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse at 30% 20%, rgba(124, 58, 237, 0.4) 0%, transparent 40%),
+                radial-gradient(ellipse at 70% 80%, rgba(236, 72, 153, 0.3) 0%, transparent 40%),
+                radial-gradient(ellipse at 50% 50%, rgba(59, 130, 246, 0.2) 0%, transparent 50%);
+            filter: blur(60px);
+            z-index: 0;
+        }
+
+        /* ========================================
+           LIQUID GLASS COMPONENTS
+           ======================================== */
+
+        /* Base glass card */
+        .glass-card {
+            background: linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.12) 0%,
+                rgba(255, 255, 255, 0.05) 100%
+            );
+            backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+            -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(var(--glass-saturation));
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            box-shadow:
+                0 8px 32px var(--glass-shadow),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            transition: all 0.4s var(--spring-smooth);
+        }
+
+        .glass-card:hover {
+            transform: translateY(-2px);
+            box-shadow:
+                0 12px 40px var(--glass-shadow),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        /* Elevated glass (more prominent) */
+        .glass-elevated {
+            background: linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.18) 0%,
+                rgba(255, 255, 255, 0.08) 100%
+            );
+            backdrop-filter: blur(60px) saturate(200%);
+            -webkit-backdrop-filter: blur(60px) saturate(200%);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow:
+                0 20px 60px rgba(0, 0, 0, 0.4),
+                0 0 0 1px rgba(255, 255, 255, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        /* Subtle glass (less prominent) */
+        .glass-subtle {
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(20px) saturate(120%);
+            -webkit-backdrop-filter: blur(20px) saturate(120%);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Colored glass variants */
+        .glass-primary {
+            background: linear-gradient(
+                135deg,
+                rgba(124, 58, 237, 0.25) 0%,
+                rgba(139, 92, 246, 0.15) 100%
+            );
+            border-color: rgba(139, 92, 246, 0.3);
+        }
+
+        .glass-accent {
+            background: linear-gradient(
+                135deg,
+                rgba(236, 72, 153, 0.25) 0%,
+                rgba(217, 70, 239, 0.15) 100%
+            );
+            border-color: rgba(236, 72, 153, 0.3);
+        }
+
+        /* ========================================
+           LIQUID GLASS NAVBAR
+           ======================================== */
+
+        .liquid-navbar {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 50;
+        }
+
+        .liquid-nav-container {
+            display: flex;
+            align-items: center;
+            padding: 8px;
+            gap: 4px;
+            background: linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.15) 0%,
+                rgba(255, 255, 255, 0.08) 100%
+            );
+            backdrop-filter: blur(50px) saturate(200%);
+            -webkit-backdrop-filter: blur(50px) saturate(200%);
+            border-radius: 32px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow:
+                0 8px 40px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+            position: relative;
+        }
+
+        /* Sliding indicator */
+        .liquid-indicator {
+            position: absolute;
+            height: calc(100% - 16px);
+            top: 8px;
+            background: linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.2) 0%,
+                rgba(255, 255, 255, 0.1) 100%
+            );
+            border-radius: 24px;
+            box-shadow:
+                0 4px 20px rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            transition: all 0.4s var(--spring-bounce);
+            z-index: 0;
+        }
+
+        .liquid-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px 18px;
+            border-radius: 24px;
+            cursor: pointer;
+            position: relative;
+            z-index: 1;
+            transition: all 0.3s var(--spring-smooth);
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .liquid-nav-item:hover {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .liquid-nav-item.active {
+            color: #fff;
+        }
+
+        .liquid-nav-item .icon {
+            width: 22px;
+            height: 22px;
+            transition: transform 0.4s var(--spring-bounce);
+        }
+
+        .liquid-nav-item.active .icon {
+            transform: scale(1.15);
+        }
+
+        .liquid-nav-item .label {
+            font-size: 10px;
+            margin-top: 3px;
+            font-weight: 600;
+            letter-spacing: 0.3px;
+            opacity: 0.9;
+        }
+
+        /* Pop animation */
+        @keyframes iconPop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.35); }
+            100% { transform: scale(1.15); }
+        }
+
+        .liquid-nav-item.pop .icon {
+            animation: iconPop 0.4s var(--spring-bounce);
+        }
+
+        /* Notification badge */
+        .liquid-badge {
+            position: absolute;
+            top: 6px;
+            right: 14px;
+            width: 8px;
+            height: 8px;
+            background: linear-gradient(135deg, #f472b6 0%, #ec4899 100%);
+            border-radius: 50%;
+            box-shadow: 0 0 10px rgba(236, 72, 153, 0.6);
+            animation: badgePulse 2s ease-in-out infinite;
+        }
+
+        @keyframes badgePulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 10px rgba(236, 72, 153, 0.6); }
+            50% { transform: scale(1.2); box-shadow: 0 0 20px rgba(236, 72, 153, 0.8); }
+        }
+
+        /* Search button */
+        .liquid-search-btn {
+            width: 52px;
+            height: 52px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.15) 0%,
+                rgba(255, 255, 255, 0.08) 100%
+            );
+            backdrop-filter: blur(50px) saturate(200%);
+            -webkit-backdrop-filter: blur(50px) saturate(200%);
+            border-radius: 50%;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow:
+                0 8px 40px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            transition: all 0.3s var(--spring-smooth);
+        }
+
+        .liquid-search-btn:hover {
+            color: #fff;
+            transform: scale(1.05);
+        }
+
+        /* ========================================
+           SPRING ANIMATIONS
+           ======================================== */
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        @keyframes morphIn {
+            from { border-radius: 12px; opacity: 0; }
+            to { border-radius: 24px; opacity: 1; }
+        }
+
+        .animate-slide-up {
+            animation: slideUp 0.5s var(--spring-bounce) forwards;
+        }
+
+        .animate-scale-in {
+            animation: scaleIn 0.4s var(--spring-bounce) forwards;
+        }
+
+        .animate-morph-in {
+            animation: morphIn 0.5s var(--spring-bounce) forwards;
+        }
+
+        /* Stagger delays */
+        .delay-1 { animation-delay: 0.1s; }
+        .delay-2 { animation-delay: 0.2s; }
+        .delay-3 { animation-delay: 0.3s; }
+        .delay-4 { animation-delay: 0.4s; }
+
+        /* ========================================
+           SCREEN TRANSITIONS
+           ======================================== */
+
+        .screen-panel {
+            animation: slideUp 0.4s var(--spring-bounce);
+        }
+
+        .screen-panel.hidden {
+            display: none;
+        }
+
+        /* ========================================
+           TYPOGRAPHY
+           ======================================== */
+
+        .text-glass {
+            background: linear-gradient(135deg, #fff 0%, rgba(255, 255, 255, 0.8) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .text-glow {
+            text-shadow: 0 0 30px rgba(139, 92, 246, 0.5);
+        }
+    </style>
+</head>
+<body class="text-white min-h-screen p-8 relative">
+    <!-- Background mesh -->
+    <div class="gradient-mesh"></div>
+
+    <!-- Header -->
+    <div class="max-w-7xl mx-auto mb-12 relative z-10">
+        <a href="index.html" class="text-primary-400 hover:text-primary-300 mb-4 inline-flex items-center gap-2 transition">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            Back to Original
+        </a>
+        <div class="flex items-center gap-4 mb-4">
+            <h1 class="text-4xl font-bold text-glass">Liquid Glass UI</h1>
+            <span class="px-3 py-1 rounded-full text-sm font-medium glass-card">iOS 26 Style</span>
+        </div>
+        <p class="text-gray-400">iOS Liquid Glass + Material 3 Expressive inspired design</p>
+        <div class="flex gap-4 mt-4">
+            <a href="index-daisyui.html" class="text-sm text-primary-400 hover:text-primary-300">View Bubble Nav Demo</a>
+            <a href="../research/liquid-glass-ui-2025.md" class="text-sm text-primary-400 hover:text-primary-300">View Research</a>
+        </div>
+    </div>
+
+    <!-- Interactive Demo -->
+    <section class="max-w-7xl mx-auto mb-24 relative z-10">
+        <h2 class="text-2xl font-bold mb-2 flex items-center gap-3">
+            <span class="w-10 h-10 rounded-2xl glass-primary flex items-center justify-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+            </span>
+            Interactive Demo
+            <span class="px-3 py-1 rounded-full text-xs font-medium glass-accent">Click tabs!</span>
+        </h2>
+        <p class="text-gray-400 mb-8">Experience the liquid glass navbar with spring animations</p>
+
+        <div class="flex justify-center">
+            <div class="phone-frame" id="demo-phone">
+                <!-- Screen Background -->
+                <div class="screen-bg"></div>
+
+                <!-- Screen Content -->
+                <div class="screen-content px-5" id="demo-screens">
+                    <!-- Home Screen -->
+                    <div class="screen-panel" data-screen="home">
+                        <!-- Greeting -->
+                        <div class="flex items-center justify-between mb-6 animate-slide-up">
+                            <div>
+                                <p class="text-gray-400 text-sm">Good morning</p>
+                                <h1 class="text-2xl font-bold text-glass">John</h1>
+                            </div>
+                            <div class="w-12 h-12 rounded-2xl glass-elevated flex items-center justify-center font-bold text-lg">
+                                JD
+                            </div>
+                        </div>
+
+                        <!-- Today's Focus Card -->
+                        <div class="glass-card glass-primary p-5 mb-5 animate-slide-up delay-1">
+                            <p class="text-white/70 text-sm mb-1">Today's Focus</p>
+                            <h3 class="text-xl font-bold mb-3">Ship auth feature</h3>
+                            <div class="flex items-center gap-2 text-white/80 text-sm">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                <span>3 blockers resolved</span>
+                            </div>
+                        </div>
+
+                        <!-- Stats Grid -->
+                        <div class="grid grid-cols-2 gap-3 mb-5">
+                            <div class="glass-card p-4 animate-scale-in delay-2">
+                                <p class="text-gray-400 text-xs mb-1">Streak</p>
+                                <p class="text-2xl font-bold text-primary-400">12 days</p>
+                            </div>
+                            <div class="glass-card p-4 animate-scale-in delay-3">
+                                <p class="text-gray-400 text-xs mb-1">This week</p>
+                                <p class="text-2xl font-bold text-green-400">5/5</p>
+                            </div>
+                        </div>
+
+                        <!-- Recent Activity -->
+                        <h3 class="font-semibold mb-3 text-sm text-gray-300">Recent Activity</h3>
+                        <div class="space-y-3">
+                            <div class="glass-subtle rounded-2xl p-4 flex items-center gap-3 animate-slide-up delay-4">
+                                <div class="w-10 h-10 rounded-xl glass-card flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="font-medium text-sm">Completed code review</p>
+                                    <p class="text-gray-500 text-xs">2 hours ago</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Journal Screen -->
+                    <div class="screen-panel hidden" data-screen="journal">
+                        <h1 class="text-2xl font-bold mb-6 text-glass animate-slide-up">Journal</h1>
+
+                        <!-- Quick Add -->
+                        <div class="glass-card p-4 mb-5 border-dashed animate-slide-up delay-1">
+                            <div class="flex items-center gap-3 text-gray-400">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                                <span>What did you work on today?</span>
+                            </div>
+                        </div>
+
+                        <h3 class="font-semibold mb-3 text-gray-400 text-xs uppercase tracking-wider">This Week</h3>
+                        <div class="space-y-3">
+                            <div class="glass-card p-4 animate-scale-in delay-2">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-xs text-gray-500">Today</span>
+                                    <span class="px-2 py-0.5 rounded-full text-xs glass-primary">Coding</span>
+                                </div>
+                                <p class="font-medium mb-1">Shipped auth feature</p>
+                                <p class="text-sm text-gray-500">Fixed OAuth edge cases</p>
+                            </div>
+                            <div class="glass-card p-4 animate-scale-in delay-3">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-xs text-gray-500">Yesterday</span>
+                                    <span class="px-2 py-0.5 rounded-full text-xs glass-accent">Review</span>
+                                </div>
+                                <p class="font-medium mb-1">Code review marathon</p>
+                                <p class="text-sm text-gray-500">Reviewed 3 PRs</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mentor Screen -->
+                    <div class="screen-panel hidden" data-screen="mentor">
+                        <div class="flex items-center gap-3 mb-6 animate-slide-up">
+                            <div class="w-12 h-12 rounded-2xl glass-primary flex items-center justify-center">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h1 class="text-xl font-bold text-glass">AI Mentor</h1>
+                                <p class="text-green-400 text-sm flex items-center gap-1">
+                                    <span class="w-2 h-2 rounded-full bg-green-400"></span>
+                                    Online
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div class="flex gap-3 animate-slide-up delay-1">
+                                <div class="w-8 h-8 rounded-xl glass-primary flex-shrink-0"></div>
+                                <div class="glass-card rounded-2xl rounded-tl-sm p-4 max-w-[85%]">
+                                    <p class="text-sm">Hey! I noticed you shipped the auth feature. Great work!</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-3 justify-end animate-slide-up delay-2">
+                                <div class="glass-elevated glass-primary rounded-2xl rounded-tr-sm p-4 max-w-[85%]">
+                                    <p class="text-sm">Thanks! Got feedback on error handling.</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-3 animate-slide-up delay-3">
+                                <div class="w-8 h-8 rounded-xl glass-primary flex-shrink-0"></div>
+                                <div class="glass-card rounded-2xl rounded-tl-sm p-4 max-w-[85%]">
+                                    <p class="text-sm">Want to discuss some patterns that work well?</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Insights Screen -->
+                    <div class="screen-panel hidden" data-screen="insights">
+                        <h1 class="text-2xl font-bold mb-6 text-glass animate-slide-up">Insights</h1>
+
+                        <div class="glass-elevated glass-primary p-5 mb-5 animate-scale-in delay-1">
+                            <p class="text-primary-300 text-sm mb-1">Weekly Summary</p>
+                            <h3 class="text-xl font-bold mb-2">Strong week!</h3>
+                            <p class="text-gray-300 text-sm">8 tasks completed, 2 mentor sessions</p>
+                        </div>
+
+                        <h3 class="font-semibold mb-4 text-sm text-gray-300">Skill Progress</h3>
+                        <div class="space-y-4">
+                            <div class="glass-card p-4 animate-slide-up delay-2">
+                                <div class="flex justify-between text-sm mb-2">
+                                    <span>Technical Leadership</span>
+                                    <span class="text-primary-400">72%</span>
+                                </div>
+                                <div class="h-2 rounded-full glass-subtle overflow-hidden">
+                                    <div class="h-full bg-gradient-to-r from-primary-500 to-primary-400 rounded-full" style="width: 72%"></div>
+                                </div>
+                            </div>
+                            <div class="glass-card p-4 animate-slide-up delay-3">
+                                <div class="flex justify-between text-sm mb-2">
+                                    <span>System Design</span>
+                                    <span class="text-green-400">85%</span>
+                                </div>
+                                <div class="h-2 rounded-full glass-subtle overflow-hidden">
+                                    <div class="h-full bg-gradient-to-r from-green-500 to-green-400 rounded-full" style="width: 85%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- LIQUID GLASS NAVBAR -->
+                <div class="liquid-navbar">
+                    <div class="liquid-nav-container" id="liquid-navbar">
+                        <div class="liquid-indicator" id="liquid-indicator"></div>
+
+                        <button class="liquid-nav-item active" data-tab="home">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                            </svg>
+                            <span class="label">Home</span>
+                        </button>
+
+                        <button class="liquid-nav-item" data-tab="journal">
+                            <span class="liquid-badge"></span>
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                            </svg>
+                            <span class="label">Journal</span>
+                        </button>
+
+                        <button class="liquid-nav-item" data-tab="mentor">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                            </svg>
+                            <span class="label">Mentor</span>
+                        </button>
+
+                        <button class="liquid-nav-item" data-tab="insights">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                            </svg>
+                            <span class="label">Insights</span>
+                        </button>
+                    </div>
+
+                    <button class="liquid-search-btn">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Card -->
+        <div class="mt-8 flex justify-center">
+            <div class="glass-card p-6 max-w-lg">
+                <h3 class="font-bold mb-4 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                    Liquid Glass Features
+                </h3>
+                <ul class="space-y-2 text-gray-400 text-sm">
+                    <li class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-primary-500"></span>
+                        Multi-layer blur with saturation (40px blur, 180% sat)
+                    </li>
+                    <li class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-primary-500"></span>
+                        Spring-based animations (cubic-bezier bounce)
+                    </li>
+                    <li class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-primary-500"></span>
+                        Gradient mesh background with animation
+                    </li>
+                    <li class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-primary-500"></span>
+                        Sliding indicator follows active tab
+                    </li>
+                    <li class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-primary-500"></span>
+                        Elevated vs subtle glass variants
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Glass Component Showcase -->
+    <section class="max-w-7xl mx-auto mb-24 relative z-10">
+        <h2 class="text-2xl font-bold mb-8 flex items-center gap-3">
+            <span class="w-10 h-10 rounded-2xl glass-accent flex items-center justify-center">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>
+                </svg>
+            </span>
+            Glass Components
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Base Glass -->
+            <div class="glass-card p-6">
+                <h3 class="font-bold mb-2">Base Glass</h3>
+                <p class="text-gray-400 text-sm">Standard glass card with 40px blur</p>
+                <code class="text-xs text-primary-400 mt-3 block">.glass-card</code>
+            </div>
+
+            <!-- Elevated Glass -->
+            <div class="glass-elevated rounded-3xl p-6">
+                <h3 class="font-bold mb-2">Elevated Glass</h3>
+                <p class="text-gray-400 text-sm">More prominent with 60px blur</p>
+                <code class="text-xs text-primary-400 mt-3 block">.glass-elevated</code>
+            </div>
+
+            <!-- Subtle Glass -->
+            <div class="glass-subtle rounded-3xl p-6">
+                <h3 class="font-bold mb-2">Subtle Glass</h3>
+                <p class="text-gray-400 text-sm">Minimal effect with 20px blur</p>
+                <code class="text-xs text-primary-400 mt-3 block">.glass-subtle</code>
+            </div>
+
+            <!-- Primary Glass -->
+            <div class="glass-card glass-primary p-6">
+                <h3 class="font-bold mb-2">Primary Glass</h3>
+                <p class="text-gray-400 text-sm">Purple tinted glass variant</p>
+                <code class="text-xs text-primary-400 mt-3 block">.glass-primary</code>
+            </div>
+
+            <!-- Accent Glass -->
+            <div class="glass-card glass-accent p-6">
+                <h3 class="font-bold mb-2">Accent Glass</h3>
+                <p class="text-gray-400 text-sm">Pink tinted glass variant</p>
+                <code class="text-xs text-accent-400 mt-3 block">.glass-accent</code>
+            </div>
+
+            <!-- Combined -->
+            <div class="glass-elevated glass-primary p-6">
+                <h3 class="font-bold mb-2">Combined</h3>
+                <p class="text-gray-400 text-sm">Elevated + Primary</p>
+                <code class="text-xs text-primary-400 mt-3 block">.glass-elevated.glass-primary</code>
+            </div>
+        </div>
+    </section>
+
+    <!-- JavaScript for Interactive Demo -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const navbar = document.getElementById('liquid-navbar');
+            const indicator = document.getElementById('liquid-indicator');
+            const tabs = navbar.querySelectorAll('.liquid-nav-item');
+            const screens = document.querySelectorAll('#demo-screens .screen-panel');
+
+            function updateIndicator(activeTab) {
+                indicator.style.left = activeTab.offsetLeft + 'px';
+                indicator.style.width = activeTab.offsetWidth + 'px';
+            }
+
+            // Initialize
+            const initialActive = navbar.querySelector('.liquid-nav-item.active');
+            if (initialActive) {
+                updateIndicator(initialActive);
+            }
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const targetScreen = this.dataset.tab;
+
+                    // Update active states
+                    tabs.forEach(t => t.classList.remove('active', 'pop'));
+                    this.classList.add('active', 'pop');
+
+                    // Move indicator with spring animation
+                    updateIndicator(this);
+
+                    // Switch screens
+                    screens.forEach(screen => {
+                        if (screen.dataset.screen === targetScreen) {
+                            screen.classList.remove('hidden');
+                            // Re-trigger animations
+                            screen.querySelectorAll('[class*="animate-"]').forEach(el => {
+                                el.style.animation = 'none';
+                                el.offsetHeight;
+                                el.style.animation = null;
+                            });
+                        } else {
+                            screen.classList.add('hidden');
+                        }
+                    });
+
+                    setTimeout(() => this.classList.remove('pop'), 400);
+                });
+            });
+
+            window.addEventListener('resize', () => {
+                const activeTab = navbar.querySelector('.liquid-nav-item.active');
+                if (activeTab) updateIndicator(activeTab);
+            });
+        });
+    </script>
+</body>
+</html>

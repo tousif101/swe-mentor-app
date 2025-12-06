@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web App Mockups - SWE Mentor</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwindcss.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f5f3ff', 100: '#ede9fe', 200: '#ddd6fe', 300: '#c4b5fd',
+                            400: '#a78bfa', 500: '#8b5cf6', 600: '#7c3aed', 700: '#6d28d9',
+                            800: '#5b21b6', 900: '#4c1d95',
+                        },
+                        accent: {
+                            50: '#fdf4ff', 100: '#fae8ff', 200: '#f5d0fe', 300: '#f0abfc',
+                            400: '#e879f9', 500: '#d946ef', 600: '#c026d3', 700: '#a21caf',
+                            800: '#86198f', 900: '#701a75',
+                        }
+                    },
+                    animation: {
+                        'gradient': 'gradient 8s linear infinite',
+                    },
+                    keyframes: {
+                        gradient: {
+                            '0%, 100%': { backgroundPosition: '0% 50%' },
+                            '50%': { backgroundPosition: '100% 50%' },
+                        },
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(-45deg, #4c1d95, #7c3aed, #8b5cf6, #a78bfa);
+            background-size: 400% 400%;
+            animation: gradient 15s ease infinite;
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .browser-frame {
+            border-radius: 12px;
+            border: 1px solid #374151;
+            overflow: hidden;
+            background: #111827;
+        }
+        .browser-header {
+            background: #1f2937;
+            padding: 12px 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid #374151;
+        }
+        .browser-dots {
+            display: flex;
+            gap: 8px;
+        }
+        .browser-dots span {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+        .browser-url {
+            flex: 1;
+            background: #374151;
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 12px;
+            color: #9ca3af;
+        }
+    </style>
+</head>
+<body class="bg-gray-950 text-white min-h-screen p-8">
+    <!-- Header -->
+    <div class="max-w-7xl mx-auto mb-12">
+        <a href="../index.html" class="text-primary-400 hover:text-primary-300 mb-4 inline-flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            Back to Overview
+        </a>
+        <h1 class="text-4xl font-bold mb-4">Web App Flows</h1>
+        <p class="text-gray-400">Complete user journey mockups for the Next.js web application</p>
+    </div>
+
+    <!-- Flow Navigation -->
+    <div class="max-w-7xl mx-auto mb-12 flex flex-wrap gap-3">
+        <a href="#auth" class="px-4 py-2 rounded-xl glass hover:bg-white/10 transition text-sm">A. Auth</a>
+        <a href="#dashboard" class="px-4 py-2 rounded-xl glass hover:bg-white/10 transition text-sm">B. Dashboard</a>
+        <a href="#journal" class="px-4 py-2 rounded-xl glass hover:bg-white/10 transition text-sm">C. Journal</a>
+        <a href="#search" class="px-4 py-2 rounded-xl glass hover:bg-white/10 transition text-sm">D. Search</a>
+        <a href="#ladder" class="px-4 py-2 rounded-xl glass hover:bg-white/10 transition text-sm">E. Career Ladder</a>
+        <a href="#planner" class="px-4 py-2 rounded-xl glass hover:bg-white/10 transition text-sm">F. Planner</a>
+        <a href="#mentor" class="px-4 py-2 rounded-xl glass hover:bg-white/10 transition text-sm">G. Mentor</a>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- FLOW A: AUTH -->
+    <!-- ============================================== -->
+    <section id="auth" class="max-w-7xl mx-auto mb-24">
+        <h2 class="text-2xl font-bold mb-2 flex items-center gap-3">
+            <span class="w-8 h-8 rounded-lg bg-accent-600 flex items-center justify-center text-sm">A</span>
+            Authentication
+        </h2>
+        <p class="text-gray-400 mb-8">Landing → Sign In → Onboarding</p>
+
+        <!-- Landing Page -->
+        <div class="mb-12">
+            <p class="text-sm text-gray-500 mb-3">Landing Page</p>
+            <div class="browser-frame">
+                <div class="browser-header">
+                    <div class="browser-dots">
+                        <span class="bg-red-500"></span>
+                        <span class="bg-yellow-500"></span>
+                        <span class="bg-green-500"></span>
+                    </div>
+                    <div class="browser-url">https://swementor.app</div>
+                </div>
+                <div class="p-0">
+                    <!-- Nav -->
+                    <nav class="flex items-center justify-between px-8 py-4 border-b border-gray-800">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-lg gradient-bg"></div>
+                            <span class="font-bold text-lg">SWE Mentor</span>
+                        </div>
+                        <div class="flex items-center gap-6">
+                            <a href="#" class="text-gray-400 hover:text-white text-sm">Features</a>
+                            <a href="#" class="text-gray-400 hover:text-white text-sm">Pricing</a>
+                            <a href="#" class="text-gray-400 hover:text-white text-sm">About</a>
+                            <button class="px-4 py-2 rounded-lg glass text-sm">Sign In</button>
+                            <button class="px-4 py-2 rounded-lg gradient-bg text-sm font-medium">Get Started</button>
+                        </div>
+                    </nav>
+
+                    <!-- Hero -->
+                    <div class="px-8 py-24 text-center">
+                        <div class="inline-block px-4 py-2 rounded-full glass mb-6 text-sm text-primary-400">
+                            AI-Powered Career Growth
+                        </div>
+                        <h1 class="text-5xl font-bold mb-6 max-w-3xl mx-auto">
+                            Track your growth. <br>
+                            <span class="bg-gradient-to-r from-primary-400 to-accent-400 bg-clip-text text-transparent">Reach senior faster.</span>
+                        </h1>
+                        <p class="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
+                            Daily journaling meets AI mentorship. Track wins, overcome blockers, and get personalized guidance on your path to senior engineer.
+                        </p>
+                        <div class="flex gap-4 justify-center">
+                            <button class="px-8 py-4 rounded-xl gradient-bg font-semibold text-lg">
+                                Start Free Trial
+                            </button>
+                            <button class="px-8 py-4 rounded-xl glass font-semibold text-lg">
+                                Watch Demo
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Features Grid -->
+                    <div class="px-8 py-16 bg-gray-900/50">
+                        <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                            <div class="rounded-2xl glass p-6">
+                                <div class="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center mb-4">
+                                    <svg class="w-6 h-6 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </div>
+                                <h3 class="font-semibold mb-2">Daily Check-ins</h3>
+                                <p class="text-sm text-gray-400">5 questions that capture your wins, blockers, and learnings</p>
+                            </div>
+                            <div class="rounded-2xl glass p-6">
+                                <div class="w-12 h-12 rounded-xl bg-purple-500/20 flex items-center justify-center mb-4">
+                                    <svg class="w-6 h-6 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                    </svg>
+                                </div>
+                                <h3 class="font-semibold mb-2">AI Mentor</h3>
+                                <p class="text-sm text-gray-400">Socratic guidance for career questions and emotional blockers</p>
+                            </div>
+                            <div class="rounded-2xl glass p-6">
+                                <div class="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center mb-4">
+                                    <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                    </svg>
+                                </div>
+                                <h3 class="font-semibold mb-2">Gap Analysis</h3>
+                                <p class="text-sm text-gray-400">Track progress against career ladders with evidence-based scoring</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sign In -->
+        <div class="mb-12">
+            <p class="text-sm text-gray-500 mb-3">Sign In Page</p>
+            <div class="browser-frame max-w-2xl">
+                <div class="browser-header">
+                    <div class="browser-dots">
+                        <span class="bg-red-500"></span>
+                        <span class="bg-yellow-500"></span>
+                        <span class="bg-green-500"></span>
+                    </div>
+                    <div class="browser-url">https://swementor.app/login</div>
+                </div>
+                <div class="p-12 flex flex-col items-center">
+                    <div class="w-12 h-12 rounded-xl gradient-bg mb-6"></div>
+                    <h2 class="text-2xl font-bold mb-2">Welcome back</h2>
+                    <p class="text-gray-400 mb-8">Sign in to continue your journey</p>
+
+                    <div class="w-full max-w-sm space-y-4">
+                        <button class="w-full py-3 rounded-xl bg-white text-gray-900 font-medium flex items-center justify-center gap-3">
+                            <svg class="w-5 h-5" viewBox="0 0 24 24">
+                                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                            </svg>
+                            Continue with Google
+                        </button>
+
+                        <div class="flex items-center gap-4">
+                            <div class="flex-1 h-px bg-gray-700"></div>
+                            <span class="text-gray-500 text-sm">or</span>
+                            <div class="flex-1 h-px bg-gray-700"></div>
+                        </div>
+
+                        <div>
+                            <label class="text-sm text-gray-400 mb-2 block">Email</label>
+                            <input type="email" placeholder="you@company.com" class="w-full px-4 py-3 rounded-xl bg-gray-800 border border-gray-700 focus:border-primary-500 focus:outline-none">
+                        </div>
+
+                        <button class="w-full py-3 rounded-xl bg-primary-600 font-medium">
+                            Send Magic Link
+                        </button>
+
+                        <p class="text-center text-gray-500 text-sm">
+                            Don't have an account? <a href="#" class="text-primary-400">Sign up</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- FLOW B: DASHBOARD -->
+    <!-- ============================================== -->
+    <section id="dashboard" class="max-w-7xl mx-auto mb-24">
+        <h2 class="text-2xl font-bold mb-2 flex items-center gap-3">
+            <span class="w-8 h-8 rounded-lg bg-accent-600 flex items-center justify-center text-sm">B</span>
+            Dashboard
+        </h2>
+        <p class="text-gray-400 mb-8">Today's summary → Progress charts → Quick actions → Recent activity</p>
+
+        <div class="browser-frame">
+            <div class="browser-header">
+                <div class="browser-dots">
+                    <span class="bg-red-500"></span>
+                    <span class="bg-yellow-500"></span>
+                    <span class="bg-green-500"></span>
+                </div>
+                <div class="browser-url">https://swementor.app/dashboard</div>
+            </div>
+            <div class="flex">
+                <!-- Sidebar -->
+                <aside class="w-64 border-r border-gray-800 p-4 min-h-[600px]">
+                    <div class="flex items-center gap-2 mb-8">
+                        <div class="w-8 h-8 rounded-lg gradient-bg"></div>
+                        <span class="font-bold">SWE Mentor</span>
+                    </div>
+
+                    <nav class="space-y-1">
+                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-primary-600/20 text-primary-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path>
+                            </svg>
+                            Dashboard
+                        </a>
+                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-400 hover:bg-white/5">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                            </svg>
+                            Journal
+                        </a>
+                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-400 hover:bg-white/5">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                            Search
+                        </a>
+                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-400 hover:bg-white/5">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                            </svg>
+                            Career Ladder
+                        </a>
+                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-400 hover:bg-white/5">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path>
+                            </svg>
+                            Planner
+                        </a>
+                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-400 hover:bg-white/5">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                            </svg>
+                            Mentor
+                        </a>
+                    </nav>
+
+                    <div class="mt-auto pt-8">
+                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-400 hover:bg-white/5">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            Settings
+                        </a>
+                    </div>
+                </aside>
+
+                <!-- Main Content -->
+                <main class="flex-1 p-8">
+                    <!-- Header -->
+                    <div class="flex items-center justify-between mb-8">
+                        <div>
+                            <h1 class="text-2xl font-bold">Good evening, John</h1>
+                            <p class="text-gray-400">Tuesday, December 3, 2024</p>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <button class="px-4 py-2 rounded-xl gradient-bg font-medium text-sm">
+                                + Daily Check-in
+                            </button>
+                            <div class="w-10 h-10 rounded-full gradient-bg"></div>
+                        </div>
+                    </div>
+
+                    <!-- Stats Row -->
+                    <div class="grid grid-cols-4 gap-4 mb-8">
+                        <div class="rounded-xl glass p-4">
+                            <p class="text-sm text-gray-400 mb-1">Current Streak</p>
+                            <p class="text-3xl font-bold">7 days</p>
+                        </div>
+                        <div class="rounded-xl glass p-4">
+                            <p class="text-sm text-gray-400 mb-1">This Week</p>
+                            <p class="text-3xl font-bold text-green-400">5 wins</p>
+                        </div>
+                        <div class="rounded-xl glass p-4">
+                            <p class="text-sm text-gray-400 mb-1">Active Blockers</p>
+                            <p class="text-3xl font-bold text-red-400">2</p>
+                        </div>
+                        <div class="rounded-xl glass p-4">
+                            <p class="text-sm text-gray-400 mb-1">Progress to Senior</p>
+                            <p class="text-3xl font-bold text-primary-400">73%</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-6">
+                        <!-- Progress Chart -->
+                        <div class="col-span-2 rounded-2xl glass p-6">
+                            <h3 class="font-semibold mb-4">Weekly Activity</h3>
+                            <div class="h-48 flex items-end gap-4">
+                                <div class="flex-1 flex flex-col items-center gap-2">
+                                    <div class="w-full bg-primary-600 rounded-t" style="height: 60%"></div>
+                                    <span class="text-xs text-gray-500">Mon</span>
+                                </div>
+                                <div class="flex-1 flex flex-col items-center gap-2">
+                                    <div class="w-full bg-primary-600 rounded-t" style="height: 80%"></div>
+                                    <span class="text-xs text-gray-500">Tue</span>
+                                </div>
+                                <div class="flex-1 flex flex-col items-center gap-2">
+                                    <div class="w-full bg-primary-600 rounded-t" style="height: 45%"></div>
+                                    <span class="text-xs text-gray-500">Wed</span>
+                                </div>
+                                <div class="flex-1 flex flex-col items-center gap-2">
+                                    <div class="w-full bg-primary-600 rounded-t" style="height: 90%"></div>
+                                    <span class="text-xs text-gray-500">Thu</span>
+                                </div>
+                                <div class="flex-1 flex flex-col items-center gap-2">
+                                    <div class="w-full bg-primary-600 rounded-t" style="height: 70%"></div>
+                                    <span class="text-xs text-gray-500">Fri</span>
+                                </div>
+                                <div class="flex-1 flex flex-col items-center gap-2">
+                                    <div class="w-full bg-gray-700 rounded-t" style="height: 20%"></div>
+                                    <span class="text-xs text-gray-500">Sat</span>
+                                </div>
+                                <div class="flex-1 flex flex-col items-center gap-2">
+                                    <div class="w-full bg-gray-700 rounded-t" style="height: 10%"></div>
+                                    <span class="text-xs text-gray-500">Sun</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- AI Insights -->
+                        <div class="rounded-2xl glass p-6">
+                            <div class="flex items-center gap-2 mb-4">
+                                <div class="w-6 h-6 rounded-lg gradient-bg"></div>
+                                <h3 class="font-semibold">AI Insights</h3>
+                            </div>
+                            <div class="space-y-4">
+                                <div class="p-3 rounded-xl bg-green-500/10 border border-green-500/20">
+                                    <p class="text-sm text-green-300">Strong week on shipping! 3 PRs merged.</p>
+                                </div>
+                                <div class="p-3 rounded-xl bg-yellow-500/10 border border-yellow-500/20">
+                                    <p class="text-sm text-yellow-300">Consider syncing with design earlier.</p>
+                                </div>
+                                <div class="p-3 rounded-xl bg-blue-500/10 border border-blue-500/20">
+                                    <p class="text-sm text-blue-300">You collaborate most with Sarah.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Entries -->
+                    <div class="mt-8">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="font-semibold">Recent Entries</h3>
+                            <a href="#" class="text-sm text-primary-400">View All</a>
+                        </div>
+                        <div class="space-y-3">
+                            <div class="rounded-xl glass p-4 flex items-center gap-4">
+                                <div class="w-2 h-2 rounded-full bg-green-400"></div>
+                                <div class="flex-1">
+                                    <p class="font-medium">Merged auth PR after 3 rounds</p>
+                                    <p class="text-sm text-gray-400">Today at 5:30 PM</p>
+                                </div>
+                                <span class="px-3 py-1 rounded-full bg-green-500/20 text-green-400 text-sm">#win</span>
+                            </div>
+                            <div class="rounded-xl glass p-4 flex items-center gap-4">
+                                <div class="w-2 h-2 rounded-full bg-red-400"></div>
+                                <div class="flex-1">
+                                    <p class="font-medium">Still waiting on design review</p>
+                                    <p class="text-sm text-gray-400">Yesterday at 6:15 PM</p>
+                                </div>
+                                <span class="px-3 py-1 rounded-full bg-red-500/20 text-red-400 text-sm">#blocker</span>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- FLOW C: JOURNAL -->
+    <!-- ============================================== -->
+    <section id="journal" class="max-w-7xl mx-auto mb-24">
+        <h2 class="text-2xl font-bold mb-2 flex items-center gap-3">
+            <span class="w-8 h-8 rounded-lg bg-accent-600 flex items-center justify-center text-sm">C</span>
+            Journal Dashboard
+        </h2>
+        <p class="text-gray-400 mb-8">Timeline view → Filters → Entry management → Evidence links</p>
+
+        <div class="browser-frame">
+            <div class="browser-header">
+                <div class="browser-dots">
+                    <span class="bg-red-500"></span>
+                    <span class="bg-yellow-500"></span>
+                    <span class="bg-green-500"></span>
+                </div>
+                <div class="browser-url">https://swementor.app/journal</div>
+            </div>
+            <div class="flex">
+                <!-- Sidebar (same as dashboard) -->
+                <aside class="w-64 border-r border-gray-800 p-4 min-h-[600px]">
+                    <div class="flex items-center gap-2 mb-8">
+                        <div class="w-8 h-8 rounded-lg gradient-bg"></div>
+                        <span class="font-bold">SWE Mentor</span>
+                    </div>
+                    <nav class="space-y-1">
+                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-400 hover:bg-white/5">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5z"></path></svg>
+                            Dashboard
+                        </a>
+                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-primary-600/20 text-primary-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253"></path></svg>
+                            Journal
+                        </a>
+                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-400 hover:bg-white/5">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                            Search
+                        </a>
+                    </nav>
+                </aside>
+
+                <!-- Main Content -->
+                <main class="flex-1 p-8">
+                    <!-- Header -->
+                    <div class="flex items-center justify-between mb-6">
+                        <h1 class="text-2xl font-bold">Journal</h1>
+                        <button class="px-4 py-2 rounded-xl gradient-bg font-medium text-sm flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                            New Entry
+                        </button>
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="flex items-center gap-3 mb-6">
+                        <div class="flex gap-2">
+                            <button class="px-4 py-2 rounded-lg bg-primary-600/20 text-primary-400 text-sm">All</button>
+                            <button class="px-4 py-2 rounded-lg glass text-gray-400 text-sm">#wins</button>
+                            <button class="px-4 py-2 rounded-lg glass text-gray-400 text-sm">#blockers</button>
+                            <button class="px-4 py-2 rounded-lg glass text-gray-400 text-sm">#learning</button>
+                        </div>
+                        <div class="flex-1"></div>
+                        <input type="date" class="px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 text-sm">
+                        <input type="date" class="px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 text-sm">
+                    </div>
+
+                    <!-- Timeline -->
+                    <div class="space-y-6">
+                        <!-- Today -->
+                        <div>
+                            <h3 class="text-sm font-semibold text-gray-400 mb-3">Today, December 3</h3>
+                            <div class="space-y-3">
+                                <div class="rounded-xl glass p-5 hover:bg-white/10 transition cursor-pointer">
+                                    <div class="flex items-start justify-between mb-3">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-2 h-2 rounded-full bg-green-400"></div>
+                                            <span class="text-sm text-gray-400">5:30 PM</span>
+                                        </div>
+                                        <span class="px-3 py-1 rounded-full bg-green-500/20 text-green-400 text-sm">#win</span>
+                                    </div>
+                                    <h4 class="font-medium mb-2">Merged auth PR after 3 rounds of review</h4>
+                                    <p class="text-sm text-gray-400 mb-3">Finally got the authentication system merged. Learned a lot about JWT refresh token patterns from the code review feedback.</p>
+                                    <div class="flex items-center gap-3">
+                                        <a href="#" class="text-xs text-primary-400 flex items-center gap-1">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
+                                            github.com/company/repo/pull/123
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Yesterday -->
+                        <div>
+                            <h3 class="text-sm font-semibold text-gray-400 mb-3">Yesterday, December 2</h3>
+                            <div class="space-y-3">
+                                <div class="rounded-xl glass p-5 hover:bg-white/10 transition cursor-pointer">
+                                    <div class="flex items-start justify-between mb-3">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-2 h-2 rounded-full bg-red-400"></div>
+                                            <span class="text-sm text-gray-400">6:15 PM</span>
+                                        </div>
+                                        <span class="px-3 py-1 rounded-full bg-red-500/20 text-red-400 text-sm">#blocker</span>
+                                    </div>
+                                    <h4 class="font-medium mb-2">Still waiting on design review for settings page</h4>
+                                    <p class="text-sm text-gray-400">Design team is swamped with the new feature launch. Need to escalate or find a workaround.</p>
+                                </div>
+
+                                <div class="rounded-xl glass p-5 hover:bg-white/10 transition cursor-pointer">
+                                    <div class="flex items-start justify-between mb-3">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-2 h-2 rounded-full bg-blue-400"></div>
+                                            <span class="text-sm text-gray-400">2:00 PM</span>
+                                        </div>
+                                        <span class="px-3 py-1 rounded-full bg-blue-500/20 text-blue-400 text-sm">#learning</span>
+                                    </div>
+                                    <h4 class="font-medium mb-2">Deep dive into Redis caching patterns</h4>
+                                    <p class="text-sm text-gray-400">Spent time understanding cache invalidation strategies. Write-through vs write-behind has interesting tradeoffs.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- FLOW D: SEARCH -->
+    <!-- ============================================== -->
+    <section id="search" class="max-w-7xl mx-auto mb-24">
+        <h2 class="text-2xl font-bold mb-2 flex items-center gap-3">
+            <span class="w-8 h-8 rounded-lg bg-accent-600 flex items-center justify-center text-sm">D</span>
+            Semantic Search
+        </h2>
+        <p class="text-gray-400 mb-8">AI-powered search → Filters → Snippet preview → Jump to entry</p>
+
+        <div class="browser-frame">
+            <div class="browser-header">
+                <div class="browser-dots">
+                    <span class="bg-red-500"></span>
+                    <span class="bg-yellow-500"></span>
+                    <span class="bg-green-500"></span>
+                </div>
+                <div class="browser-url">https://swementor.app/search</div>
+            </div>
+            <div class="flex">
+                <!-- Sidebar -->
+                <aside class="w-64 border-r border-gray-800 p-4 min-h-[600px]">
+                    <div class="flex items-center gap-2 mb-8">
+                        <div class="w-8 h-8 rounded-lg gradient-bg"></div>
+                        <span class="font-bold">SWE Mentor</span>
+                    </div>
+                    <nav class="space-y-1">
+                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-400">Dashboard</a>
+                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-400">Journal</a>
+                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-primary-600/20 text-primary-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                            Search
+                        </a>
+                    </nav>
+                </aside>
+
+                <main class="flex-1 p-8">
+                    <h1 class="text-2xl font-bold mb-6">Search</h1>
+
+                    <!-- Search Box -->
+                    <div class="relative mb-6">
+                        <svg class="w-5 h-5 absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        <input type="text" value="system design blockers last month" class="w-full pl-12 pr-4 py-4 rounded-xl bg-gray-800 border border-gray-700 text-lg focus:border-primary-500 focus:outline-none">
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="flex items-center gap-4 mb-6">
+                        <select class="px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 text-sm">
+                            <option>All time</option>
+                            <option selected>Last month</option>
+                            <option>Last week</option>
+                        </select>
+                        <select class="px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 text-sm">
+                            <option>All tags</option>
+                            <option selected>#blocker</option>
+                            <option>#win</option>
+                        </select>
+                        <div class="flex gap-2">
+                            <button class="px-4 py-2 rounded-lg bg-primary-600/20 text-primary-400 text-sm">Semantic</button>
+                            <button class="px-4 py-2 rounded-lg glass text-gray-400 text-sm">Exact</button>
+                        </div>
+                    </div>
+
+                    <!-- Results -->
+                    <div class="space-y-4">
+                        <p class="text-sm text-gray-400">Found 3 results</p>
+
+                        <div class="rounded-xl glass p-5 hover:bg-white/10 transition cursor-pointer">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="px-2 py-0.5 rounded bg-red-500/20 text-red-400 text-xs">#blocker</span>
+                                <span class="text-sm text-gray-500">November 28, 2024</span>
+                                <span class="text-sm text-primary-400">92% match</span>
+                            </div>
+                            <h4 class="font-medium mb-2">Database schema design getting complex</h4>
+                            <p class="text-sm text-gray-400">The <mark class="bg-yellow-500/30 text-yellow-200 px-1 rounded">system design</mark> for the new analytics feature is getting complicated. Need to think about sharding strategy...</p>
+                        </div>
+
+                        <div class="rounded-xl glass p-5 hover:bg-white/10 transition cursor-pointer">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="px-2 py-0.5 rounded bg-red-500/20 text-red-400 text-xs">#blocker</span>
+                                <span class="text-sm text-gray-500">November 15, 2024</span>
+                                <span class="text-sm text-primary-400">87% match</span>
+                            </div>
+                            <h4 class="font-medium mb-2">API design feedback loop taking too long</h4>
+                            <p class="text-sm text-gray-400">Getting stuck on the <mark class="bg-yellow-500/30 text-yellow-200 px-1 rounded">design</mark> review process. Each iteration takes 3-4 days to get feedback...</p>
+                        </div>
+
+                        <div class="rounded-xl glass p-5 hover:bg-white/10 transition cursor-pointer">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="px-2 py-0.5 rounded bg-red-500/20 text-red-400 text-xs">#blocker</span>
+                                <span class="text-sm text-gray-500">November 8, 2024</span>
+                                <span class="text-sm text-primary-400">78% match</span>
+                            </div>
+                            <h4 class="font-medium mb-2">Microservices architecture decisions</h4>
+                            <p class="text-sm text-gray-400">Team disagreement on <mark class="bg-yellow-500/30 text-yellow-200 px-1 rounded">system</mark> boundaries. Should the auth service be separate or combined...</p>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- FLOW E: CAREER LADDER -->
+    <!-- ============================================== -->
+    <section id="ladder" class="max-w-7xl mx-auto mb-24">
+        <h2 class="text-2xl font-bold mb-2 flex items-center gap-3">
+            <span class="w-8 h-8 rounded-lg bg-accent-600 flex items-center justify-center text-sm">E</span>
+            Career Ladder & Gap Analysis
+        </h2>
+        <p class="text-gray-400 mb-8">Competencies → Evidence mapping → Radar chart → AI suggestions</p>
+
+        <div class="browser-frame">
+            <div class="browser-header">
+                <div class="browser-dots">
+                    <span class="bg-red-500"></span>
+                    <span class="bg-yellow-500"></span>
+                    <span class="bg-green-500"></span>
+                </div>
+                <div class="browser-url">https://swementor.app/ladder</div>
+            </div>
+            <div class="flex">
+                <!-- Sidebar -->
+                <aside class="w-64 border-r border-gray-800 p-4 min-h-[700px]">
+                    <div class="flex items-center gap-2 mb-8">
+                        <div class="w-8 h-8 rounded-lg gradient-bg"></div>
+                        <span class="font-bold">SWE Mentor</span>
+                    </div>
+                    <nav class="space-y-1">
+                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-400">Dashboard</a>
+                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-400">Journal</a>
+                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-400">Search</a>
+                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-primary-600/20 text-primary-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+                            Career Ladder
+                        </a>
+                    </nav>
+                </aside>
+
+                <main class="flex-1 p-8">
+                    <!-- Header -->
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h1 class="text-2xl font-bold">Career Ladder</h1>
+                            <p class="text-gray-400">Tracking progress to Senior Engineer</p>
+                        </div>
+                        <button class="px-4 py-2 rounded-xl glass text-sm">Upload Framework</button>
+                    </div>
+
+                    <div class="grid grid-cols-3 gap-6">
+                        <!-- Radar Chart (placeholder) -->
+                        <div class="col-span-2 rounded-2xl glass p-6">
+                            <h3 class="font-semibold mb-4">Competency Overview</h3>
+                            <div class="h-64 flex items-center justify-center">
+                                <!-- Simplified radar chart representation -->
+                                <div class="relative w-48 h-48">
+                                    <div class="absolute inset-0 border border-gray-700 rounded-full"></div>
+                                    <div class="absolute inset-4 border border-gray-700 rounded-full"></div>
+                                    <div class="absolute inset-8 border border-gray-700 rounded-full"></div>
+                                    <div class="absolute inset-12 border border-gray-700 rounded-full"></div>
+
+                                    <!-- Radar points connected -->
+                                    <svg class="absolute inset-0" viewBox="0 0 200 200">
+                                        <polygon
+                                            points="100,25 165,70 145,145 55,145 35,70"
+                                            fill="rgba(139, 92, 246, 0.3)"
+                                            stroke="#8b5cf6"
+                                            stroke-width="2"
+                                        />
+                                    </svg>
+
+                                    <!-- Labels -->
+                                    <span class="absolute -top-6 left-1/2 -translate-x-1/2 text-xs text-gray-400">Technical</span>
+                                    <span class="absolute top-1/4 -right-16 text-xs text-gray-400">Design</span>
+                                    <span class="absolute bottom-0 -right-12 text-xs text-gray-400">Comm.</span>
+                                    <span class="absolute bottom-0 -left-16 text-xs text-gray-400">Leadership</span>
+                                    <span class="absolute top-1/4 -left-12 text-xs text-gray-400">Impact</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Progress Summary -->
+                        <div class="rounded-2xl gradient-bg p-6">
+                            <h3 class="font-semibold mb-4">Progress to Senior</h3>
+                            <div class="text-5xl font-bold mb-2">73%</div>
+                            <p class="text-white/70 mb-4">+5% this month</p>
+                            <div class="w-full h-3 bg-white/20 rounded-full">
+                                <div class="w-3/4 h-full bg-white rounded-full"></div>
+                            </div>
+                            <p class="text-sm text-white/70 mt-4">Estimated readiness: Q2 2025</p>
+                        </div>
+                    </div>
+
+                    <!-- Competencies -->
+                    <div class="mt-8">
+                        <h3 class="font-semibold mb-4">Competency Breakdown</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="rounded-xl glass p-5">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h4 class="font-medium">Technical Execution</h4>
+                                    <span class="text-green-400 font-semibold">85%</span>
+                                </div>
+                                <div class="w-full h-2 bg-gray-700 rounded-full mb-3">
+                                    <div class="w-[85%] h-full bg-green-500 rounded-full"></div>
+                                </div>
+                                <p class="text-sm text-gray-400 mb-3">Strong evidence from 12 journal entries</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="px-2 py-1 rounded bg-gray-800 text-xs">PR #123: Auth system</span>
+                                    <span class="px-2 py-1 rounded bg-gray-800 text-xs">PR #98: API refactor</span>
+                                </div>
+                            </div>
+
+                            <div class="rounded-xl glass p-5">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h4 class="font-medium">System Design</h4>
+                                    <span class="text-yellow-400 font-semibold">65%</span>
+                                </div>
+                                <div class="w-full h-2 bg-gray-700 rounded-full mb-3">
+                                    <div class="w-[65%] h-full bg-yellow-500 rounded-full"></div>
+                                </div>
+                                <p class="text-sm text-gray-400 mb-3">Moderate evidence from 6 entries</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="px-2 py-1 rounded bg-gray-800 text-xs">Design doc: Analytics</span>
+                                </div>
+                            </div>
+
+                            <div class="rounded-xl glass p-5">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h4 class="font-medium">Communication</h4>
+                                    <span class="text-blue-400 font-semibold">72%</span>
+                                </div>
+                                <div class="w-full h-2 bg-gray-700 rounded-full mb-3">
+                                    <div class="w-[72%] h-full bg-blue-500 rounded-full"></div>
+                                </div>
+                                <p class="text-sm text-gray-400 mb-3">Good evidence from 8 entries</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="px-2 py-1 rounded bg-gray-800 text-xs">Led incident review</span>
+                                    <span class="px-2 py-1 rounded bg-gray-800 text-xs">Tech talk: Caching</span>
+                                </div>
+                            </div>
+
+                            <div class="rounded-xl glass p-5 border border-orange-500/30">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h4 class="font-medium">Leadership</h4>
+                                    <span class="text-red-400 font-semibold">58%</span>
+                                </div>
+                                <div class="w-full h-2 bg-gray-700 rounded-full mb-3">
+                                    <div class="w-[58%] h-full bg-red-500 rounded-full"></div>
+                                </div>
+                                <p class="text-sm text-gray-400 mb-3">Limited evidence - focus area</p>
+                                <div class="p-3 rounded-lg bg-orange-500/10 border border-orange-500/20">
+                                    <p class="text-sm text-orange-300">Suggestion: Lead a project or mentor a junior engineer</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- FLOW F: PLANNER -->
+    <!-- ============================================== -->
+    <section id="planner" class="max-w-7xl mx-auto mb-24">
+        <h2 class="text-2xl font-bold mb-2 flex items-center gap-3">
+            <span class="w-8 h-8 rounded-lg bg-accent-600 flex items-center justify-center text-sm">F</span>
+            Project Planner
+        </h2>
+        <p class="text-gray-400 mb-8">Project intake → AI breakdown → Task list → Competency mapping</p>
+
+        <div class="browser-frame">
+            <div class="browser-header">
+                <div class="browser-dots">
+                    <span class="bg-red-500"></span>
+                    <span class="bg-yellow-500"></span>
+                    <span class="bg-green-500"></span>
+                </div>
+                <div class="browser-url">https://swementor.app/planner</div>
+            </div>
+            <div class="flex">
+                <!-- Sidebar -->
+                <aside class="w-64 border-r border-gray-800 p-4 min-h-[600px]">
+                    <div class="flex items-center gap-2 mb-8">
+                        <div class="w-8 h-8 rounded-lg gradient-bg"></div>
+                        <span class="font-bold">SWE Mentor</span>
+                    </div>
+                    <nav class="space-y-1">
+                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-400">Dashboard</a>
+                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-400">Journal</a>
+                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-400">Search</a>
+                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-400">Career Ladder</a>
+                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-primary-600/20 text-primary-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                            Planner
+                        </a>
+                    </nav>
+                </aside>
+
+                <main class="flex-1 p-8">
+                    <div class="grid grid-cols-2 gap-8">
+                        <!-- Input Form -->
+                        <div>
+                            <h2 class="text-xl font-bold mb-6">Plan a Project</h2>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="text-sm text-gray-400 mb-2 block">Project Goal</label>
+                                    <textarea class="w-full px-4 py-3 rounded-xl bg-gray-800 border border-gray-700 resize-none h-24" placeholder="What do you want to achieve?">Build a real-time notification system for our app</textarea>
+                                </div>
+                                <div>
+                                    <label class="text-sm text-gray-400 mb-2 block">Deadline</label>
+                                    <input type="date" value="2024-12-31" class="w-full px-4 py-3 rounded-xl bg-gray-800 border border-gray-700">
+                                </div>
+                                <div>
+                                    <label class="text-sm text-gray-400 mb-2 block">Constraints</label>
+                                    <textarea class="w-full px-4 py-3 rounded-xl bg-gray-800 border border-gray-700 resize-none h-20" placeholder="Any limitations or requirements?">Must use existing Redis infrastructure, team of 2</textarea>
+                                </div>
+                                <div>
+                                    <label class="text-sm text-gray-400 mb-2 block">Stakeholders</label>
+                                    <input type="text" class="w-full px-4 py-3 rounded-xl bg-gray-800 border border-gray-700" value="Product: Sarah, Design: Mike">
+                                </div>
+                                <button class="w-full py-3 rounded-xl gradient-bg font-semibold">
+                                    Generate Plan
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Generated Plan -->
+                        <div>
+                            <div class="flex items-center gap-2 mb-6">
+                                <div class="w-6 h-6 rounded-lg gradient-bg"></div>
+                                <h2 class="text-xl font-bold">AI-Generated Plan</h2>
+                            </div>
+
+                            <div class="rounded-2xl glass p-6">
+                                <h3 class="font-semibold mb-4">Phase 1: Design & Planning</h3>
+                                <div class="space-y-3 mb-6">
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-5 h-5 rounded border border-gray-600 flex-shrink-0 mt-0.5"></div>
+                                        <div class="flex-1">
+                                            <p class="font-medium">Write technical design doc</p>
+                                            <div class="flex gap-2 mt-1">
+                                                <span class="px-2 py-0.5 rounded bg-blue-500/20 text-blue-400 text-xs">System Design</span>
+                                                <span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-400 text-xs">Communication</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-5 h-5 rounded border border-gray-600 flex-shrink-0 mt-0.5"></div>
+                                        <div class="flex-1">
+                                            <p class="font-medium">Review with stakeholders</p>
+                                            <div class="flex gap-2 mt-1">
+                                                <span class="px-2 py-0.5 rounded bg-purple-500/20 text-purple-400 text-xs">Communication</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <h3 class="font-semibold mb-4">Phase 2: Implementation</h3>
+                                <div class="space-y-3 mb-6">
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-5 h-5 rounded border border-gray-600 flex-shrink-0 mt-0.5"></div>
+                                        <div class="flex-1">
+                                            <p class="font-medium">Set up Redis pub/sub infrastructure</p>
+                                            <span class="px-2 py-0.5 rounded bg-green-500/20 text-green-400 text-xs">Technical Execution</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-5 h-5 rounded border border-gray-600 flex-shrink-0 mt-0.5"></div>
+                                        <div class="flex-1">
+                                            <p class="font-medium">Build notification service</p>
+                                            <span class="px-2 py-0.5 rounded bg-green-500/20 text-green-400 text-xs">Technical Execution</span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+                                    <p class="text-sm text-yellow-300"><strong>Risk:</strong> Redis cluster failover needs testing under load</p>
+                                </div>
+                            </div>
+
+                            <button class="mt-4 w-full py-3 rounded-xl glass font-medium">
+                                Save Plan to Tasks
+                            </button>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- FLOW G: MENTOR CHAT -->
+    <!-- ============================================== -->
+    <section id="mentor" class="max-w-7xl mx-auto mb-24">
+        <h2 class="text-2xl font-bold mb-2 flex items-center gap-3">
+            <span class="w-8 h-8 rounded-lg bg-accent-600 flex items-center justify-center text-sm">G</span>
+            AI Mentor
+        </h2>
+        <p class="text-gray-400 mb-8">Full-featured mentor chat with context from your journal</p>
+
+        <div class="browser-frame">
+            <div class="browser-header">
+                <div class="browser-dots">
+                    <span class="bg-red-500"></span>
+                    <span class="bg-yellow-500"></span>
+                    <span class="bg-green-500"></span>
+                </div>
+                <div class="browser-url">https://swementor.app/mentor</div>
+            </div>
+            <div class="flex">
+                <!-- Sidebar -->
+                <aside class="w-64 border-r border-gray-800 p-4 min-h-[600px]">
+                    <div class="flex items-center gap-2 mb-8">
+                        <div class="w-8 h-8 rounded-lg gradient-bg"></div>
+                        <span class="font-bold">SWE Mentor</span>
+                    </div>
+                    <nav class="space-y-1">
+                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-400">Dashboard</a>
+                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-400">Journal</a>
+                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-400">Search</a>
+                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-400">Career Ladder</a>
+                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-xl text-gray-400">Planner</a>
+                        <a href="#" class="flex items-center gap-3 px-4 py-2.5 rounded-xl bg-primary-600/20 text-primary-400">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+                            Mentor
+                        </a>
+                    </nav>
+
+                    <!-- Chat History -->
+                    <div class="mt-8">
+                        <p class="text-xs text-gray-500 mb-3 px-4">RECENT CHATS</p>
+                        <div class="space-y-1">
+                            <a href="#" class="block px-4 py-2 rounded-lg bg-white/5 text-sm truncate">System design interviews</a>
+                            <a href="#" class="block px-4 py-2 rounded-lg text-gray-400 text-sm truncate hover:bg-white/5">Career progression</a>
+                            <a href="#" class="block px-4 py-2 rounded-lg text-gray-400 text-sm truncate hover:bg-white/5">Dealing with feedback</a>
+                        </div>
+                    </div>
+                </aside>
+
+                <main class="flex-1 flex flex-col min-h-[600px]">
+                    <!-- Chat Header -->
+                    <div class="p-4 border-b border-gray-800 flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full gradient-bg flex items-center justify-center">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="font-semibold">SWE Mentor</p>
+                            <p class="text-xs text-green-400">Powered by your journal context</p>
+                        </div>
+                    </div>
+
+                    <!-- Chat Messages -->
+                    <div class="flex-1 p-6 overflow-y-auto space-y-6">
+                        <div class="flex justify-end">
+                            <div class="max-w-[70%] rounded-2xl rounded-br-md bg-primary-600 px-5 py-3">
+                                <p>How can I get better at system design interviews? I have one coming up next month.</p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3">
+                            <div class="w-8 h-8 rounded-full gradient-bg flex-shrink-0 flex items-center justify-center">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                            </div>
+                            <div class="max-w-[70%]">
+                                <div class="rounded-2xl rounded-bl-md bg-gray-800 px-5 py-3 mb-2">
+                                    <p class="mb-4">Great question! Based on your journal entries, I can see you've been working on distributed systems recently - that's excellent preparation.</p>
+                                    <p class="mb-4">Here's a structured approach I'd recommend:</p>
+                                    <ol class="list-decimal list-inside space-y-2 text-gray-300">
+                                        <li><strong>Study common patterns</strong> - Load balancing, caching, sharding, message queues</li>
+                                        <li><strong>Practice with real-world case studies</strong> - Design Twitter, Uber, etc.</li>
+                                        <li><strong>Learn to articulate trade-offs</strong> - This is what interviewers really look for</li>
+                                    </ol>
+                                </div>
+                                <!-- Citation -->
+                                <div class="flex items-center gap-2 text-xs text-gray-500">
+                                    <span>Based on:</span>
+                                    <a href="#" class="text-primary-400">Journal: Nov 28 - Redis caching</a>
+                                    <a href="#" class="text-primary-400">Journal: Nov 15 - API design</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end">
+                            <div class="max-w-[70%] rounded-2xl rounded-br-md bg-primary-600 px-5 py-3">
+                                <p>Can you create a study plan for me based on my upcoming interview?</p>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-3">
+                            <div class="w-8 h-8 rounded-full gradient-bg flex-shrink-0 flex items-center justify-center">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                            </div>
+                            <div class="max-w-[70%]">
+                                <div class="rounded-2xl rounded-bl-md bg-gray-800 px-5 py-3">
+                                    <p class="mb-3">Absolutely! Here's a personalized 4-week plan:</p>
+                                    <div class="space-y-3">
+                                        <div class="p-3 rounded-lg bg-gray-700/50">
+                                            <p class="font-medium text-sm">Week 1: Fundamentals</p>
+                                            <p class="text-sm text-gray-400">CAP theorem, consistency models, database scaling</p>
+                                        </div>
+                                        <div class="p-3 rounded-lg bg-gray-700/50">
+                                            <p class="font-medium text-sm">Week 2: Common Patterns</p>
+                                            <p class="text-sm text-gray-400">Caching, queues, load balancing, CDNs</p>
+                                        </div>
+                                        <div class="p-3 rounded-lg bg-gray-700/50">
+                                            <p class="font-medium text-sm">Week 3: Practice Problems</p>
+                                            <p class="text-sm text-gray-400">URL shortener, chat system, news feed</p>
+                                        </div>
+                                        <div class="p-3 rounded-lg bg-gray-700/50">
+                                            <p class="font-medium text-sm">Week 4: Mock Interviews</p>
+                                            <p class="text-sm text-gray-400">Practice with peers, focus on communication</p>
+                                        </div>
+                                    </div>
+                                    <p class="mt-3 text-sm text-gray-400">Would you like me to save this to your Planner?</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Input -->
+                    <div class="p-4 border-t border-gray-800">
+                        <div class="flex gap-3">
+                            <input type="text" placeholder="Ask me anything about your career..." class="flex-1 px-5 py-3 rounded-xl bg-gray-800 border border-gray-700 focus:border-primary-500 focus:outline-none">
+                            <button class="px-6 py-3 rounded-xl gradient-bg font-medium">Send</button>
+                        </div>
+                    </div>
+                </main>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="max-w-7xl mx-auto py-12 border-t border-gray-800 text-center text-gray-500">
+        <p>Web App Mockups - SWE Mentor</p>
+        <p class="text-sm mt-2">Using shadcn/ui Violet Theme + Next.js App Router</p>
+    </footer>
+</body>
+</html>

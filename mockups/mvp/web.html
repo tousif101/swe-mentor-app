@@ -1,0 +1,1392 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SWE Mentor - MVP Web Flows</title>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.14.1/dist/full.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background: #0f0f1a; }
+
+        /* Desktop frame */
+        .desktop-frame {
+            width: 1200px;
+            height: 750px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+            background: #111827;
+            display: flex;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 240px;
+            background: rgba(17, 24, 39, 0.95);
+            border-right: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 24px 16px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.6);
+            transition: all 0.2s ease;
+            margin-bottom: 4px;
+        }
+
+        .sidebar-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .sidebar-item.active {
+            background: rgba(139, 92, 246, 0.15);
+            color: #a78bfa;
+        }
+
+        .sidebar-item .icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Main content */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            background: #0f172a;
+        }
+
+        /* Hashtags */
+        .hashtag {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 500;
+            background: rgba(139, 92, 246, 0.15);
+            color: #a78bfa;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .hashtag.review {
+            background: rgba(236, 72, 153, 0.15);
+            color: #f472b6;
+            border-color: rgba(236, 72, 153, 0.3);
+        }
+
+        .hashtag.meeting {
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+            border-color: rgba(59, 130, 246, 0.3);
+        }
+
+        .hashtag.learning {
+            background: rgba(34, 197, 94, 0.15);
+            color: #4ade80;
+            border-color: rgba(34, 197, 94, 0.3);
+        }
+
+        .hashtag.mentoring {
+            background: rgba(251, 146, 60, 0.15);
+            color: #fb923c;
+            border-color: rgba(251, 146, 60, 0.3);
+        }
+
+        .hashtag.debugging {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border-color: rgba(239, 68, 68, 0.3);
+        }
+
+        /* Glass card */
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Level badges */
+        .level-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .level-badge.current {
+            background: rgba(139, 92, 246, 0.2);
+            color: #a78bfa;
+            border: 1px solid rgba(139, 92, 246, 0.4);
+        }
+
+        .level-badge.target {
+            background: rgba(34, 197, 94, 0.2);
+            color: #4ade80;
+            border: 1px solid rgba(34, 197, 94, 0.4);
+        }
+
+        /* Framework card */
+        .framework-card {
+            padding: 20px;
+            border-radius: 16px;
+            border: 2px solid transparent;
+            background: rgba(255, 255, 255, 0.03);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .framework-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .framework-card.selected {
+            border-color: #8b5cf6;
+            background: rgba(139, 92, 246, 0.1);
+        }
+
+        /* Level selector */
+        .level-option {
+            padding: 16px 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.03);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .level-option:hover {
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .level-option.selected {
+            border-color: #8b5cf6;
+            background: rgba(139, 92, 246, 0.15);
+        }
+
+        .level-option.target-selected {
+            border-color: #22c55e;
+            background: rgba(34, 197, 94, 0.15);
+        }
+
+        /* Onboarding modal */
+        .onboarding-frame {
+            width: 500px;
+            min-height: 600px;
+            border-radius: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: #111827;
+            padding: 40px;
+        }
+
+        /* Chat message */
+        .chat-bubble-custom {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 16px;
+            line-height: 1.5;
+        }
+
+        .chat-bubble-user {
+            background: rgba(139, 92, 246, 0.3);
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+
+        .chat-bubble-ai {
+            background: rgba(255, 255, 255, 0.1);
+            border-bottom-left-radius: 4px;
+        }
+
+        /* Journal entry card */
+        .journal-card {
+            padding: 20px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .journal-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: rgba(255, 255, 255, 0.12);
+        }
+
+        /* Stat card */
+        .stat-card {
+            padding: 20px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* Progress bar */
+        .competency-progress {
+            height: 8px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            overflow: hidden;
+        }
+
+        .competency-progress .bar {
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+    </style>
+</head>
+<body class="text-white min-h-screen p-8">
+    <!-- Header -->
+    <div class="max-w-7xl mx-auto mb-10">
+        <h1 class="text-4xl font-bold mb-2">MVP Web Flows</h1>
+        <p class="text-gray-400 mb-4">SWE Mentor - Desktop application mockups</p>
+        <div class="flex flex-wrap gap-3">
+            <a href="#onboarding" class="btn btn-sm btn-outline btn-primary">1. Onboarding</a>
+            <a href="#dashboard" class="btn btn-sm btn-outline">2. Dashboard</a>
+            <a href="#journal" class="btn btn-sm btn-outline">3. Journal</a>
+            <a href="#mentor" class="btn btn-sm btn-outline">4. Mentor</a>
+            <a href="#insights" class="btn btn-sm btn-outline">5. Insights</a>
+        </div>
+    </div>
+
+    <!-- ==========================================
+         SECTION 1: ONBOARDING FLOW
+         ========================================== -->
+    <section id="onboarding" class="max-w-7xl mx-auto mb-20">
+        <h2 class="text-2xl font-bold mb-2 flex items-center gap-3">
+            <span class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-sm">1</span>
+            Onboarding Flow
+        </h2>
+        <p class="text-gray-400 mb-8">Modal-based onboarding experience for desktop</p>
+
+        <div class="flex gap-8 overflow-x-auto pb-4">
+            <!-- Screen 1: Welcome -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">1.1 Welcome</p>
+                <div class="onboarding-frame flex flex-col items-center justify-center text-center">
+                    <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center mb-6">
+                        <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                    <h1 class="text-3xl font-bold mb-3">SWE Mentor</h1>
+                    <p class="text-gray-400 mb-8 max-w-xs">Track your work. Grow your career. Level up as an engineer.</p>
+
+                    <div class="w-full max-w-xs space-y-3">
+                        <button class="btn btn-primary w-full">Get Started</button>
+                        <button class="btn btn-ghost w-full">I have an account</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Screen 2: Sign In -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">1.2 Sign In</p>
+                <div class="onboarding-frame">
+                    <h1 class="text-2xl font-bold mb-2">Welcome back</h1>
+                    <p class="text-gray-400 mb-8">Sign in to continue your journey</p>
+
+                    <button class="btn btn-outline w-full gap-3 mb-4">
+                        <svg class="w-5 h-5" viewBox="0 0 24 24">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                        </svg>
+                        Continue with Google
+                    </button>
+
+                    <button class="btn btn-outline w-full gap-3 mb-6">
+                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                        Continue with GitHub
+                    </button>
+
+                    <div class="divider text-gray-600 text-xs">OR</div>
+
+                    <div class="form-control mb-4">
+                        <label class="label"><span class="label-text text-gray-400">Work Email</span></label>
+                        <input type="email" placeholder="you@company.com" class="input input-bordered bg-base-200">
+                    </div>
+
+                    <button class="btn btn-primary w-full">Send Magic Link</button>
+                    <p class="text-center text-gray-500 text-xs mt-4">We'll email you a secure login link</p>
+                </div>
+            </div>
+
+            <!-- Screen 3: Select Framework -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">1.3 Select Framework</p>
+                <div class="onboarding-frame">
+                    <div class="flex gap-1 mb-6">
+                        <div class="flex-1 h-1 rounded-full bg-primary"></div>
+                        <div class="flex-1 h-1 rounded-full bg-base-300"></div>
+                        <div class="flex-1 h-1 rounded-full bg-base-300"></div>
+                    </div>
+
+                    <h1 class="text-2xl font-bold mb-2">Choose your framework</h1>
+                    <p class="text-gray-400 mb-6">Select a career ladder to track against</p>
+
+                    <div class="space-y-3">
+                        <div class="framework-card selected">
+                            <div class="flex items-center gap-4 mb-2">
+                                <div class="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-blue-400" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                                    </svg>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="font-semibold text-lg">Dropbox Engineering</p>
+                                    <p class="text-sm text-gray-500">IC1 → IC6 career levels</p>
+                                </div>
+                                <svg class="w-6 h-6 text-primary" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div class="framework-card opacity-50">
+                            <div class="flex items-center gap-4">
+                                <div class="w-12 h-12 rounded-xl bg-gray-500/20 flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                    </svg>
+                                </div>
+                                <div class="flex-1">
+                                    <p class="font-semibold text-lg text-gray-400">Custom Framework</p>
+                                    <p class="text-sm text-gray-600">Coming soon</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary w-full mt-8">Continue</button>
+                </div>
+            </div>
+
+            <!-- Screen 4: Current Level -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">1.4 Current Level</p>
+                <div class="onboarding-frame">
+                    <div class="flex gap-1 mb-6">
+                        <div class="flex-1 h-1 rounded-full bg-primary"></div>
+                        <div class="flex-1 h-1 rounded-full bg-primary"></div>
+                        <div class="flex-1 h-1 rounded-full bg-base-300"></div>
+                    </div>
+
+                    <h1 class="text-2xl font-bold mb-2">Your current level</h1>
+                    <p class="text-gray-400 mb-6">Where are you in your career journey?</p>
+
+                    <div class="space-y-3">
+                        <div class="level-option">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="font-semibold">IC2 - Software Engineer</p>
+                                    <p class="text-sm text-gray-500">Entry level, learning the ropes</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="level-option selected">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="font-semibold">IC3 - Software Engineer</p>
+                                    <p class="text-sm text-gray-500">Independent contributor</p>
+                                </div>
+                                <svg class="w-5 h-5 text-primary" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div class="level-option">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="font-semibold">IC4 - Senior Engineer</p>
+                                    <p class="text-sm text-gray-500">Technical leader</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="level-option">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="font-semibold">IC5 - Staff Engineer</p>
+                                    <p class="text-sm text-gray-500">Cross-team influence</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary w-full mt-8">Continue</button>
+                </div>
+            </div>
+
+            <!-- Screen 5: Target Level -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">1.5 Target Level</p>
+                <div class="onboarding-frame">
+                    <div class="flex gap-1 mb-6">
+                        <div class="flex-1 h-1 rounded-full bg-primary"></div>
+                        <div class="flex-1 h-1 rounded-full bg-primary"></div>
+                        <div class="flex-1 h-1 rounded-full bg-primary"></div>
+                    </div>
+
+                    <h1 class="text-2xl font-bold mb-2">Set your goal</h1>
+                    <p class="text-gray-400 mb-6">What level are you working toward?</p>
+
+                    <div class="p-4 rounded-xl bg-primary/10 border border-primary/30 mb-6">
+                        <div class="flex items-center gap-3">
+                            <span class="level-badge current">IC3</span>
+                            <span class="text-gray-400">→</span>
+                            <span class="text-gray-400">Select target</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="level-option target-selected">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="font-semibold">IC4 - Senior Engineer</p>
+                                    <p class="text-sm text-gray-500">Technical leader</p>
+                                </div>
+                                <svg class="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div class="level-option">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="font-semibold">IC5 - Staff Engineer</p>
+                                    <p class="text-sm text-gray-500">Cross-team influence</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="level-option">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <p class="font-semibold">IC6 - Principal Engineer</p>
+                                    <p class="text-sm text-gray-500">Organization-wide impact</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-primary w-full mt-8">Complete Setup</button>
+                </div>
+            </div>
+
+            <!-- Screen 6: Setup Complete -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">1.6 Complete</p>
+                <div class="onboarding-frame flex flex-col items-center justify-center text-center">
+                    <div class="w-20 h-20 rounded-full bg-green-500/20 flex items-center justify-center mb-6">
+                        <svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <h1 class="text-3xl font-bold mb-3">You're all set!</h1>
+                    <p class="text-gray-400 mb-2">Your journey from</p>
+                    <div class="flex items-center gap-3 mb-8">
+                        <span class="level-badge current">IC3</span>
+                        <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                        </svg>
+                        <span class="level-badge target">IC4</span>
+                    </div>
+                    <p class="text-gray-500 text-sm mb-8 max-w-xs">Start journaling your work and let your AI mentor guide you to the next level.</p>
+
+                    <button class="btn btn-primary w-full max-w-xs">Open Dashboard</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================
+         SECTION 2: DASHBOARD
+         ========================================== -->
+    <section id="dashboard" class="max-w-7xl mx-auto mb-20">
+        <h2 class="text-2xl font-bold mb-2 flex items-center gap-3">
+            <span class="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center text-sm">2</span>
+            Dashboard
+        </h2>
+        <p class="text-gray-400 mb-8">Home view with quick stats and recent activity</p>
+
+        <div class="flex-shrink-0">
+            <p class="text-sm text-gray-500 mb-3">2.1 Dashboard Home</p>
+            <div class="desktop-frame">
+                <!-- Sidebar -->
+                <div class="sidebar">
+                    <div class="flex items-center gap-3 mb-8">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                            </svg>
+                        </div>
+                        <span class="font-bold">SWE Mentor</span>
+                    </div>
+
+                    <div class="sidebar-item active">
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                        </svg>
+                        <span>Dashboard</span>
+                    </div>
+
+                    <div class="sidebar-item">
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                        </svg>
+                        <span>Journal</span>
+                    </div>
+
+                    <div class="sidebar-item">
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                        </svg>
+                        <span>Mentor</span>
+                    </div>
+
+                    <div class="sidebar-item">
+                        <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                        <span>Insights</span>
+                    </div>
+
+                    <div class="mt-auto">
+                        <div class="sidebar-item">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                            <span>Settings</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main Content -->
+                <div class="main-content p-8">
+                    <!-- Header -->
+                    <div class="flex items-center justify-between mb-8">
+                        <div>
+                            <h1 class="text-2xl font-bold mb-1">Welcome back!</h1>
+                            <p class="text-gray-400">Here's your progress this week</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <span class="level-badge current">IC3</span>
+                            <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                            </svg>
+                            <span class="level-badge target">IC4</span>
+                        </div>
+                    </div>
+
+                    <!-- Stats Grid -->
+                    <div class="grid grid-cols-4 gap-4 mb-8">
+                        <div class="stat-card">
+                            <p class="text-gray-400 text-sm mb-1">Journal Entries</p>
+                            <p class="text-3xl font-bold">24</p>
+                            <p class="text-green-500 text-xs mt-1">+3 this week</p>
+                        </div>
+                        <div class="stat-card">
+                            <p class="text-gray-400 text-sm mb-1">Active Streak</p>
+                            <p class="text-3xl font-bold">12<span class="text-lg text-gray-500"> days</span></p>
+                            <p class="text-primary text-xs mt-1">Personal best!</p>
+                        </div>
+                        <div class="stat-card">
+                            <p class="text-gray-400 text-sm mb-1">IC4 Progress</p>
+                            <p class="text-3xl font-bold">68%</p>
+                            <div class="competency-progress mt-2">
+                                <div class="bar bg-primary" style="width: 68%"></div>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <p class="text-gray-400 text-sm mb-1">Mentor Sessions</p>
+                            <p class="text-3xl font-bold">8</p>
+                            <p class="text-gray-500 text-xs mt-1">This month</p>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="grid grid-cols-2 gap-6">
+                        <!-- Recent Journal -->
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <h2 class="text-lg font-semibold">Recent Journal</h2>
+                                <button class="btn btn-ghost btn-sm">View all</button>
+                            </div>
+                            <div class="space-y-3">
+                                <div class="journal-card">
+                                    <div class="flex items-start justify-between mb-2">
+                                        <p class="font-medium">API pagination refactor</p>
+                                        <span class="text-xs text-gray-500">Today</span>
+                                    </div>
+                                    <p class="text-sm text-gray-400 mb-3">Implemented cursor-based pagination for the search endpoint. Reduced response time by 40%.</p>
+                                    <div class="flex flex-wrap gap-2">
+                                        <span class="hashtag">#coding</span>
+                                        <span class="hashtag review">#review</span>
+                                    </div>
+                                </div>
+                                <div class="journal-card">
+                                    <div class="flex items-start justify-between mb-2">
+                                        <p class="font-medium">Design review feedback</p>
+                                        <span class="text-xs text-gray-500">Yesterday</span>
+                                    </div>
+                                    <p class="text-sm text-gray-400 mb-3">Led the design review for the new onboarding flow. Good discussion on error states.</p>
+                                    <div class="flex flex-wrap gap-2">
+                                        <span class="hashtag meeting">#meeting</span>
+                                        <span class="hashtag review">#review</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Mentor Suggestions -->
+                        <div>
+                            <div class="flex items-center justify-between mb-4">
+                                <h2 class="text-lg font-semibold">From Your Mentor</h2>
+                                <button class="btn btn-ghost btn-sm">Chat now</button>
+                            </div>
+                            <div class="glass rounded-2xl p-5">
+                                <div class="flex items-start gap-4 mb-4">
+                                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="font-medium mb-1">Focus area this week</p>
+                                        <p class="text-sm text-gray-400">Based on your recent entries, consider documenting your pagination work as a tech spec. This demonstrates IC4-level technical communication.</p>
+                                    </div>
+                                </div>
+                                <div class="flex gap-2">
+                                    <button class="btn btn-primary btn-sm">Start writing</button>
+                                    <button class="btn btn-ghost btn-sm">Learn more</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================
+         SECTION 3: JOURNAL
+         ========================================== -->
+    <section id="journal" class="max-w-7xl mx-auto mb-20">
+        <h2 class="text-2xl font-bold mb-2 flex items-center gap-3">
+            <span class="w-8 h-8 rounded-lg bg-accent flex items-center justify-center text-sm">3</span>
+            Journal
+        </h2>
+        <p class="text-gray-400 mb-8">Track work with hashtag categories</p>
+
+        <div class="flex gap-8 overflow-x-auto pb-4">
+            <!-- Journal List -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">3.1 Journal List</p>
+                <div class="desktop-frame">
+                    <!-- Sidebar -->
+                    <div class="sidebar">
+                        <div class="flex items-center gap-3 mb-8">
+                            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                            </div>
+                            <span class="font-bold">SWE Mentor</span>
+                        </div>
+
+                        <div class="sidebar-item">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                            </svg>
+                            <span>Dashboard</span>
+                        </div>
+
+                        <div class="sidebar-item active">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                            </svg>
+                            <span>Journal</span>
+                        </div>
+
+                        <div class="sidebar-item">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                            </svg>
+                            <span>Mentor</span>
+                        </div>
+
+                        <div class="sidebar-item">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                            </svg>
+                            <span>Insights</span>
+                        </div>
+
+                        <!-- Filter by hashtag -->
+                        <div class="mt-8">
+                            <p class="text-xs text-gray-500 uppercase tracking-wide mb-3 px-4">Filter by Tag</p>
+                            <div class="space-y-1">
+                                <div class="sidebar-item py-2">
+                                    <span class="w-2 h-2 rounded-full bg-violet-500"></span>
+                                    <span class="text-sm">#coding</span>
+                                    <span class="ml-auto text-xs text-gray-500">12</span>
+                                </div>
+                                <div class="sidebar-item py-2">
+                                    <span class="w-2 h-2 rounded-full bg-pink-500"></span>
+                                    <span class="text-sm">#review</span>
+                                    <span class="ml-auto text-xs text-gray-500">8</span>
+                                </div>
+                                <div class="sidebar-item py-2">
+                                    <span class="w-2 h-2 rounded-full bg-blue-500"></span>
+                                    <span class="text-sm">#meeting</span>
+                                    <span class="ml-auto text-xs text-gray-500">6</span>
+                                </div>
+                                <div class="sidebar-item py-2">
+                                    <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                                    <span class="text-sm">#learning</span>
+                                    <span class="ml-auto text-xs text-gray-500">4</span>
+                                </div>
+                                <div class="sidebar-item py-2">
+                                    <span class="w-2 h-2 rounded-full bg-orange-500"></span>
+                                    <span class="text-sm">#mentoring</span>
+                                    <span class="ml-auto text-xs text-gray-500">3</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Content -->
+                    <div class="main-content p-8">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <h1 class="text-2xl font-bold mb-1">Journal</h1>
+                                <p class="text-gray-400">24 entries this month</p>
+                            </div>
+                            <button class="btn btn-primary gap-2">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                </svg>
+                                New Entry
+                            </button>
+                        </div>
+
+                        <!-- Search and filters -->
+                        <div class="flex gap-3 mb-6">
+                            <div class="flex-1">
+                                <input type="text" placeholder="Search entries..." class="input input-bordered bg-base-200 w-full">
+                            </div>
+                            <select class="select select-bordered bg-base-200">
+                                <option>All time</option>
+                                <option selected>This week</option>
+                                <option>This month</option>
+                            </select>
+                        </div>
+
+                        <!-- Entries -->
+                        <div class="space-y-4">
+                            <div class="journal-card">
+                                <div class="flex items-start justify-between mb-3">
+                                    <div>
+                                        <p class="font-semibold text-lg mb-1">API pagination refactor</p>
+                                        <p class="text-sm text-gray-500">Today at 3:45 PM</p>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm btn-square">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <p class="text-gray-400 mb-4">Implemented cursor-based pagination for the search endpoint. Reduced response time by 40%. Had to refactor the query builder to support dynamic cursors.</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="hashtag">#coding</span>
+                                    <span class="hashtag review">#review</span>
+                                </div>
+                            </div>
+
+                            <div class="journal-card">
+                                <div class="flex items-start justify-between mb-3">
+                                    <div>
+                                        <p class="font-semibold text-lg mb-1">Design review for onboarding</p>
+                                        <p class="text-sm text-gray-500">Yesterday at 2:00 PM</p>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm btn-square">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <p class="text-gray-400 mb-4">Led the design review session. Focused on error handling and edge cases. Team agreed on progressive disclosure pattern for complex forms.</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="hashtag meeting">#meeting</span>
+                                    <span class="hashtag review">#review</span>
+                                </div>
+                            </div>
+
+                            <div class="journal-card">
+                                <div class="flex items-start justify-between mb-3">
+                                    <div>
+                                        <p class="font-semibold text-lg mb-1">Mentoring session with Alex</p>
+                                        <p class="text-sm text-gray-500">Dec 1 at 11:00 AM</p>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm btn-square">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <p class="text-gray-400 mb-4">Helped Alex debug a tricky React state issue. Walked through the component lifecycle and introduced useReducer pattern.</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="hashtag mentoring">#mentoring</span>
+                                    <span class="hashtag debugging">#debugging</span>
+                                </div>
+                            </div>
+
+                            <div class="journal-card">
+                                <div class="flex items-start justify-between mb-3">
+                                    <div>
+                                        <p class="font-semibold text-lg mb-1">GraphQL federation deep dive</p>
+                                        <p class="text-sm text-gray-500">Nov 30 at 4:30 PM</p>
+                                    </div>
+                                    <button class="btn btn-ghost btn-sm btn-square">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"/>
+                                        </svg>
+                                    </button>
+                                </div>
+                                <p class="text-gray-400 mb-4">Spent 2 hours studying Apollo Federation 2.0. Key insight: @key directives can reference multiple fields.</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="hashtag learning">#learning</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- New Entry -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">3.2 New Entry</p>
+                <div class="desktop-frame">
+                    <!-- Sidebar (collapsed state for focus) -->
+                    <div class="sidebar" style="width: 80px; padding: 24px 12px;">
+                        <div class="flex flex-col items-center gap-4">
+                            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                            </div>
+                            <div class="w-10 h-10 rounded-xl flex items-center justify-center text-gray-500 hover:bg-white/5 cursor-pointer">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                                </svg>
+                            </div>
+                            <div class="w-10 h-10 rounded-xl flex items-center justify-center bg-primary/20 text-primary cursor-pointer">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                                </svg>
+                            </div>
+                            <div class="w-10 h-10 rounded-xl flex items-center justify-center text-gray-500 hover:bg-white/5 cursor-pointer">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                                </svg>
+                            </div>
+                            <div class="w-10 h-10 rounded-xl flex items-center justify-center text-gray-500 hover:bg-white/5 cursor-pointer">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Content -->
+                    <div class="main-content p-8">
+                        <div class="max-w-2xl mx-auto">
+                            <div class="flex items-center justify-between mb-6">
+                                <button class="btn btn-ghost gap-2">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                                    </svg>
+                                    Back
+                                </button>
+                                <div class="flex gap-2">
+                                    <button class="btn btn-ghost">Save Draft</button>
+                                    <button class="btn btn-primary">Publish</button>
+                                </div>
+                            </div>
+
+                            <div class="mb-6">
+                                <input type="text" placeholder="Entry title..." class="input input-ghost text-2xl font-bold w-full p-0 focus:outline-none" value="Sprint retrospective insights">
+                            </div>
+
+                            <div class="mb-6">
+                                <p class="text-sm text-gray-500 mb-3">Tags</p>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="hashtag meeting">#meeting</span>
+                                    <span class="hashtag review">#review</span>
+                                    <button class="btn btn-ghost btn-xs gap-1">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                        </svg>
+                                        Add tag
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="mb-6">
+                                <textarea class="textarea textarea-ghost w-full h-64 text-base leading-relaxed resize-none focus:outline-none" placeholder="What did you work on today?">Today's sprint retro brought up some interesting points about our deployment process.
+
+Key takeaways:
+- We need better rollback procedures
+- Feature flags would help with safer deployments
+- The team wants more visibility into what's being deployed
+
+I volunteered to draft a proposal for implementing feature flags. This aligns with my IC4 goal of driving technical initiatives.
+
+Action items:
+1. Research feature flag services (LaunchDarkly, Split.io)
+2. Draft RFC by Friday
+3. Schedule review with platform team</textarea>
+                            </div>
+
+                            <div class="glass rounded-xl p-4">
+                                <div class="flex items-start gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-400 mb-1"><strong class="text-white">AI Insight:</strong> Volunteering to lead the feature flags initiative shows IC4-level ownership. Consider:</p>
+                                        <ul class="text-sm text-gray-400 list-disc list-inside">
+                                            <li>Include cost-benefit analysis in your RFC</li>
+                                            <li>Get buy-in from SRE team early</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================
+         SECTION 4: MENTOR
+         ========================================== -->
+    <section id="mentor" class="max-w-7xl mx-auto mb-20">
+        <h2 class="text-2xl font-bold mb-2 flex items-center gap-3">
+            <span class="w-8 h-8 rounded-lg bg-info flex items-center justify-center text-sm">4</span>
+            Mentor
+        </h2>
+        <p class="text-gray-400 mb-8">AI-powered career mentoring conversations</p>
+
+        <div class="flex gap-8 overflow-x-auto pb-4">
+            <!-- Mentor Chat -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">4.1 Mentor Chat</p>
+                <div class="desktop-frame">
+                    <!-- Sidebar -->
+                    <div class="sidebar">
+                        <div class="flex items-center gap-3 mb-8">
+                            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                            </div>
+                            <span class="font-bold">SWE Mentor</span>
+                        </div>
+
+                        <div class="sidebar-item">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                            </svg>
+                            <span>Dashboard</span>
+                        </div>
+
+                        <div class="sidebar-item">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                            </svg>
+                            <span>Journal</span>
+                        </div>
+
+                        <div class="sidebar-item active">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                            </svg>
+                            <span>Mentor</span>
+                        </div>
+
+                        <div class="sidebar-item">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                            </svg>
+                            <span>Insights</span>
+                        </div>
+
+                        <!-- Chat history -->
+                        <div class="mt-8">
+                            <p class="text-xs text-gray-500 uppercase tracking-wide mb-3 px-4">Recent Chats</p>
+                            <div class="space-y-1">
+                                <div class="sidebar-item py-2 active">
+                                    <span class="text-sm truncate">Feature flags RFC</span>
+                                </div>
+                                <div class="sidebar-item py-2">
+                                    <span class="text-sm truncate">Promotion prep</span>
+                                </div>
+                                <div class="sidebar-item py-2">
+                                    <span class="text-sm truncate">1:1 with manager</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Content -->
+                    <div class="main-content flex flex-col">
+                        <!-- Chat header -->
+                        <div class="p-4 border-b border-white/10">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="font-semibold">Your AI Mentor</p>
+                                    <p class="text-xs text-gray-500">Helping you grow from IC3 → IC4</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chat messages -->
+                        <div class="flex-1 overflow-y-auto p-6 space-y-4">
+                            <div class="flex gap-3">
+                                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0 mt-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                    </svg>
+                                </div>
+                                <div class="chat-bubble-custom chat-bubble-ai">
+                                    <p>I saw you're working on a feature flags RFC. That's a great initiative for IC4-level visibility! How can I help you with it?</p>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-end">
+                                <div class="chat-bubble-custom chat-bubble-user">
+                                    <p>I'm not sure how to structure the RFC. What should I include to make it convincing?</p>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-3">
+                                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0 mt-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                    </svg>
+                                </div>
+                                <div class="chat-bubble-custom chat-bubble-ai">
+                                    <p class="mb-3">Great question! For an effective RFC that demonstrates IC4-level thinking, I'd recommend this structure:</p>
+                                    <ol class="list-decimal list-inside space-y-2 text-sm">
+                                        <li><strong>Problem Statement</strong> - Tie to recent incidents (like the retro discussion)</li>
+                                        <li><strong>Proposed Solution</strong> - Compare 2-3 options with trade-offs</li>
+                                        <li><strong>Implementation Plan</strong> - Phased rollout approach</li>
+                                        <li><strong>Cost Analysis</strong> - Include both tool cost and eng time</li>
+                                        <li><strong>Success Metrics</strong> - How will you measure impact?</li>
+                                    </ol>
+                                    <p class="mt-3">Would you like me to help you draft any of these sections?</p>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-end">
+                                <div class="chat-bubble-custom chat-bubble-user">
+                                    <p>Yes, let's start with the problem statement. How do I make it compelling?</p>
+                                </div>
+                            </div>
+
+                            <div class="flex gap-3">
+                                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-primary to-secondary flex items-center justify-center flex-shrink-0 mt-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                    </svg>
+                                </div>
+                                <div class="chat-bubble-custom chat-bubble-ai">
+                                    <p>Based on your journal entry about the retro, here's a draft problem statement:</p>
+                                    <div class="bg-black/20 rounded-lg p-3 mt-3 text-sm">
+                                        <p class="italic">"Our current deployment process requires full rollbacks when issues are detected, resulting in X hours of downtime per incident. In Q4, we had 3 such incidents affecting Y users. Feature flags would enable instant feature disabling without deployment, reducing MTTR from hours to seconds."</p>
+                                    </div>
+                                    <p class="mt-3 text-sm">The key is connecting the problem to business impact. Do you have access to incident data to fill in the specifics?</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Chat input -->
+                        <div class="p-4 border-t border-white/10">
+                            <div class="flex gap-3">
+                                <input type="text" placeholder="Ask your mentor anything..." class="input input-bordered bg-base-200 flex-1">
+                                <button class="btn btn-primary">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="flex gap-2 mt-3">
+                                <button class="btn btn-ghost btn-xs">Review my journal</button>
+                                <button class="btn btn-ghost btn-xs">Prep for 1:1</button>
+                                <button class="btn btn-ghost btn-xs">IC4 competencies</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================
+         SECTION 5: INSIGHTS
+         ========================================== -->
+    <section id="insights" class="max-w-7xl mx-auto mb-20">
+        <h2 class="text-2xl font-bold mb-2 flex items-center gap-3">
+            <span class="w-8 h-8 rounded-lg bg-warning flex items-center justify-center text-sm text-black">5</span>
+            Insights
+        </h2>
+        <p class="text-gray-400 mb-8">Track progress toward IC4 competencies</p>
+
+        <div class="flex gap-8 overflow-x-auto pb-4">
+            <!-- Insights Dashboard -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">5.1 Insights Dashboard</p>
+                <div class="desktop-frame">
+                    <!-- Sidebar -->
+                    <div class="sidebar">
+                        <div class="flex items-center gap-3 mb-8">
+                            <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                            </div>
+                            <span class="font-bold">SWE Mentor</span>
+                        </div>
+
+                        <div class="sidebar-item">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+                            </svg>
+                            <span>Dashboard</span>
+                        </div>
+
+                        <div class="sidebar-item">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                            </svg>
+                            <span>Journal</span>
+                        </div>
+
+                        <div class="sidebar-item">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                            </svg>
+                            <span>Mentor</span>
+                        </div>
+
+                        <div class="sidebar-item active">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                            </svg>
+                            <span>Insights</span>
+                        </div>
+                    </div>
+
+                    <!-- Main Content -->
+                    <div class="main-content p-8 overflow-y-auto">
+                        <!-- Header -->
+                        <div class="flex items-center justify-between mb-8">
+                            <div>
+                                <h1 class="text-2xl font-bold mb-1">Your Progress</h1>
+                                <p class="text-gray-400">IC3 → IC4 journey</p>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <div class="text-right">
+                                    <p class="text-3xl font-bold">68%</p>
+                                    <p class="text-sm text-gray-500">Overall IC4 readiness</p>
+                                </div>
+                                <div class="radial-progress text-primary" style="--value:68; --size:4rem; --thickness:6px;">
+                                    <span class="text-xs">68%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Competency Grid -->
+                        <div class="grid grid-cols-2 gap-6 mb-8">
+                            <!-- Technical Excellence -->
+                            <div class="stat-card">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-xl bg-blue-500/20 flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="font-semibold">Technical Excellence</p>
+                                            <p class="text-xs text-gray-500">Code quality & architecture</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-xl font-bold text-blue-400">85%</span>
+                                </div>
+                                <div class="competency-progress">
+                                    <div class="bar bg-blue-500" style="width: 85%"></div>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-3">Strong in code quality. Focus on system design docs.</p>
+                            </div>
+
+                            <!-- Execution -->
+                            <div class="stat-card">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-xl bg-green-500/20 flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="font-semibold">Execution</p>
+                                            <p class="text-xs text-gray-500">Delivery & reliability</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-xl font-bold text-green-400">75%</span>
+                                </div>
+                                <div class="competency-progress">
+                                    <div class="bar bg-green-500" style="width: 75%"></div>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-3">Good velocity. Work on breaking down complex projects.</p>
+                            </div>
+
+                            <!-- Collaboration -->
+                            <div class="stat-card">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="font-semibold">Collaboration</p>
+                                            <p class="text-xs text-gray-500">Teamwork & communication</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-xl font-bold text-purple-400">70%</span>
+                                </div>
+                                <div class="competency-progress">
+                                    <div class="bar bg-purple-500" style="width: 70%"></div>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-3">Active in code reviews. Expand cross-team influence.</p>
+                            </div>
+
+                            <!-- Leadership -->
+                            <div class="stat-card">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-10 h-10 rounded-xl bg-orange-500/20 flex items-center justify-center">
+                                            <svg class="w-5 h-5 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+                                            </svg>
+                                        </div>
+                                        <div>
+                                            <p class="font-semibold">Leadership</p>
+                                            <p class="text-xs text-gray-500">Mentoring & initiative</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-xl font-bold text-orange-400">55%</span>
+                                </div>
+                                <div class="competency-progress">
+                                    <div class="bar bg-orange-500" style="width: 55%"></div>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-3">Growth area! The RFC initiative will help here.</p>
+                            </div>
+                        </div>
+
+                        <!-- Activity Breakdown -->
+                        <div class="grid grid-cols-3 gap-6">
+                            <div class="stat-card col-span-2">
+                                <h3 class="font-semibold mb-4">Activity This Month</h3>
+                                <div class="grid grid-cols-3 gap-4">
+                                    <div class="text-center p-4 rounded-xl bg-violet-500/10">
+                                        <p class="text-2xl font-bold text-violet-400">12</p>
+                                        <p class="text-xs text-gray-500">#coding</p>
+                                    </div>
+                                    <div class="text-center p-4 rounded-xl bg-pink-500/10">
+                                        <p class="text-2xl font-bold text-pink-400">8</p>
+                                        <p class="text-xs text-gray-500">#review</p>
+                                    </div>
+                                    <div class="text-center p-4 rounded-xl bg-blue-500/10">
+                                        <p class="text-2xl font-bold text-blue-400">6</p>
+                                        <p class="text-xs text-gray-500">#meeting</p>
+                                    </div>
+                                    <div class="text-center p-4 rounded-xl bg-green-500/10">
+                                        <p class="text-2xl font-bold text-green-400">4</p>
+                                        <p class="text-xs text-gray-500">#learning</p>
+                                    </div>
+                                    <div class="text-center p-4 rounded-xl bg-orange-500/10">
+                                        <p class="text-2xl font-bold text-orange-400">3</p>
+                                        <p class="text-xs text-gray-500">#mentoring</p>
+                                    </div>
+                                    <div class="text-center p-4 rounded-xl bg-red-500/10">
+                                        <p class="text-2xl font-bold text-red-400">2</p>
+                                        <p class="text-xs text-gray-500">#debugging</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="stat-card">
+                                <h3 class="font-semibold mb-4">Focus Areas</h3>
+                                <div class="space-y-3">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-2 h-2 rounded-full bg-orange-500"></div>
+                                        <span class="text-sm">Lead a technical initiative</span>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-2 h-2 rounded-full bg-purple-500"></div>
+                                        <span class="text-sm">Mentor 2+ engineers</span>
+                                    </div>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-2 h-2 rounded-full bg-blue-500"></div>
+                                        <span class="text-sm">Write system design doc</span>
+                                    </div>
+                                </div>
+                                <button class="btn btn-primary btn-sm w-full mt-4">View IC4 Requirements</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="max-w-7xl mx-auto text-center py-8 border-t border-white/10">
+        <p class="text-gray-500 text-sm">SWE Mentor - MVP Web Flows</p>
+        <p class="text-gray-600 text-xs mt-1">Built with DaisyUI + Tailwind CSS</p>
+    </footer>
+</body>
+</html>
