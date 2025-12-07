@@ -1,6 +1,22 @@
 // Shared types, constants, and utilities for SWE Mentor
 
 // ============================================
+// Database Types (generated from Supabase)
+// ============================================
+
+import type { Tables } from './database.types';
+
+export type { Database, Json } from './database.types';
+export type { Tables, TablesInsert, TablesUpdate } from './database.types';
+
+// Convenience type aliases for common tables
+export type Profile = Tables<'profiles'>;
+export type JournalEntryRow = Tables<'journal_entries'>;
+export type Conversation = Tables<'conversations'>;
+export type Message = Tables<'messages'>;
+export type DailyMetrics = Tables<'daily_metrics'>;
+
+// ============================================
 // Theme Constants
 // ============================================
 
