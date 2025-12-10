@@ -44,7 +44,8 @@ describe('Supabase Connection', () => {
     ]
 
     for (const table of tables) {
-      const { error } = await client.from(table).select('id').limit(0)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { error } = await (client.from as any)(table).select('id').limit(0)
 
       // PGRST204 = no rows (OK), 42501 = RLS policy (table exists), null = success
       const tableExists = error === null || error.code === '42501' || error.code === 'PGRST116'
