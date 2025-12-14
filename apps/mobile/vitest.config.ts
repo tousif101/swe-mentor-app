@@ -13,6 +13,7 @@ export default defineConfig({
     alias: {
       '@': resolve(__dirname, './src'),
       '@swe-mentor/shared': resolve(__dirname, '../../packages/shared/src'),
+      'react-native': resolve(__dirname, './__mocks__/react-native.ts'),
     },
   },
 })

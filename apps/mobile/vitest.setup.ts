@@ -1,5 +1,8 @@
 import { vi } from 'vitest'
 
+// Note: react-native is aliased to __mocks__/react-native.ts in vitest.config.ts
+// This avoids parsing issues with React Native's Flow syntax
+
 // Mock expo-secure-store
 vi.mock('expo-secure-store', () => ({
   getItemAsync: vi.fn(),
