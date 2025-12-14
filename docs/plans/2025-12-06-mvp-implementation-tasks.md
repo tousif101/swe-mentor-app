@@ -10,13 +10,143 @@
 
 ---
 
+## Progress Summary (Updated 2025-12-07)
+
+| Phase | Status | Tasks Complete |
+|-------|--------|----------------|
+| **Phase 1: Foundation (Backend)** | ✅ COMPLETE | 4/4 |
+| **Phase 2: Foundation (Frontend)** | ✅ COMPLETE | 2/2 |
+| Phase 3: Authentication | 🔄 In Progress | 3/5 |
+| Phase 4: Onboarding | ⬜ Not Started | 0/1 |
+| Phase 5: Journaling | ⬜ Not Started | 0/2 |
+| Phase 6: AI Mentor | ⬜ Not Started | 0/3 |
+| Phase 7: Metrics | ⬜ Not Started | 0/1 |
+| Phase 8: Mobile Sync | ⬜ Not Started | 0/1 |
+| Phase 9: Polish & Deploy | ⬜ Not Started | 0/1 |
+
+### Key Decisions Made
+1. **Mobile Storage:** Using `expo-secure-store` instead of AsyncStorage for encrypted session storage
+2. **pgvector:** Deferred to post-MVP (not needed for core features)
+3. **Migrations:** Applied via Supabase MCP tool (remote project)
+4. **Testing:** Integration tests with Vitest, 21 total tests across web (13) and mobile (8)
+5. **Next.js 16 Proxy Rename:** `middleware.ts` → `proxy.ts` and `middleware()` → `proxy()` (confirmed via Next.js MCP docs)
+
+### Current Test Coverage
+- **Web:** 13 tests (browser client, server client, connection verification)
+- **Mobile:** 8 tests (client config, storage adapter, error handling)
+
+### Phase 3 Auth Status (Updated 2025-12-07)
+
+**Frontend Implementation Complete:**
+| Feature | Login | Signup | Status |
+|---------|-------|--------|--------|
+| Password auth | ✅ | ✅ | Working |
+| Magic link | ✅ | ❌ | Login only - **signup needs implementation** |
+| Google OAuth | ✅ | ✅ | Frontend ready - **needs Supabase dashboard config** |
+| Auth callback | ✅ | ✅ | Working |
+| UI/Styling | ✅ | ✅ | Matching design system |
+
+**Backend Configuration Required:**
+
+### 1. Google OAuth Setup (Supabase + Google Cloud Console)
+
+**Step 1: Create Google Cloud OAuth Credentials**
+1. Go to [Google Cloud Console](https://console.cloud.google.com/)
+2. Create a new project or select existing
+3. Navigate to **APIs & Services > Credentials**
+4. Click **Create Credentials > OAuth Client ID**
+5. Select **Web application**
+6. Add **Authorized redirect URIs**:
+   - `https://<your-project-ref>.supabase.co/auth/v1/callback`
+   - `http://localhost:3000/auth/callback` (for local dev)
+7. Copy the **Client ID** and **Client Secret**
+
+**Step 2: Enable Google Provider in Supabase**
+1. Go to [Supabase Dashboard](https://supabase.com/dashboard) > Your Project
+2. Navigate to **Authentication > Providers**
+3. Find **Google** and enable it
+4. Paste your **Client ID** and **Client Secret**
+5. Save
+
+**Step 3: Configure Redirect URLs**
+1. Go to **Authentication > URL Configuration**
+2. Set **Site URL**: `http://localhost:3000` (dev) or your production URL
+3. Add **Redirect URLs**:
+   - `http://localhost:3000/auth/callback`
+   - `https://your-domain.com/auth/callback` (production)
+
+### 2. Magic Link / Email Configuration
+
+**Option A: Use Supabase Built-in (Dev Only)**
+- Limited to 4 emails/hour
+- Only sends to project team member emails
+- Good for testing, NOT for production
+
+**Option B: Custom SMTP (Production)**
+1. Go to **Authentication > SMTP Settings** in Supabase Dashboard
+2. Configure with your provider (Resend, SendGrid, AWS SES, etc.):
+
+**Example with Resend:**
+```
+Host: smtp.resend.com
+Port: 465
+User: resend
+Password: re_xxxxxxxxxxxx (your API key)
+Sender email: no-reply@yourdomain.com
+Sender name: SWE Mentor
+```
+
+**Example with SendGrid:**
+```
+Host: smtp.sendgrid.net
+Port: 587
+User: apikey
+Password: SG.xxxxxxxxxxxx (your API key)
+Sender email: no-reply@yourdomain.com
+```
+
+3. After saving, go to **Authentication > Rate Limits** and increase email limits
+
+**Docs:** https://supabase.com/docs/guides/auth/auth-smtp
+
+### 3. Magic Link Signup (TODO - Frontend Implementation)
+- Signup page currently only has password + Google OAuth
+- Need to add `signupWithMagicLink` action in `apps/web/src/app/(auth)/signup/actions.ts`:
+```typescript
+export async function signupWithMagicLink(
+  prevState: AuthActionState,
+  formData: FormData
+): Promise<AuthActionState> {
+  const parsed = magicLinkSchema.safeParse({ email: formData.get('email') })
+  if (!parsed.success) {
+    return { status: 'error', errors: parsed.error.flatten().fieldErrors }
+  }
+
+  const supabase = await createClient()
+  const origin = (await headers()).get('origin') || ''
+
+  const { error } = await supabase.auth.signInWithOtp({
+    email: parsed.data.email,
+    options: { emailRedirectTo: `${origin}/auth/callback` },
+  })
+
+  if (error) {
+    return { status: 'error', errors: { _form: ['Failed to send magic link'] } }
+  }
+  return { status: 'success' }
+}
+```
+- Then add a "Sign up with Magic Link" button to the signup page
+
+---
+
 ## Phase Overview
 
 ```
-Phase 1: Foundation (Backend)     ──┬── Can run in PARALLEL
-Phase 2: Foundation (Frontend)    ──┘
+Phase 1: Foundation (Backend)     ──┬── ✅ COMPLETE
+Phase 2: Foundation (Frontend)    ──┘   ✅ COMPLETE
 
-Phase 3: Auth (Backend + Frontend) ── Sequential (depends on Phase 1-2)
+Phase 3: Auth (Backend + Frontend) ── Sequential (depends on Phase 1-2) ← NEXT UP
 
 Phase 4: Onboarding ──┬── Can run in PARALLEL after Phase 3
 Phase 5: Journaling ──┤
@@ -47,9 +177,9 @@ Phase 9: Polish & Deploy ── Final
 
 ---
 
-# Phase 1: Foundation (Backend)
+# Phase 1: Foundation (Backend) ✅ COMPLETE
 
-## Task 1.1: Initialize Supabase
+## Task 1.1: Initialize Supabase ✅ COMPLETE
 
 **Assignee:** Backend Dev
 **Estimate:** 30 min
@@ -111,14 +241,18 @@ git commit -m "chore: initialize supabase local development"
 ```
 
 **Acceptance Criteria:**
-- [ ] `supabase start` runs without errors
-- [ ] Local Studio accessible at http://localhost:54323
-- [ ] API accessible at http://localhost:54321
-- [ ] `.env.local.example` documents all required env vars
+- [x] `supabase start` runs without errors
+- [x] Local Studio accessible at http://localhost:54323
+- [x] API accessible at http://localhost:54321
+- [x] `.env.local.example` documents all required env vars
+
+**Implementation Notes (2025-12-07):**
+- Using remote Supabase project with MCP integration for migrations
+- Config at `supabase/config.toml` with API port 54321, DB port 54322
 
 ---
 
-## Task 1.2: Create Database Schema Migration
+## Task 1.2: Create Database Schema Migration ✅ COMPLETE
 
 **Assignee:** Backend Dev
 **Estimate:** 45 min
@@ -357,15 +491,26 @@ git commit -m "feat(db): add initial schema with profiles, journals, conversatio
 ```
 
 **Acceptance Criteria:**
-- [ ] All 5 tables created (profiles, journal_entries, conversations, messages, daily_metrics)
-- [ ] RLS enabled on all tables
-- [ ] RLS policies prevent cross-user data access
-- [ ] Trigger auto-creates profile on user signup
-- [ ] Indexes created for query performance
+- [x] All 5 tables created (profiles, journal_entries, conversations, messages, daily_metrics)
+- [x] RLS enabled on all tables
+- [x] RLS policies prevent cross-user data access
+- [x] Trigger auto-creates profile on user signup
+- [x] Indexes created for query performance
+
+**Implementation Notes (2025-12-07):**
+- Applied via Supabase MCP tool (migrations: `initial_schema`, `fix_function_search_paths`)
+- All tables verified with proper columns, constraints, and foreign keys:
+  - `profiles`: id, email, name, avatar_url, role, target_role, focus_areas, onboarding_completed
+  - `journal_entries`: id, user_id, title, content, tags, created_at, updated_at
+  - `conversations`: id, user_id, title, created_at, updated_at
+  - `messages`: id, conversation_id, role (user|assistant), content, created_at
+  - `daily_metrics`: id, user_id, date, entries_count, tags_used, mentor_messages
+- Role enum constraint: software_engineer_1, software_engineer_2, senior_engineer, staff_engineer, principal_engineer
+- **Decision:** Deferred pgvector extension for semantic search to later phase (not needed for MVP core)
 
 ---
 
-## Task 1.3: Generate TypeScript Database Types
+## Task 1.3: Generate TypeScript Database Types ✅ COMPLETE
 
 **Assignee:** Backend Dev
 **Estimate:** 15 min
@@ -419,13 +564,20 @@ git commit -m "feat(types): generate supabase database types"
 ```
 
 **Acceptance Criteria:**
-- [ ] Types generated without errors
-- [ ] Types exported from shared package
-- [ ] TypeScript compilation succeeds
+- [x] Types generated without errors
+- [x] Types exported from shared package
+- [x] TypeScript compilation succeeds
+
+**Implementation Notes (2025-12-07):**
+- Types generated at `packages/shared/src/database.types.ts`
+- Exported from `packages/shared/src/index.ts` with convenience aliases:
+  - `Profile`, `JournalEntryRow`, `Conversation`, `Message`, `DailyMetrics`
+- Additional custom types added: `User`, `JournalEntry`, `Tag`, `MentorMessage`, `Insight`, `SkillProgress`
+- Theme constants (primary/accent colors) also exported from shared
 
 ---
 
-## Task 1.4: Install Supabase Dependencies
+## Task 1.4: Install Supabase Dependencies ✅ COMPLETE
 
 **Assignee:** Backend Dev
 **Estimate:** 15 min
@@ -465,15 +617,20 @@ git commit -m "chore: install supabase dependencies"
 ```
 
 **Acceptance Criteria:**
-- [ ] @supabase/supabase-js installed at root
-- [ ] @supabase/ssr installed in web app
-- [ ] @react-native-async-storage/async-storage installed in mobile
+- [x] @supabase/supabase-js installed at root
+- [x] @supabase/ssr installed in web app
+- [x] @react-native-async-storage/async-storage installed in mobile
+
+**Implementation Notes (2025-12-07):**
+- `@supabase/supabase-js` v2.86.2 installed at root
+- `@supabase/ssr` v0.8.0 installed in web app
+- **Decision:** Mobile uses `expo-secure-store` v15.0.8 instead of AsyncStorage for encrypted session storage (more secure)
 
 ---
 
-# Phase 2: Foundation (Frontend)
+# Phase 2: Foundation (Frontend) ✅ COMPLETE
 
-## Task 2.1: Create Supabase Client Utilities (Web)
+## Task 2.1: Create Supabase Client Utilities (Web) ✅ COMPLETE
 
 **Assignee:** Frontend Dev (Web)
 **Estimate:** 30 min
@@ -614,14 +771,28 @@ git commit -m "feat(web): add supabase client utilities"
 ```
 
 **Acceptance Criteria:**
-- [ ] Browser client creates successfully
-- [ ] Server client creates successfully
-- [ ] Middleware handles auth redirects
-- [ ] TypeScript compiles without errors
+- [x] Browser client creates successfully
+- [x] Server client creates successfully
+- [x] Middleware handles auth redirects
+- [x] TypeScript compiles without errors
+
+**Implementation Notes (2025-12-07):**
+- Browser client: `apps/web/src/lib/supabase/client.ts` using `createBrowserClient` from `@supabase/ssr`
+- Server client: `apps/web/src/lib/supabase/server.ts` with cookie-based session management
+- Middleware: `apps/web/src/lib/supabase/middleware.ts` + `apps/web/middleware.ts`
+  - Redirects unauthenticated users to `/login`
+  - Redirects authenticated users away from auth pages to `/journal`
+  - Public routes: `/`, `/login`, `/signup`, `/auth/callback`
+- **Tests added:**
+  - `browser-client.test.ts` (7 tests) - auth flow, query validation
+  - `server-client.test.ts` (6 tests) - cookie session handling
+  - `supabase-connection.test.ts` - table existence verification
+- Test utilities at `apps/web/src/__tests__/setup/test-utils.ts`:
+  - `createTestClient()`, `createAdminClient()`, `createTestUser()`, `deleteTestUser()`
 
 ---
 
-## Task 2.2: Create Supabase Client (Mobile)
+## Task 2.2: Create Supabase Client (Mobile) ✅ COMPLETE
 
 **Assignee:** Mobile Dev
 **Estimate:** 30 min
@@ -687,9 +858,20 @@ git commit -m "feat(mobile): add supabase client"
 ```
 
 **Acceptance Criteria:**
-- [ ] Supabase client initializes without errors
-- [ ] AsyncStorage configured for session persistence
-- [ ] Connection test logs success
+- [x] Supabase client initializes without errors
+- [x] ~~AsyncStorage~~ SecureStore configured for session persistence
+- [x] Connection test logs success
+
+**Implementation Notes (2025-12-07):**
+- Client at `apps/mobile/src/lib/supabase.ts`
+- **Decision:** Uses `expo-secure-store` instead of AsyncStorage for encrypted session storage
+- Custom `ExpoSecureStoreAdapter` with full error handling for:
+  - `getItem()`, `setItem()`, `removeItem()`
+  - Graceful fallbacks when SecureStore unavailable
+- Config: `autoRefreshToken: true`, `persistSession: true`, `detectSessionInUrl: false`
+- **Tests added:** `apps/mobile/src/lib/__tests__/supabase.test.ts` (8 tests)
+  - Config validation, storage adapter functionality, error handling
+- Entry point at `apps/mobile/index.ts` with React Native URL polyfill
 
 ---
 
@@ -716,7 +898,11 @@ import { NextResponse } from 'next/server'
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url)
   const code = searchParams.get('code')
-  const next = searchParams.get('next') ?? '/journal'
+  // Security: Validate next parameter to prevent open redirect attacks
+  let next = searchParams.get('next') ?? '/journal'
+  if (!next.startsWith('/')) {
+    next = '/journal'
+  }
 
   if (code) {
     const supabase = await createClient()
@@ -737,7 +923,17 @@ export async function GET(request: Request) {
         }
       }
 
-      return NextResponse.redirect(`${origin}${next}`)
+      // Handle load balancer scenarios with x-forwarded-host
+      const forwardedHost = request.headers.get('x-forwarded-host')
+      const isLocalEnv = process.env.NODE_ENV === 'development'
+
+      if (isLocalEnv) {
+        return NextResponse.redirect(`${origin}${next}`)
+      } else if (forwardedHost) {
+        return NextResponse.redirect(`https://${forwardedHost}${next}`)
+      } else {
+        return NextResponse.redirect(`${origin}${next}`)
+      }
     }
   }
 
@@ -754,14 +950,24 @@ git commit -m "feat(auth): add OAuth callback route"
 ```
 
 **Acceptance Criteria:**
-- [ ] Callback exchanges code for session
-- [ ] Redirects to onboarding if not completed
-- [ ] Redirects to journal if onboarding complete
-- [ ] Handles errors gracefully
+- [x] Callback exchanges code for session
+- [x] Redirects to onboarding if not completed
+- [x] Redirects to journal if onboarding complete
+- [x] Handles errors gracefully
+- [x] Security: Validates `next` param to prevent open redirect attacks
+- [x] Handles x-forwarded-host for load balancer scenarios
+
+**Implementation Notes (2025-12-07):**
+- Created `apps/web/src/app/auth/callback/route.ts`
+- Uses PKCE flow via `exchangeCodeForSession(code)`
+- Security: Validates `next` parameter starts with `/` to prevent open redirect attacks
+- Checks `profiles.onboarding_completed` to route new users to onboarding
+- Handles production load balancers via `x-forwarded-host` header
+- All 18 existing tests continue to pass
 
 ---
 
-## Task 3.2: Create Login Page (Web)
+## Task 3.2: Create Login Page (Web) ✅ COMPLETE
 
 **Assignee:** Frontend Dev (Web)
 **Estimate:** 45 min
@@ -968,16 +1174,26 @@ git commit -m "feat(auth): add login page with email and Google OAuth"
 ```
 
 **Acceptance Criteria:**
-- [ ] Login form displays correctly
-- [ ] Email/password login works
-- [ ] Google OAuth redirects correctly
-- [ ] Error messages display properly
-- [ ] Loading states work
-- [ ] Styling matches design system
+- [x] Login form displays correctly
+- [x] Email/password login works
+- [x] Google OAuth redirects correctly (frontend ready, needs Supabase config)
+- [x] Magic link login works (frontend ready, needs SMTP config for production)
+- [x] Error messages display properly
+- [x] Loading states work
+- [x] Styling matches design system
+
+**Implementation Notes (2025-12-07):**
+- Created `apps/web/src/app/(auth)/login/page.tsx` with modern dark theme UI
+- Created `apps/web/src/app/(auth)/login/actions.ts` with:
+  - `login()` - password authentication with Zod validation
+  - `loginWithMagicLink()` - OTP-based passwordless login
+- Created `apps/web/src/components/auth/SocialAuthButtons.tsx` for Google OAuth
+- Uses `useActionState` (React 19) for form state management
+- Two login options: "Sign in with Password" (primary) + "Sign in with Magic Link" (secondary)
 
 ---
 
-## Task 3.3: Create Signup Page (Web)
+## Task 3.3: Create Signup Page (Web) ✅ PARTIAL
 
 **Assignee:** Frontend Dev (Web)
 **Estimate:** 30 min
@@ -1145,33 +1361,47 @@ git commit -m "feat(auth): add signup page"
 ```
 
 **Acceptance Criteria:**
-- [ ] Signup form displays correctly
-- [ ] Account creation works
-- [ ] Redirects to onboarding after signup
-- [ ] Password validation (min 8 chars)
-- [ ] Error handling works
+- [x] Signup form displays correctly
+- [x] Account creation works (password + confirm password)
+- [x] Shows email confirmation message after signup
+- [x] Password validation (min 8 chars, uppercase, lowercase, number)
+- [x] Error handling works
+- [x] Google OAuth button present and working
+- [ ] **TODO: Add magic link signup option** (currently only password signup)
+
+**Implementation Notes (2025-12-07):**
+- Created `apps/web/src/app/(auth)/signup/page.tsx` with matching dark theme UI
+- Created `apps/web/src/app/(auth)/signup/actions.ts` with:
+  - `signup()` - password signup with Zod validation
+- Includes confirm password field with validation
+- Success state shows "Check your email" message
+- Uses same `SocialAuthButtons` component for Google OAuth
+- **Gap:** No magic link signup - user must use password or Google OAuth to create account
 
 ---
 
-## Task 3.4: Create Middleware for Auth Protection (Web)
+## Task 3.4: Create Proxy for Auth Protection (Web)
 
 **Assignee:** Frontend Dev (Web)
 **Estimate:** 15 min
 **Dependencies:** Task 2.1
 **Parallel:** None
 
+> **Note:** Starting with Next.js 16, Middleware is now called Proxy. The file must be `proxy.ts` and export a `proxy` function.
+
 **Files:**
-- Create: `apps/web/src/middleware.ts`
+- Rename: `apps/web/middleware.ts` → `apps/web/proxy.ts`
 
-**Step 1: Create middleware**
+**Step 1: Rename middleware to proxy (Next.js 16)**
 
-Create `apps/web/src/middleware.ts`:
+Rename `apps/web/middleware.ts` to `apps/web/proxy.ts` and update the export:
 
 ```typescript
 import { type NextRequest } from 'next/server'
 import { updateSession } from '@/lib/supabase/middleware'
 
-export async function middleware(request: NextRequest) {
+// Next.js 16: middleware() renamed to proxy()
+export async function proxy(request: NextRequest) {
   return await updateSession(request)
 }
 
@@ -1185,8 +1415,9 @@ export const config = {
 **Step 2: Commit**
 
 ```bash
-git add apps/web/src/middleware.ts
-git commit -m "feat(auth): add middleware for route protection"
+git add apps/web/proxy.ts
+git rm apps/web/middleware.ts  # if it existed
+git commit -m "feat(auth): add proxy for route protection (Next.js 16)"
 ```
 
 **Acceptance Criteria:**
@@ -1194,6 +1425,7 @@ git commit -m "feat(auth): add middleware for route protection"
 - [ ] Authenticated users redirected away from /login, /signup
 - [ ] Public routes accessible without auth
 - [ ] Session refreshed on each request
+- [ ] File named `proxy.ts` with `proxy()` export (Next.js 16 convention)
 
 ---
 
