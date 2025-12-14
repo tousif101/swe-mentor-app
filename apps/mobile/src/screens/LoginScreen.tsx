@@ -11,8 +11,9 @@ import {
 } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import { Ionicons } from '@expo/vector-icons'
 import { supabase } from '../lib/supabase'
-import { loginSchema, magicLinkSchema } from '../utils/validation'
+import { loginSchema } from '../utils/validation'
 import { AuthStackParamList } from '../navigation/RootNavigator'
 
 type Props = {
@@ -28,57 +29,31 @@ type FormErrors = {
 export function LoginScreen({ navigation }: Props) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [useMagicLink, setUseMagicLink] = useState(false)
+  const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<FormErrors>({})
-  const [successMessage, setSuccessMessage] = useState('')
 
   const handleLogin = async () => {
     setErrors({})
-    setSuccessMessage('')
 
-    if (useMagicLink) {
-      // Magic link flow
-      const parsed = magicLinkSchema.safeParse({ email })
-      if (!parsed.success) {
-        const fieldErrors = parsed.error.flatten().fieldErrors
-        setErrors({ email: fieldErrors.email?.[0] })
-        return
-      }
-
-      setIsLoading(true)
-      const { error } = await supabase.auth.signInWithOtp({
-        email: parsed.data.email,
+    const parsed = loginSchema.safeParse({ email, password })
+    if (!parsed.success) {
+      const fieldErrors = parsed.error.flatten().fieldErrors
+      setErrors({
+        email: fieldErrors.email?.[0],
+        password: fieldErrors.password?.[0],
       })
-      setIsLoading(false)
-
-      if (error) {
-        setErrors({ form: 'Failed to send magic link. Please try again.' })
-        return
-      }
-
-      setSuccessMessage('Check your email for the magic link!')
-    } else {
-      // Password flow
-      const parsed = loginSchema.safeParse({ email, password })
-      if (!parsed.success) {
-        const fieldErrors = parsed.error.flatten().fieldErrors
-        setErrors({
-          email: fieldErrors.email?.[0],
-          password: fieldErrors.password?.[0],
-        })
-        return
-      }
-
-      setIsLoading(true)
-      const { error } = await supabase.auth.signInWithPassword(parsed.data)
-      setIsLoading(false)
-
-      if (error) {
-        setErrors({ form: 'Invalid email or password' })
-      }
-      // Success: useAuth hook will detect session change and navigate
+      return
     }
+
+    setIsLoading(true)
+    const { error } = await supabase.auth.signInWithPassword(parsed.data)
+    setIsLoading(false)
+
+    if (error) {
+      setErrors({ form: 'Invalid email or password' })
+    }
+    // Success: useAuth hook will detect session change and navigate
   }
 
   return (
@@ -117,7 +92,9 @@ export function LoginScreen({ navigation }: Props) {
             placeholderTextColor="#6b7280"
             keyboardType="email-address"
             autoCapitalize="none"
-            autoComplete="email"
+            autoComplete="off"
+            textContentType="none"
+            autoCorrect={false}
             className="w-full px-4 py-3.5 rounded-xl bg-gray-800 border border-gray-700 text-white"
           />
           {errors.email && (
@@ -125,35 +102,41 @@ export function LoginScreen({ navigation }: Props) {
           )}
         </View>
 
-        {/* Password Input - only when not using magic link */}
-        {!useMagicLink && (
-          <View className="mb-4">
+        {/* Password Input */}
+        <View className="mb-4">
+          <View className="flex-row items-center bg-gray-800 border border-gray-700 rounded-xl">
             <TextInput
               value={password}
               onChangeText={setPassword}
               placeholder="Enter your password"
               placeholderTextColor="#6b7280"
-              secureTextEntry
-              autoComplete="password"
-              className="w-full px-4 py-3.5 rounded-xl bg-gray-800 border border-gray-700 text-white"
+              secureTextEntry={!showPassword}
+              autoComplete="off"
+              textContentType="none"
+              autoCapitalize="none"
+              autoCorrect={false}
+              className="flex-1 px-4 py-3.5 text-white"
             />
-            {errors.password && (
-              <Text className="text-red-400 text-sm mt-1">{errors.password}</Text>
-            )}
+            <Pressable
+              onPress={() => setShowPassword(!showPassword)}
+              className="px-4 py-3.5"
+            >
+              <Ionicons
+                name={showPassword ? 'eye-off' : 'eye'}
+                size={20}
+                color="#6b7280"
+              />
+            </Pressable>
           </View>
-        )}
+          {errors.password && (
+            <Text className="text-red-400 text-sm mt-1">{errors.password}</Text>
+          )}
+        </View>
 
         {/* Form Error */}
         {errors.form && (
           <View className="mb-4 py-3 px-4 rounded-xl bg-red-500/10 border border-red-500/20">
             <Text className="text-red-400 text-sm">{errors.form}</Text>
-          </View>
-        )}
-
-        {/* Success Message */}
-        {successMessage && (
-          <View className="mb-4 py-3 px-4 rounded-xl bg-green-500/10 border border-green-500/20">
-            <Text className="text-green-400 text-sm">{successMessage}</Text>
           </View>
         )}
 
@@ -167,31 +150,9 @@ export function LoginScreen({ navigation }: Props) {
           {isLoading ? (
             <ActivityIndicator color="white" />
           ) : (
-            <Text className="text-white font-medium">
-              {useMagicLink ? 'Send Magic Link' : 'Sign in'}
-            </Text>
+            <Text className="text-white font-medium">Sign in</Text>
           )}
         </Pressable>
-
-        {/* Toggle Magic Link / Password */}
-        <Pressable
-          onPress={() => {
-            setUseMagicLink(!useMagicLink)
-            setErrors({})
-            setSuccessMessage('')
-          }}
-          className="mb-4"
-        >
-          <Text className="text-primary-400 text-sm text-center" style={{ color: '#a78bfa' }}>
-            {useMagicLink ? 'Use password instead' : 'Sign in with email link'}
-          </Text>
-        </Pressable>
-
-        {useMagicLink && (
-          <Text className="text-gray-500 text-xs text-center mb-4">
-            New here? We'll create an account for you automatically.
-          </Text>
-        )}
 
         {/* Sign Up Link */}
         <View className="flex-row justify-center mt-8">

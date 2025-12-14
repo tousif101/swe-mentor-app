@@ -1,0 +1,73 @@
+# Maestro E2E Test: Onboarding Flow
+# Run with: maestro test .maestro/onboarding.yaml
+#
+# Prerequisites:
+# - Expo app running on simulator (npx expo start)
+# - Maestro CLI installed (brew install maestro)
+
+appId: host.exp.Exponent  # Expo Go app ID
+
+---
+
+# Start from Welcome Screen
+- assertVisible: "Level up your engineering career"
+- assertVisible: "Get Started"
+
+# Navigate to Signup
+- tapOn: "Get Started"
+
+# Fill Signup Form
+- assertVisible: "Create an account"
+- tapOn: "Enter your email"
+- inputText: "testuser+${maestro.timestamp}@example.com"
+- tapOn: "Create a password"
+- inputText: "TestPass123"
+- tapOn: "Confirm your password"
+- inputText: "TestPass123"
+- tapOn: "Create account"
+
+# Wait for signup to complete and show success or onboarding
+- extendedWaitUntil:
+    visible: "Check your email|Set up your profile"
+    timeout: 10000
+
+# If email confirmation is required, we can't proceed further in test
+# For local dev with email confirmation disabled, continue to onboarding:
+
+# Profile Setup Screen
+- runFlow:
+    when:
+      visible: "Set up your profile"
+    commands:
+      - assertVisible: "What should I call you?"
+
+      # Enter name
+      - tapOn: "Enter your name"
+      - inputText: "Test User"
+
+      # Select current role
+      - tapOn: "Select your current role"
+      - assertVisible: "Software Engineer 1"
+      - tapOn: "Software Engineer 2"
+
+      # Select target role (should auto-default to Senior)
+      - tapOn:
+          text: "Senior Software Engineer"
+          optional: true
+
+      # Continue to Ready screen
+      - tapOn: "Continue"
+
+      # Ready Screen
+      - assertVisible: "Welcome, Test User!"
+      - assertVisible: "Impact"
+      - assertVisible: "Start Your First Entry"
+
+      # Complete onboarding
+      - tapOn: "Start Your First Entry"
+
+      # Verify we reached Home
+      - assertVisible:
+          text: "Welcome!"
+          timeout: 5000
+      - assertVisible: "You are logged in"
