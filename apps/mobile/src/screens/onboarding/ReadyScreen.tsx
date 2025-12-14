@@ -21,7 +21,7 @@ type Props = {
 }
 
 export function ReadyScreen({ navigation, route }: Props) {
-  const { name, role, targetRole } = route.params
+  const { name, role, targetRole, reminderSettings } = route.params
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { refetch } = useProfileContext()
@@ -62,6 +62,26 @@ export function ReadyScreen({ navigation, route }: Props) {
         return
       }
 
+      // Save reminder settings if provided
+      if (reminderSettings) {
+        const { error: reminderError } = await supabase
+          .from('user_notification_settings')
+          .upsert({
+            user_id: user.id,
+            morning_enabled: reminderSettings.morningEnabled,
+            morning_time: reminderSettings.morningTime,
+            evening_enabled: reminderSettings.eveningEnabled,
+            evening_time: reminderSettings.eveningTime,
+            timezone: reminderSettings.timezone,
+            push_enabled: reminderSettings.morningEnabled || reminderSettings.eveningEnabled,
+          })
+
+        if (reminderError) {
+          console.error('Reminder settings error:', reminderError)
+          // Don't block onboarding if reminder settings fail
+        }
+      }
+
       // Refetch profile to trigger navigation to main app
       await refetch()
     } catch (err) {
@@ -74,7 +94,7 @@ export function ReadyScreen({ navigation, route }: Props) {
 
   return (
     <View className="flex-1 bg-gray-950">
-      <ProgressBar currentStep={2} totalSteps={2} />
+      <ProgressBar currentStep={3} totalSteps={3} />
 
       <View className="flex-1 justify-center px-6">
         {/* Celebration Icon */}

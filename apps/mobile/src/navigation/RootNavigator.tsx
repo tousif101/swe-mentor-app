@@ -1,13 +1,13 @@
 import { NavigationContainer } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
-import { View, Text, ActivityIndicator, Pressable } from 'react-native'
+import { View, ActivityIndicator } from 'react-native'
 import { useAuth } from '../hooks'
 import { ProfileProvider, useProfileContext } from '../contexts'
 import { WelcomeScreen } from '../screens/WelcomeScreen'
 import { LoginScreen } from '../screens/LoginScreen'
 import { SignupScreen } from '../screens/SignupScreen'
 import { OnboardingNavigator } from './OnboardingNavigator'
-import { supabase } from '../lib/supabase'
+import { MainTabNavigator } from './MainTabNavigator'
 
 export type AuthStackParamList = {
   Welcome: undefined
@@ -15,12 +15,7 @@ export type AuthStackParamList = {
   Signup: undefined
 }
 
-export type AppStackParamList = {
-  Home: undefined
-}
-
 const AuthStack = createNativeStackNavigator<AuthStackParamList>()
-const AppStack = createNativeStackNavigator<AppStackParamList>()
 
 function AuthNavigator() {
   return (
@@ -38,38 +33,6 @@ function AuthNavigator() {
   )
 }
 
-// Placeholder home screen until main app is built
-function HomeScreen() {
-  const handleLogout = async () => {
-    await supabase.auth.signOut()
-  }
-
-  return (
-    <View className="flex-1 bg-gray-950 items-center justify-center">
-      <Text className="text-white text-2xl font-bold mb-4">Welcome!</Text>
-      <Text className="text-gray-400 mb-8">You are logged in</Text>
-      <Pressable
-        onPress={handleLogout}
-        className="px-6 py-3 rounded-xl border border-gray-700"
-      >
-        <Text className="text-gray-300">Sign out</Text>
-      </Pressable>
-    </View>
-  )
-}
-
-function AppNavigator() {
-  return (
-    <AppStack.Navigator
-      screenOptions={{
-        headerShown: false,
-        contentStyle: { backgroundColor: '#030712' },
-      }}
-    >
-      <AppStack.Screen name="Home" component={HomeScreen} />
-    </AppStack.Navigator>
-  )
-}
 
 function LoadingScreen() {
   return (
@@ -101,7 +64,7 @@ function RootNavigatorContent() {
     }
 
     // Authenticated and onboarded -> Main app
-    return <AppNavigator />
+    return <MainTabNavigator />
   }
 
   return <NavigationContainer>{getNavigator()}</NavigationContainer>

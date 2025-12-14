@@ -209,6 +209,67 @@ export type Database = {
         }
         Relationships: []
       }
+      user_notification_settings: {
+        Row: {
+          created_at: string | null
+          evening_enabled: boolean | null
+          evening_time: string | null
+          id: string
+          morning_enabled: boolean | null
+          morning_time: string | null
+          phone_number: string | null
+          push_enabled: boolean | null
+          sms_enabled: boolean | null
+          timezone: string | null
+          updated_at: string | null
+          user_id: string
+          weekly_day: string | null
+          weekly_enabled: boolean | null
+          weekly_time: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          evening_enabled?: boolean | null
+          evening_time?: string | null
+          id?: string
+          morning_enabled?: boolean | null
+          morning_time?: string | null
+          phone_number?: string | null
+          push_enabled?: boolean | null
+          sms_enabled?: boolean | null
+          timezone?: string | null
+          updated_at?: string | null
+          user_id: string
+          weekly_day?: string | null
+          weekly_enabled?: boolean | null
+          weekly_time?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          evening_enabled?: boolean | null
+          evening_time?: string | null
+          id?: string
+          morning_enabled?: boolean | null
+          morning_time?: string | null
+          phone_number?: string | null
+          push_enabled?: boolean | null
+          sms_enabled?: boolean | null
+          timezone?: string | null
+          updated_at?: string | null
+          user_id?: string
+          weekly_day?: string | null
+          weekly_enabled?: boolean | null
+          weekly_time?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_notification_settings_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
