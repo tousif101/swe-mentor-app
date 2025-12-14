@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { loginSchema, magicLinkSchema, signupSchema } from '../validation'
+import { loginSchema, magicLinkSchema, signupSchema, profileSchema } from '../validation'
 
 describe('loginSchema', () => {
   it('validates correct email and password', () => {
@@ -163,6 +163,99 @@ describe('signupSchema', () => {
       email: 'user@domain.co.uk',
       password: 'MySecure123Pass!',
       confirmPassword: 'MySecure123Pass!',
+    })
+    expect(result.success).toBe(true)
+  })
+})
+
+describe('profileSchema', () => {
+  const validProfile = {
+    name: 'John Doe',
+    role: 'software_engineer_2' as const,
+    targetRole: 'senior_engineer' as const,
+  }
+
+  it('validates correct profile data', () => {
+    const result = profileSchema.safeParse(validProfile)
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects name shorter than 2 characters', () => {
+    const result = profileSchema.safeParse({
+      ...validProfile,
+      name: 'J',
+    })
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error.flatten().fieldErrors.name).toContain(
+        'Name must be at least 2 characters'
+      )
+    }
+  })
+
+  it('rejects empty name', () => {
+    const result = profileSchema.safeParse({
+      ...validProfile,
+      name: '',
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects invalid role', () => {
+    const result = profileSchema.safeParse({
+      ...validProfile,
+      role: 'invalid_role',
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects target role below current role', () => {
+    const result = profileSchema.safeParse({
+      name: 'John Doe',
+      role: 'senior_engineer',
+      targetRole: 'software_engineer_1',
+    })
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error.flatten().fieldErrors.targetRole).toContain(
+        'Target role must be at or above your current role'
+      )
+    }
+  })
+
+  it('accepts same role as target (no promotion goal)', () => {
+    const result = profileSchema.safeParse({
+      name: 'John Doe',
+      role: 'senior_engineer',
+      targetRole: 'senior_engineer',
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts all valid role combinations going up', () => {
+    const roles = [
+      'software_engineer_1',
+      'software_engineer_2',
+      'senior_engineer',
+      'staff_engineer',
+      'principal_engineer',
+    ] as const
+
+    // Test SE1 can target any role
+    roles.forEach((targetRole) => {
+      const result = profileSchema.safeParse({
+        name: 'Test User',
+        role: 'software_engineer_1',
+        targetRole,
+      })
+      expect(result.success).toBe(true)
+    })
+  })
+
+  it('accepts valid 2-character name', () => {
+    const result = profileSchema.safeParse({
+      ...validProfile,
+      name: 'Jo',
     })
     expect(result.success).toBe(true)
   })

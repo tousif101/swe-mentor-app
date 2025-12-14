@@ -1,10 +1,12 @@
 import { NavigationContainer } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { View, Text, ActivityIndicator, Pressable } from 'react-native'
-import { useAuth } from '../hooks/useAuth'
+import { useAuth } from '../hooks'
+import { ProfileProvider, useProfileContext } from '../contexts'
 import { WelcomeScreen } from '../screens/WelcomeScreen'
 import { LoginScreen } from '../screens/LoginScreen'
 import { SignupScreen } from '../screens/SignupScreen'
+import { OnboardingNavigator } from './OnboardingNavigator'
 import { supabase } from '../lib/supabase'
 
 export type AuthStackParamList = {
@@ -77,16 +79,45 @@ function LoadingScreen() {
   )
 }
 
-export function RootNavigator() {
-  const { session, isLoading } = useAuth()
+function RootNavigatorContent() {
+  const { session } = useAuth()
+  const { profile, isLoading: profileLoading } = useProfileContext()
 
-  if (isLoading) {
+  // Show loading while checking profile for authenticated users
+  if (session && profileLoading) {
+    return <LoadingScreen />
+  }
+
+  // Determine which navigator to show
+  const getNavigator = () => {
+    // Not authenticated -> Auth flow
+    if (!session) {
+      return <AuthNavigator />
+    }
+
+    // Authenticated but onboarding not complete -> Onboarding flow
+    if (!profile?.onboarding_completed) {
+      return <OnboardingNavigator />
+    }
+
+    // Authenticated and onboarded -> Main app
+    return <AppNavigator />
+  }
+
+  return <NavigationContainer>{getNavigator()}</NavigationContainer>
+}
+
+export function RootNavigator() {
+  const { user, isLoading: authLoading } = useAuth()
+
+  // Show loading while checking auth
+  if (authLoading) {
     return <LoadingScreen />
   }
 
   return (
-    <NavigationContainer>
-      {session ? <AppNavigator /> : <AuthNavigator />}
-    </NavigationContainer>
+    <ProfileProvider userId={user?.id ?? null}>
+      <RootNavigatorContent />
+    </ProfileProvider>
   )
 }

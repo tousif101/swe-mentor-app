@@ -11,6 +11,7 @@ import {
 } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import { Ionicons } from '@expo/vector-icons'
 import { supabase } from '../lib/supabase'
 import { signupSchema } from '../utils/validation'
 import { AuthStackParamList } from '../navigation/RootNavigator'
@@ -30,6 +31,8 @@ export function SignupScreen({ navigation }: Props) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<FormErrors>({})
   const [isSuccess, setIsSuccess] = useState(false)
@@ -125,7 +128,9 @@ export function SignupScreen({ navigation }: Props) {
             placeholderTextColor="#6b7280"
             keyboardType="email-address"
             autoCapitalize="none"
-            autoComplete="email"
+            autoComplete="off"
+            textContentType="none"
+            autoCorrect={false}
             className="w-full px-4 py-3.5 rounded-xl bg-gray-800 border border-gray-700 text-white"
           />
           {errors.email && (
@@ -135,15 +140,30 @@ export function SignupScreen({ navigation }: Props) {
 
         {/* Password Input */}
         <View className="mb-4">
-          <TextInput
-            value={password}
-            onChangeText={setPassword}
-            placeholder="Create a password"
-            placeholderTextColor="#6b7280"
-            secureTextEntry
-            autoComplete="new-password"
-            className="w-full px-4 py-3.5 rounded-xl bg-gray-800 border border-gray-700 text-white"
-          />
+          <View className="flex-row items-center bg-gray-800 border border-gray-700 rounded-xl">
+            <TextInput
+              value={password}
+              onChangeText={setPassword}
+              placeholder="Create a password"
+              placeholderTextColor="#6b7280"
+              secureTextEntry={!showPassword}
+              autoComplete="off"
+              textContentType="none"
+              autoCapitalize="none"
+              autoCorrect={false}
+              className="flex-1 px-4 py-3.5 text-white"
+            />
+            <Pressable
+              onPress={() => setShowPassword(!showPassword)}
+              className="px-4 py-3.5"
+            >
+              <Ionicons
+                name={showPassword ? 'eye-off' : 'eye'}
+                size={20}
+                color="#6b7280"
+              />
+            </Pressable>
+          </View>
           {errors.password && (
             <Text className="text-red-400 text-sm mt-1">{errors.password}</Text>
           )}
@@ -151,15 +171,30 @@ export function SignupScreen({ navigation }: Props) {
 
         {/* Confirm Password Input */}
         <View className="mb-4">
-          <TextInput
-            value={confirmPassword}
-            onChangeText={setConfirmPassword}
-            placeholder="Confirm your password"
-            placeholderTextColor="#6b7280"
-            secureTextEntry
-            autoComplete="new-password"
-            className="w-full px-4 py-3.5 rounded-xl bg-gray-800 border border-gray-700 text-white"
-          />
+          <View className="flex-row items-center bg-gray-800 border border-gray-700 rounded-xl">
+            <TextInput
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+              placeholder="Confirm your password"
+              placeholderTextColor="#6b7280"
+              secureTextEntry={!showConfirmPassword}
+              autoComplete="off"
+              textContentType="none"
+              autoCapitalize="none"
+              autoCorrect={false}
+              className="flex-1 px-4 py-3.5 text-white"
+            />
+            <Pressable
+              onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="px-4 py-3.5"
+            >
+              <Ionicons
+                name={showConfirmPassword ? 'eye-off' : 'eye'}
+                size={20}
+                color="#6b7280"
+              />
+            </Pressable>
+          </View>
           {errors.confirmPassword && (
             <Text className="text-red-400 text-sm mt-1">{errors.confirmPassword}</Text>
           )}

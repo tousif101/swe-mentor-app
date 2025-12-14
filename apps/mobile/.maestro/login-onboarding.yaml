@@ -1,0 +1,45 @@
+# Maestro E2E Test: Login + Onboarding Flow
+# Run with: maestro test .maestro/login-onboarding.yaml
+#
+# Use this when you have an existing test account that hasn't completed onboarding
+
+appId: host.exp.Exponent
+
+env:
+  TEST_EMAIL: ""  # Set via CLI: maestro test -e TEST_EMAIL=user@example.com
+  TEST_PASSWORD: ""  # Set via CLI: -e TEST_PASSWORD=yourpassword
+
+---
+
+# Welcome Screen
+- assertVisible: "Get Started"
+- tapOn: "Sign in"
+
+# Login Screen
+- assertVisible: "Welcome back"
+- tapOn: "Enter your email"
+- inputText: ${TEST_EMAIL}
+- tapOn: "Enter your password"
+- inputText: ${TEST_PASSWORD}
+- tapOn: "Sign in"
+
+# Wait for login and onboarding screen
+- extendedWaitUntil:
+    visible: "Set up your profile"
+    timeout: 10000
+
+# Profile Setup
+- tapOn: "Enter your name"
+- inputText: "Test User"
+- tapOn: "Select your current role"
+- tapOn: "Software Engineer 2"
+- tapOn: "Continue"
+
+# Ready Screen
+- assertVisible: "Welcome, Test User!"
+- tapOn: "Start Your First Entry"
+
+# Home Screen
+- assertVisible:
+    text: "Welcome!"
+    timeout: 5000
