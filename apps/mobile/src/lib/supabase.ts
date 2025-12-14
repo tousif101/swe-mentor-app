@@ -2,16 +2,11 @@ import * as SecureStore from 'expo-secure-store'
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from '@swe-mentor/shared'
 
-// Validate required environment variables
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY
+// HARDCODED FOR DEBUGGING - TODO: restore env var usage once Metro caching issue is resolved
+const supabaseUrl = 'http://192.168.5.124:54321'
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0'
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error(
-    'Missing Supabase environment variables. ' +
-      'Ensure EXPO_PUBLIC_SUPABASE_URL and EXPO_PUBLIC_SUPABASE_ANON_KEY are set in .env file.'
-  )
-}
+console.log('[Supabase] Using hardcoded config:', supabaseUrl)
 
 // SecureStore adapter with error handling
 // SecureStore can fail on certain devices/simulators, so we handle errors gracefully

@@ -153,8 +153,8 @@ export function ProfileScreen({ navigation }: Props) {
       return
     }
 
-    // Navigate to Ready screen with profile data
-    navigation.navigate('Ready', {
+    // Navigate to ReminderSetup screen with profile data
+    navigation.navigate('ReminderSetup', {
       name: parsed.data.name,
       role: parsed.data.role,
       targetRole: parsed.data.targetRole,
@@ -168,7 +168,7 @@ export function ProfileScreen({ navigation }: Props) {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       className="flex-1 bg-gray-950"
     >
-      <ProgressBar currentStep={1} totalSteps={2} />
+      <ProgressBar currentStep={1} totalSteps={3} />
 
       <ScrollView
         contentContainerStyle={{
