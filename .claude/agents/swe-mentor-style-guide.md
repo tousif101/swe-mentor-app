@@ -86,6 +86,146 @@ Tailwind: `gradient-bg` or `bg-gradient-to-br from-primary-600 to-accent-600`
 - Incoming (AI): `rounded-2xl rounded-tl-none bg-gray-800`
 - Outgoing (User): `rounded-2xl rounded-tr-none bg-primary-600`
 
+### Auth Pages (Login/Signup)
+
+#### Page Container
+```jsx
+<div className="flex flex-col items-center px-4 w-full">
+  {/* Card goes here */}
+</div>
+```
+
+#### Auth Card
+```jsx
+<div className="w-full max-w-lg rounded-2xl border border-gray-800 bg-gray-900/50 p-10">
+  {/* Content */}
+</div>
+```
+- Always use `max-w-lg` for auth cards (consistency across login/signup)
+- Parent must have `w-full` to ensure proper centering
+
+#### Auth Header Pattern
+```jsx
+{/* Logo */}
+<div className="flex justify-center mb-6">
+  <div className="w-14 h-14 rounded-xl gradient-bg"></div>
+</div>
+
+{/* Title */}
+<h1 className="text-3xl font-bold text-center mb-3">Title Here</h1>
+<p className="text-gray-400 text-center mb-8 text-sm leading-relaxed">
+  Subtitle text
+</p>
+```
+
+#### Social Auth Buttons
+- Full width white button: `w-full py-3.5 rounded-xl bg-white text-gray-900 font-medium`
+- Place before form with "Or" divider below
+
+#### Auth Divider
+```jsx
+<div className="flex items-center gap-4 my-6">
+  <div className="flex-1 h-px bg-gray-700"></div>
+  <span className="text-gray-500 text-sm">Or</span>
+  <div className="flex-1 h-px bg-gray-700"></div>
+</div>
+```
+
+#### Form Inputs with Icons
+```jsx
+<div className="relative">
+  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
+    <svg className="w-5 h-5" /* icon */ />
+  </div>
+  <input
+    className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-gray-800 border border-gray-700 focus:border-primary-500 focus:outline-none placeholder:text-gray-500"
+  />
+</div>
+```
+
+#### Primary Submit Button
+```jsx
+<button className="w-full py-3.5 rounded-xl bg-primary-600 hover:bg-primary-500 font-medium transition-colors">
+  Button Text
+</button>
+```
+
+#### Text Toggle Button (Secondary Action)
+```jsx
+<button
+  type="button"
+  className="w-full text-center text-primary-400 hover:text-primary-300 text-sm"
+>
+  Toggle text
+</button>
+```
+
+#### Error Messages
+```jsx
+{/* Field error */}
+<p className="text-red-400 text-sm">{error}</p>
+
+{/* Form-level error */}
+<div role="alert" className="text-sm py-3 px-4 rounded-xl bg-red-500/10 border border-red-500/20 text-red-400">
+  {error}
+</div>
+```
+
+#### Success Messages
+```jsx
+<div role="status" className="text-sm py-3 px-4 rounded-xl bg-green-500/10 border border-green-500/20 text-green-400">
+  Success message
+</div>
+```
+
+#### Success State (Full Card)
+```jsx
+<div className="text-center">
+  <div className="flex justify-center mb-6">
+    <div className="w-16 h-16 rounded-full bg-green-500/20 flex items-center justify-center">
+      <svg className="w-8 h-8 text-green-400" /* checkmark icon */ />
+    </div>
+  </div>
+  <h1 className="text-3xl font-bold mb-3">Success Title</h1>
+  <p className="text-gray-400 mb-8">Success message</p>
+</div>
+```
+
+#### Helper Text
+```jsx
+<p className="text-center text-gray-500 text-xs">
+  Helper information
+</p>
+```
+
+#### Footer Link
+```jsx
+<p className="text-center text-gray-500 text-sm mt-8">
+  Prompt text{' '}
+  <Link href="/path" className="text-primary-400 hover:text-primary-300">
+    Link text
+  </Link>
+</p>
+```
+
+#### State-Based Form Toggle Pattern
+When forms have multiple modes (e.g., password vs magic link):
+```jsx
+const [useAlternateMode, setUseAlternateMode] = useState(false)
+
+{/* Conditionally render fields */}
+{!useAlternateMode && <PasswordField />}
+
+{/* Toggle button */}
+<button
+  type="button"
+  onClick={() => setUseAlternateMode(!useAlternateMode)}
+  className="w-full text-center text-primary-400 hover:text-primary-300 text-sm"
+>
+  {useAlternateMode ? 'Use password instead' : 'Sign in with email link'}
+</button>
+```
+
 ### Icons
 - Default size: `w-5 h-5`
 - Stroke-based SVGs (Heroicons style)
@@ -136,5 +276,11 @@ For each violation:
 5. Primary color is purple (`primary-*`), not blue
 6. Active navigation state uses `text-pink-300` / `#f9a8d4`
 7. Glass effect requires backdrop blur AND semi-transparent background
+8. Auth pages MUST use `max-w-lg` for card width (login AND signup must match)
+9. Auth page parent container MUST have `w-full` class for proper centering
+10. Form inputs with icons use `pl-12` padding and icon positioned with `absolute left-4`
+11. Auth buttons use `py-3.5 rounded-xl` (not `py-4 rounded-2xl` like other CTAs)
+12. Error alerts use `role="alert"`, success uses `role="status"` for accessibility
+13. Text toggle buttons (secondary actions) use `text-primary-400 hover:text-primary-300 text-sm`
 
 You are the final quality gate for UI consistency. Be thorough, specific, and always reference the exact style guide specification when identifying issues.
