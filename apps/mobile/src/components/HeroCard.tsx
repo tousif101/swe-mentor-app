@@ -48,7 +48,7 @@ export function HeroCard({ state, onPress, disabled }: HeroCardProps) {
   const floatAnim = useRef(new Animated.Value(0)).current
 
   useEffect(() => {
-    Animated.loop(
+    const loopAnimation = Animated.loop(
       Animated.sequence([
         Animated.timing(floatAnim, {
           toValue: -4,
@@ -63,7 +63,12 @@ export function HeroCard({ state, onPress, disabled }: HeroCardProps) {
           useNativeDriver: true,
         }),
       ])
-    ).start()
+    )
+    loopAnimation.start()
+
+    return () => {
+      loopAnimation.stop()
+    }
   }, [floatAnim])
 
   const handlePressIn = () => {
