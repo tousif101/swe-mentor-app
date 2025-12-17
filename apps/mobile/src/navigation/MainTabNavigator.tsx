@@ -1,6 +1,6 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { Ionicons } from '@expo/vector-icons'
-import { HomeScreen } from '../screens/main/HomeScreen'
+import { HomeStackNavigator } from './HomeStackNavigator'
 import { JournalScreen } from '../screens/main/JournalScreen'
 import { InsightsScreen } from '../screens/main/InsightsScreen'
 import { ProfileScreen } from '../screens/main/ProfileScreen'
@@ -37,7 +37,7 @@ export function MainTabNavigator() {
     >
       <Tab.Screen
         name="HomeTab"
-        component={HomeScreen}
+        component={HomeStackNavigator}
         options={{
           tabBarLabel: 'Home',
           tabBarIcon: ({ color, size }) => (

@@ -34,6 +34,73 @@ export type Database = {
   }
   public: {
     Tables: {
+      check_ins: {
+        Row: {
+          id: string
+          user_id: string
+          check_in_type: string
+          check_in_date: string
+          input_method: string | null
+          focus_area: string | null
+          daily_goal: string | null
+          goal_completed: string | null
+          quick_win: string | null
+          blocker: string | null
+          energy_level: number | null
+          tomorrow_carry: string | null
+          ai_feedback: string | null
+          ai_feedback_generated_at: string | null
+          completed_at: string | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          check_in_type: string
+          check_in_date: string
+          input_method?: string | null
+          focus_area?: string | null
+          daily_goal?: string | null
+          goal_completed?: string | null
+          quick_win?: string | null
+          blocker?: string | null
+          energy_level?: number | null
+          tomorrow_carry?: string | null
+          ai_feedback?: string | null
+          ai_feedback_generated_at?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          check_in_type?: string
+          check_in_date?: string
+          input_method?: string | null
+          focus_area?: string | null
+          daily_goal?: string | null
+          goal_completed?: string | null
+          quick_win?: string | null
+          blocker?: string | null
+          energy_level?: number | null
+          tomorrow_carry?: string | null
+          ai_feedback?: string | null
+          ai_feedback_generated_at?: string | null
+          completed_at?: string | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "check_ins_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       conversations: {
         Row: {
           created_at: string | null
@@ -208,6 +275,52 @@ export type Database = {
           updated_at?: string | null
         }
         Relationships: []
+      }
+      user_streaks: {
+        Row: {
+          id: string
+          user_id: string
+          current_streak: number | null
+          longest_streak: number | null
+          last_check_in_date: string | null
+          total_check_ins: number | null
+          total_morning_check_ins: number | null
+          total_evening_check_ins: number | null
+          created_at: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          current_streak?: number | null
+          longest_streak?: number | null
+          last_check_in_date?: string | null
+          total_check_ins?: number | null
+          total_morning_check_ins?: number | null
+          total_evening_check_ins?: number | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          current_streak?: number | null
+          longest_streak?: number | null
+          last_check_in_date?: string | null
+          total_check_ins?: number | null
+          total_morning_check_ins?: number | null
+          total_evening_check_ins?: number | null
+          created_at?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_streaks_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_notification_settings: {
         Row: {
