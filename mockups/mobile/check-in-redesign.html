@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Daily Check-in Redesign - SWE Mentor</title>
+    <!-- DaisyUI + Tailwind CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@4.14.1/dist/full.min.css" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: '#f5f3ff', 100: '#ede9fe', 200: '#ddd6fe', 300: '#c4b5fd',
+                            400: '#a78bfa', 500: '#8b5cf6', 600: '#7c3aed', 700: '#6d28d9',
+                            800: '#5b21b6', 900: '#4c1d95',
+                        },
+                        accent: {
+                            50: '#fdf4ff', 100: '#fae8ff', 200: '#f5d0fe', 300: '#f0abfc',
+                            400: '#e879f9', 500: '#d946ef', 600: '#c026d3', 700: '#a21caf',
+                            800: '#86198f', 900: '#701a75',
+                        }
+                    },
+                    animation: {
+                        'gradient': 'gradient 8s linear infinite',
+                        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                        'bounce-subtle': 'bounce-subtle 2s ease-in-out infinite',
+                        'confetti': 'confetti 1s ease-out forwards',
+                        'scale-in': 'scale-in 0.3s ease-out forwards',
+                    },
+                    keyframes: {
+                        gradient: {
+                            '0%, 100%': { backgroundPosition: '0% 50%' },
+                            '50%': { backgroundPosition: '100% 50%' },
+                        },
+                        'bounce-subtle': {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-5px)' },
+                        },
+                        'confetti': {
+                            '0%': { transform: 'scale(0) rotate(0deg)', opacity: '1' },
+                            '100%': { transform: 'scale(1) rotate(360deg)', opacity: '0' },
+                        },
+                        'scale-in': {
+                            '0%': { transform: 'scale(0.9)', opacity: '0' },
+                            '100%': { transform: 'scale(1)', opacity: '1' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background: #0f0f1a; }
+
+        /* Phone Frame */
+        .phone-frame {
+            width: 375px;
+            height: 812px;
+            border-radius: 44px;
+            border: 6px solid #1f2937;
+            overflow: hidden;
+            position: relative;
+            background: #111827;
+        }
+        .phone-frame::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 120px;
+            height: 32px;
+            background: #1f2937;
+            border-radius: 0 0 18px 18px;
+            z-index: 100;
+        }
+        .screen-content {
+            height: 100%;
+            overflow-y: auto;
+            padding-top: 48px;
+            padding-bottom: 100px;
+        }
+
+        /* Hero Card Gradients */
+        .hero-morning {
+            background: linear-gradient(135deg, #F97316 0%, #FBBF24 50%, #FCD34D 100%);
+            background-size: 200% 200%;
+            animation: gradient 8s ease infinite;
+        }
+        .hero-evening {
+            background: linear-gradient(135deg, #8B5CF6 0%, #6366F1 50%, #3B82F6 100%);
+            background-size: 200% 200%;
+            animation: gradient 8s ease infinite;
+        }
+        .hero-completed {
+            background: linear-gradient(135deg, #10B981 0%, #14B8A6 50%, #06B6D4 100%);
+            background-size: 200% 200%;
+            animation: gradient 8s ease infinite;
+        }
+        .hero-streak {
+            background: linear-gradient(135deg, #F59E0B 0%, #EF4444 50%, #EC4899 100%);
+            background-size: 200% 200%;
+            animation: gradient 6s ease infinite;
+        }
+
+        /* Hero Card Interactive States */
+        .hero-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+        }
+        .hero-card:hover {
+            transform: scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        .hero-card:active {
+            transform: scale(0.98);
+        }
+
+        /* Bubble Navbar */
+        .bubble-nav {
+            position: absolute;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 50;
+        }
+        .bubble-container {
+            display: flex;
+            align-items: center;
+            background: rgba(31, 41, 55, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 9999px;
+            padding: 8px;
+            gap: 4px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+        }
+        .bubble-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 16px;
+            border-radius: 9999px;
+            cursor: pointer;
+            position: relative;
+            z-index: 1;
+            transition: all 0.3s ease;
+            color: rgba(255, 255, 255, 0.5);
+        }
+        .bubble-item.active { color: #f9a8d4; }
+        .bubble-item .icon { width: 20px; height: 20px; }
+        .bubble-item .label { font-size: 10px; margin-top: 2px; font-weight: 500; }
+
+        /* Glass Effect */
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 9999px;
+            transition: width 0.5s ease;
+        }
+
+        /* Week Dots */
+        .week-dot {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .week-dot.completed { background: #10B981; color: white; }
+        .week-dot.today { background: #8B5CF6; color: white; }
+        .week-dot.future { background: rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.4); }
+
+        /* Celebration Animation */
+        @keyframes celebrate {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .celebrate {
+            animation: celebrate 0.5s ease-in-out;
+        }
+
+        /* Streak Fire */
+        .streak-fire {
+            animation: bounce-subtle 1s ease-in-out infinite;
+        }
+
+        /* Question Card */
+        .question-card {
+            background: linear-gradient(180deg, rgba(139, 92, 246, 0.15) 0%, rgba(59, 130, 246, 0.1) 100%);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+    </style>
+</head>
+<body class="text-white min-h-screen p-8">
+    <!-- Header -->
+    <div class="max-w-7xl mx-auto mb-10">
+        <a href="index-daisyui.html" class="text-primary-400 hover:text-primary-300 mb-4 inline-flex items-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+            </svg>
+            Back to Mobile Flows
+        </a>
+        <div class="flex items-center gap-4 mb-4">
+            <h1 class="text-4xl font-bold">Daily Check-in Redesign</h1>
+            <span class="badge badge-primary badge-lg">Hero Card Approach</span>
+        </div>
+        <p class="text-gray-400 mb-4">Simplified home screen with single primary action and progressive disclosure</p>
+
+        <!-- Navigation Pills -->
+        <div class="flex flex-wrap gap-3">
+            <a href="#interactive" class="px-4 py-2 rounded-xl bg-primary-600 hover:bg-primary-500 transition text-sm font-semibold">Interactive Demo</a>
+            <a href="#core" class="px-4 py-2 rounded-xl glass hover:bg-white/20 transition text-sm">Core Screens</a>
+            <a href="#variations" class="px-4 py-2 rounded-xl glass hover:bg-white/20 transition text-sm">Variations</a>
+            <a href="#progressive" class="px-4 py-2 rounded-xl glass hover:bg-white/20 transition text-sm">Progressive Disclosure</a>
+            <a href="#flow" class="px-4 py-2 rounded-xl glass hover:bg-white/20 transition text-sm">Check-in Flow</a>
+        </div>
+    </div>
+
+    <!-- ============================================== -->
+    <!-- SECTION 0: INTERACTIVE DEMO -->
+    <!-- ============================================== -->
+    <section id="interactive" class="max-w-7xl mx-auto mb-24">
+        <h2 class="text-2xl font-bold mb-2 flex items-center gap-3">
+            <span class="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                </svg>
+            </span>
+            Interactive Demo
+            <span class="badge badge-secondary">Click to switch states!</span>
+        </h2>
+        <p class="text-gray-400 mb-8">Click the hero card or use buttons to see Morning, Evening, and Completed states</p>
+
+        <div class="flex flex-col lg:flex-row gap-8 items-start">
+            <!-- Phone Frame -->
+            <div class="phone-frame" id="demo-phone">
+                <div class="screen-content px-5 pt-6" id="demo-screen">
+                    <!-- Header -->
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <p class="text-gray-400 text-sm" id="demo-greeting">Good evening,</p>
+                            <h1 class="text-xl font-bold">Tousif</h1>
+                        </div>
+                        <div class="flex gap-2">
+                            <button class="w-10 h-10 rounded-full glass flex items-center justify-center">
+                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                                </svg>
+                            </button>
+                            <button class="w-10 h-10 rounded-full glass flex items-center justify-center">
+                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Hero Card - 60% of screen -->
+                    <div class="hero-card hero-evening rounded-3xl p-6 mb-4" id="demo-hero" onclick="cycleState()" style="min-height: 340px;">
+                        <div class="flex flex-col items-center text-center py-8">
+                            <div class="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center mb-4" id="demo-icon">
+                                <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                                </svg>
+                            </div>
+                            <h2 class="text-2xl font-bold text-white mb-2" id="demo-title">Evening Check-in</h2>
+                            <p class="text-white/80 text-sm" id="demo-subtitle">Reflect and set up tomorrow</p>
+                        </div>
+                    </div>
+
+                    <!-- Context Info -->
+                    <p class="text-center text-gray-500 text-sm mb-6" id="demo-context">This evening &bull; ~3 min</p>
+
+                    <!-- Progress Section -->
+                    <div class="glass rounded-2xl p-4" id="demo-progress">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-sm font-medium flex items-center gap-1">&#128202; This Week</span>
+                            <span class="text-sm text-primary-400">5/7</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill bg-primary-500" style="width: 71%"></div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">Great progress! 2 more to complete the week</p>
+                        <button class="text-xs text-primary-400 font-medium mt-2">View Insights &rarr;</button>
+                    </div>
+                </div>
+
+                <!-- Bubble Nav -->
+                <div class="bubble-nav">
+                    <div class="bubble-container">
+                        <button class="bubble-item active">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                            </svg>
+                            <span class="label">Home</span>
+                        </button>
+                        <button class="bubble-item">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
+                            </svg>
+                            <span class="label">Journal</span>
+                        </button>
+                        <button class="bubble-item">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                            </svg>
+                            <span class="label">Insights</span>
+                        </button>
+                        <button class="bubble-item">
+                            <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            </svg>
+                            <span class="label">Profile</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="flex-1 max-w-md">
+                <div class="glass rounded-2xl p-6">
+                    <h3 class="font-bold mb-4">Switch State</h3>
+                    <div class="space-y-3">
+                        <button onclick="setState('morning')" class="w-full py-3 rounded-xl bg-gradient-to-r from-orange-500 to-yellow-400 font-medium text-left px-4 flex items-center gap-3">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                            </svg>
+                            Morning Check-in
+                        </button>
+                        <button onclick="setState('evening')" class="w-full py-3 rounded-xl bg-gradient-to-r from-purple-500 to-blue-500 font-medium text-left px-4 flex items-center gap-3">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                            </svg>
+                            Evening Check-in
+                        </button>
+                        <button onclick="setState('completed')" class="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-400 font-medium text-left px-4 flex items-center gap-3">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            All Done Today!
+                        </button>
+                    </div>
+                </div>
+
+                <div class="glass rounded-2xl p-6 mt-4">
+                    <h3 class="font-bold mb-3 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                        Key Design Principles
+                    </h3>
+                    <ul class="space-y-2 text-gray-400 text-sm">
+                        <li>60% screen = hero card (instant clarity)</li>
+                        <li>Single primary action (no confusion)</li>
+                        <li>Time-aware gradients and icons</li>
+                        <li>Progressive stats (only when meaningful)</li>
+                        <li>Full card is tappable</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- SECTION 1: CORE HOME SCREENS -->
+    <!-- ============================================== -->
+    <section id="core" class="max-w-7xl mx-auto mb-24">
+        <h2 class="text-2xl font-bold mb-2 flex items-center gap-3">
+            <span class="w-8 h-8 rounded-lg bg-primary-600 flex items-center justify-center text-sm">1</span>
+            Core Home Screens
+        </h2>
+        <p class="text-gray-400 mb-8">Hero card approach - Morning, Evening, and Completed states (shown for established users with history)</p>
+
+        <div class="flex gap-6 overflow-x-auto pb-4">
+            <!-- Morning Check-in -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">1.1 Morning Check-in (5am-12pm)</p>
+                <div class="phone-frame">
+                    <div class="screen-content px-5 pt-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-gray-400 text-sm">Good morning,</p>
+                                <h1 class="text-xl font-bold">Tousif</h1>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="w-10 h-10 rounded-full glass flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                                    </svg>
+                                </button>
+                                <button class="w-10 h-10 rounded-full glass flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Morning Hero Card - 60% of screen -->
+                        <div class="hero-card hero-morning rounded-3xl p-6 mb-4" style="min-height: 340px;">
+                            <div class="flex flex-col items-center justify-center text-center h-full py-8">
+                                <div class="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center mb-4">
+                                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                                    </svg>
+                                </div>
+                                <h2 class="text-2xl font-bold text-white mb-2">Morning Check-in</h2>
+                                <p class="text-white/80 text-sm">Set your focus for the day ahead</p>
+                            </div>
+                        </div>
+
+                        <p class="text-center text-gray-500 text-sm mb-4">This morning &bull; ~3 min</p>
+
+                        <div class="glass rounded-2xl p-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-sm font-medium flex items-center gap-1">&#128202; This Week</span>
+                                <span class="text-sm text-primary-400">5/7</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill bg-primary-500" style="width: 71%"></div>
+                            </div>
+                            <button class="text-xs text-primary-400 font-medium mt-3">View Insights &rarr;</button>
+                        </div>
+                    </div>
+
+                    <div class="bubble-nav">
+                        <div class="bubble-container">
+                            <button class="bubble-item active">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                                <span class="label">Home</span>
+                            </button>
+                            <button class="bubble-item">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                                <span class="label">Journal</span>
+                            </button>
+                            <button class="bubble-item">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                                <span class="label">Insights</span>
+                            </button>
+                            <button class="bubble-item">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                <span class="label">Profile</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Evening Check-in -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">1.2 Evening Check-in (5pm-11pm)</p>
+                <div class="phone-frame">
+                    <div class="screen-content px-5 pt-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-gray-400 text-sm">Good evening,</p>
+                                <h1 class="text-xl font-bold">Tousif</h1>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="w-10 h-10 rounded-full glass flex items-center justify-center">
+                                    <!-- Notification bell icon -->
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                                    </svg>
+                                </button>
+                                <button class="w-10 h-10 rounded-full glass flex items-center justify-center">
+                                    <!-- Settings icon -->
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Evening Hero Card - 60% of screen -->
+                        <div class="hero-card hero-evening rounded-3xl p-6 mb-4" style="min-height: 340px;">
+                            <div class="flex flex-col items-center text-center py-8">
+                                <div class="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center mb-4">
+                                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                                    </svg>
+                                </div>
+                                <h2 class="text-2xl font-bold text-white mb-2">Evening Check-in</h2>
+                                <p class="text-white/80 text-sm">Reflect and set up tomorrow</p>
+                            </div>
+                        </div>
+
+                        <p class="text-center text-gray-500 text-sm mb-6">This evening &bull; ~3 min</p>
+
+                        <div class="glass rounded-2xl p-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-sm font-medium flex items-center gap-1">&#128202; This Week</span>
+                                <span class="text-sm text-primary-400">5/7</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill bg-primary-500" style="width: 71%"></div>
+                            </div>
+                            <button class="text-xs text-primary-400 font-medium mt-3">View Insights &rarr;</button>
+                        </div>
+                    </div>
+
+                    <div class="bubble-nav">
+                        <div class="bubble-container">
+                            <button class="bubble-item active">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                                <span class="label">Home</span>
+                            </button>
+                            <button class="bubble-item">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                                <span class="label">Journal</span>
+                            </button>
+                            <button class="bubble-item">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                                <span class="label">Insights</span>
+                            </button>
+                            <button class="bubble-item">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                <span class="label">Profile</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Both Completed -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">1.3 Both Completed (Celebration)</p>
+                <div class="phone-frame">
+                    <div class="screen-content px-5 pt-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-gray-400 text-sm">Great work,</p>
+                                <h1 class="text-xl font-bold">Tousif</h1>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="w-10 h-10 rounded-full glass flex items-center justify-center">
+                                    <!-- Notification bell icon -->
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                                    </svg>
+                                </button>
+                                <button class="w-10 h-10 rounded-full glass flex items-center justify-center">
+                                    <!-- Settings icon -->
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Completed Hero Card - 60% of screen -->
+                        <div class="hero-card hero-completed rounded-3xl p-6 mb-4" style="min-height: 340px;">
+                            <div class="flex flex-col items-center text-center py-8">
+                                <div class="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center mb-4">
+                                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                </div>
+                                <h2 class="text-2xl font-bold text-white mb-2">All done today!</h2>
+                                <p class="text-white/80 text-sm mb-4">Great work on both check-ins</p>
+                                <button class="px-4 py-2 rounded-xl bg-white/20 text-white text-sm font-medium">
+                                    View Journal
+                                </button>
+                            </div>
+                        </div>
+
+                        <p class="text-center text-gray-500 text-sm mb-6">See you tomorrow morning</p>
+
+                        <div class="glass rounded-2xl p-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-sm font-medium flex items-center gap-1">&#128202; This Week</span>
+                                <span class="text-sm text-emerald-400">6/7</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill bg-emerald-500" style="width: 86%"></div>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2">Almost there! 1 more day to complete the week</p>
+                            <button class="text-xs text-primary-400 font-medium mt-2">View Insights &rarr;</button>
+                        </div>
+                    </div>
+
+                    <div class="bubble-nav">
+                        <div class="bubble-container">
+                            <button class="bubble-item active">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                                <span class="label">Home</span>
+                            </button>
+                            <button class="bubble-item">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                                <span class="label">Journal</span>
+                            </button>
+                            <button class="bubble-item">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                                <span class="label">Insights</span>
+                            </button>
+                            <button class="bubble-item">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                <span class="label">Profile</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- SECTION 2: DESIGN VARIATIONS -->
+    <!-- ============================================== -->
+    <section id="variations" class="max-w-7xl mx-auto mb-24">
+        <h2 class="text-2xl font-bold mb-2 flex items-center gap-3">
+            <span class="w-8 h-8 rounded-lg bg-accent-600 flex items-center justify-center text-sm">2</span>
+            Design Variations
+        </h2>
+        <p class="text-gray-400 mb-8">Three alternative layouts based on user preferences</p>
+
+        <div class="flex gap-6 overflow-x-auto pb-4">
+            <!-- Variation A: Minimal Plus -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">2.1 Minimal Plus (Most Aggressive)</p>
+                <div class="phone-frame">
+                    <div class="screen-content px-5 pt-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <p class="text-gray-400 text-sm">Good evening,</p>
+                                <h1 class="text-xl font-bold">Tousif</h1>
+                            </div>
+                        </div>
+
+                        <!-- Extra Large Hero - 80% of screen -->
+                        <div class="hero-card hero-evening rounded-3xl p-8 mb-4" style="min-height: 420px;">
+                            <div class="flex flex-col items-center justify-center text-center h-full py-12">
+                                <div class="w-24 h-24 rounded-full bg-white/20 flex items-center justify-center mb-6">
+                                    <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                                    </svg>
+                                </div>
+                                <h2 class="text-3xl font-bold text-white mb-3">Evening Check-in</h2>
+                                <p class="text-white/80">Reflect and set up tomorrow</p>
+                            </div>
+                        </div>
+
+                        <p class="text-center text-gray-500 text-sm">This evening &bull; ~3 min</p>
+                    </div>
+
+                    <div class="bubble-nav">
+                        <div class="bubble-container">
+                            <button class="bubble-item active">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                                <span class="label">Home</span>
+                            </button>
+                            <button class="bubble-item">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                                <span class="label">Journal</span>
+                            </button>
+                            <button class="bubble-item">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                                <span class="label">Insights</span>
+                            </button>
+                            <button class="bubble-item">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                <span class="label">Profile</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Variation B: Celebration Mode -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">2.2 Celebration Mode (With Streak)</p>
+                <div class="phone-frame">
+                    <div class="screen-content px-5 pt-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-gray-400 text-sm">Amazing work,</p>
+                                <h1 class="text-xl font-bold">Tousif!</h1>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="w-10 h-10 rounded-full glass flex items-center justify-center">
+                                    <!-- Notification bell icon -->
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                                    </svg>
+                                </button>
+                                <button class="w-10 h-10 rounded-full glass flex items-center justify-center">
+                                    <!-- Settings icon -->
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Hero Card - 50% -->
+                        <div class="hero-card hero-evening rounded-3xl p-5 mb-4">
+                            <div class="flex flex-col items-center text-center py-6">
+                                <div class="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mb-3">
+                                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                                    </svg>
+                                </div>
+                                <h2 class="text-xl font-bold text-white mb-1">Evening Check-in</h2>
+                                <p class="text-white/80 text-sm">Reflect and set up tomorrow</p>
+                            </div>
+                        </div>
+
+                        <!-- Streak Celebration Card -->
+                        <div class="hero-streak rounded-2xl p-5 mb-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <span class="text-lg font-bold text-white">5-day streak!</span>
+                                <span class="streak-fire text-2xl">&#128293;</span>
+                            </div>
+                            <div class="flex gap-1 mb-3">
+                                <div class="week-dot completed">M</div>
+                                <div class="week-dot completed">T</div>
+                                <div class="week-dot completed">W</div>
+                                <div class="week-dot completed">T</div>
+                                <div class="week-dot today">F</div>
+                                <div class="week-dot future">S</div>
+                                <div class="week-dot future">S</div>
+                            </div>
+                            <p class="text-white/80 text-sm">Keep it going! You're on fire!</p>
+                        </div>
+
+                        <p class="text-center text-gray-500 text-sm">This evening &bull; ~3 min</p>
+                    </div>
+
+                    <div class="bubble-nav">
+                        <div class="bubble-container">
+                            <button class="bubble-item active">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                                <span class="label">Home</span>
+                            </button>
+                            <button class="bubble-item">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                                <span class="label">Journal</span>
+                            </button>
+                            <button class="bubble-item">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                                <span class="label">Insights</span>
+                            </button>
+                            <button class="bubble-item">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                <span class="label">Profile</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Variation C: Dashboard Lite -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">2.3 Dashboard Lite (Data-Rich)</p>
+                <div class="phone-frame">
+                    <div class="screen-content px-5 pt-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-gray-400 text-sm">Good evening,</p>
+                                <h1 class="text-xl font-bold">Tousif</h1>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="w-10 h-10 rounded-full glass flex items-center justify-center">
+                                    <!-- Notification bell icon -->
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                                    </svg>
+                                </button>
+                                <button class="w-10 h-10 rounded-full glass flex items-center justify-center">
+                                    <!-- Settings icon -->
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Hero Card - 40% -->
+                        <div class="hero-card hero-evening rounded-3xl p-5 mb-4">
+                            <div class="flex flex-col items-center text-center py-4">
+                                <div class="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center mb-3">
+                                    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                                    </svg>
+                                </div>
+                                <h2 class="text-lg font-bold text-white mb-1">Evening Check-in</h2>
+                                <p class="text-white/80 text-sm">Reflect tomorrow</p>
+                            </div>
+                        </div>
+
+                        <!-- Quick Stats Row -->
+                        <div class="mb-4">
+                            <p class="text-xs text-gray-500 uppercase tracking-wider mb-2">Quick Stats</p>
+                            <div class="grid grid-cols-3 gap-2">
+                                <div class="glass rounded-xl p-3 text-center">
+                                    <p class="text-lg font-bold text-primary-400">5</p>
+                                    <p class="text-xs text-gray-500">day streak</p>
+                                </div>
+                                <div class="glass rounded-xl p-3 text-center">
+                                    <p class="text-lg font-bold text-emerald-400">2/2</p>
+                                    <p class="text-xs text-gray-500">today</p>
+                                </div>
+                                <div class="glass rounded-xl p-3 text-center">
+                                    <p class="text-lg font-bold text-blue-400">85%</p>
+                                    <p class="text-xs text-gray-500">this month</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Upcoming -->
+                        <div class="glass rounded-2xl p-4">
+                            <p class="text-xs text-gray-500 uppercase tracking-wider mb-2">Upcoming</p>
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 rounded-full hero-morning flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium">Morning check-in</p>
+                                    <p class="text-xs text-gray-500">in 14 hours</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bubble-nav">
+                        <div class="bubble-container">
+                            <button class="bubble-item active">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                                <span class="label">Home</span>
+                            </button>
+                            <button class="bubble-item">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                                <span class="label">Journal</span>
+                            </button>
+                            <button class="bubble-item">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                                <span class="label">Insights</span>
+                            </button>
+                            <button class="bubble-item">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                <span class="label">Profile</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- SECTION 3: PROGRESSIVE DISCLOSURE -->
+    <!-- ============================================== -->
+    <section id="progressive" class="max-w-7xl mx-auto mb-24">
+        <h2 class="text-2xl font-bold mb-2 flex items-center gap-3">
+            <span class="w-8 h-8 rounded-lg bg-emerald-600 flex items-center justify-center text-sm">3</span>
+            Progressive Disclosure Journey
+        </h2>
+        <p class="text-gray-400 mb-8">How the home screen evolves as the user builds their habit</p>
+
+        <div class="flex gap-6 overflow-x-auto pb-4">
+            <!-- Week 1: Day 1 - New User -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">3.1 Week 1: Day 1 (New User)</p>
+                <div class="phone-frame">
+                    <div class="screen-content px-5 pt-6">
+                        <div class="flex items-center justify-between mb-6">
+                            <div>
+                                <p class="text-primary-400 text-sm font-medium">Welcome,</p>
+                                <h1 class="text-xl font-bold">Tousif! Let's begin</h1>
+                            </div>
+                        </div>
+
+                        <!-- Hero Only - No Stats -->
+                        <div class="hero-card hero-morning rounded-3xl p-6 mb-4" style="min-height: 320px;">
+                            <div class="flex flex-col items-center justify-center text-center h-full py-10">
+                                <div class="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center mb-4">
+                                    <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                                    </svg>
+                                </div>
+                                <h2 class="text-2xl font-bold text-white mb-2">Morning Check-in</h2>
+                                <p class="text-white/80 text-sm">Set your focus for the day ahead</p>
+                            </div>
+                        </div>
+
+                        <p class="text-center text-gray-400 text-sm">Just 3 quick questions</p>
+                    </div>
+
+                    <div class="bubble-nav">
+                        <div class="bubble-container">
+                            <button class="bubble-item active">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                                <span class="label">Home</span>
+                            </button>
+                            <button class="bubble-item">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                                <span class="label">Journal</span>
+                            </button>
+                            <button class="bubble-item">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                                <span class="label">Insights</span>
+                            </button>
+                            <button class="bubble-item">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                <span class="label">Profile</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Week 1: After First Check-in -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">3.2 Week 1: After First Check-in</p>
+                <div class="phone-frame">
+                    <div class="screen-content px-5 pt-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-emerald-400 text-sm font-medium">Great start,</p>
+                                <h1 class="text-xl font-bold">Tousif!</h1>
+                            </div>
+                        </div>
+
+                        <!-- Next Step Hero -->
+                        <div class="hero-card hero-evening rounded-3xl p-6 mb-4">
+                            <div class="flex flex-col items-center text-center py-8">
+                                <div class="w-18 h-18 rounded-full bg-white/20 flex items-center justify-center mb-4">
+                                    <svg class="w-9 h-9 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                                    </svg>
+                                </div>
+                                <h2 class="text-xl font-bold text-white mb-2">Evening Check-in</h2>
+                                <p class="text-white/80 text-sm">Reflect and set up tomorrow</p>
+                            </div>
+                        </div>
+
+                        <!-- Gentle Tip - Unlocked -->
+                        <div class="glass rounded-2xl p-4 border border-primary-500/30 bg-primary-500/10">
+                            <div class="flex items-start gap-3">
+                                <div class="w-8 h-8 rounded-full bg-primary-500/20 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-4 h-4 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-medium text-primary-300 mb-1">Tip</p>
+                                    <p class="text-xs text-gray-400">Complete both check-ins daily to build your reflection habit</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bubble-nav">
+                        <div class="bubble-container">
+                            <button class="bubble-item active">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                                <span class="label">Home</span>
+                            </button>
+                            <button class="bubble-item">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                                <span class="label">Journal</span>
+                            </button>
+                            <button class="bubble-item">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                                <span class="label">Insights</span>
+                            </button>
+                            <button class="bubble-item">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                <span class="label">Profile</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Week 2: Day 5 - Building Streak -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">3.3 Week 2: Day 5 (Building Streak)</p>
+                <div class="phone-frame">
+                    <div class="screen-content px-5 pt-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-gray-400 text-sm">Good morning,</p>
+                                <h1 class="text-xl font-bold">Tousif</h1>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="w-10 h-10 rounded-full glass flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                                    </svg>
+                                </button>
+                                <button class="w-10 h-10 rounded-full glass flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="hero-card hero-morning rounded-3xl p-6 mb-4">
+                            <div class="flex flex-col items-center text-center py-6">
+                                <div class="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center mb-3">
+                                    <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                                    </svg>
+                                </div>
+                                <h2 class="text-xl font-bold text-white mb-1">Morning Check-in</h2>
+                                <p class="text-white/80 text-sm">Set your focus for today</p>
+                            </div>
+                        </div>
+
+                        <!-- Progress Unlocked! -->
+                        <div class="glass rounded-2xl p-4 mb-3">
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-sm font-medium flex items-center gap-1">&#128202; This Week</span>
+                                <span class="text-sm text-primary-400">5/7 (72%)</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill bg-primary-500" style="width: 72%"></div>
+                            </div>
+                            <button class="text-xs text-primary-400 font-medium mt-2">View Insights &rarr;</button>
+                        </div>
+
+                        <!-- Motivation -->
+                        <div class="flex items-center justify-center gap-2 text-amber-400">
+                            <span class="text-lg">&#128293;</span>
+                            <span class="text-sm font-medium">Keep going to reach 7 days!</span>
+                        </div>
+                    </div>
+
+                    <div class="bubble-nav">
+                        <div class="bubble-container">
+                            <button class="bubble-item active">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                                <span class="label">Home</span>
+                            </button>
+                            <button class="bubble-item">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                                <span class="label">Journal</span>
+                            </button>
+                            <button class="bubble-item">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                                <span class="label">Insights</span>
+                            </button>
+                            <button class="bubble-item">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                <span class="label">Profile</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Week 3: Day 15 - Established Habit -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">3.4 Week 3: Day 15 (Established)</p>
+                <div class="phone-frame">
+                    <div class="screen-content px-5 pt-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <div>
+                                <p class="text-amber-400 text-sm font-medium">Amazing work,</p>
+                                <h1 class="text-xl font-bold">Tousif!</h1>
+                            </div>
+                            <div class="flex gap-2">
+                                <button class="w-10 h-10 rounded-full glass flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+                                    </svg>
+                                </button>
+                                <button class="w-10 h-10 rounded-full glass flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="hero-card hero-evening rounded-3xl p-5 mb-3">
+                            <div class="flex flex-col items-center text-center py-5">
+                                <div class="w-14 h-14 rounded-full bg-white/20 flex items-center justify-center mb-3">
+                                    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path>
+                                    </svg>
+                                </div>
+                                <h2 class="text-lg font-bold text-white mb-1">Evening Check-in</h2>
+                                <p class="text-white/80 text-sm">Reflect and set up tomorrow</p>
+                            </div>
+                        </div>
+
+                        <!-- Full Stats Unlocked -->
+                        <div class="glass rounded-2xl p-4 mb-3">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-lg">&#128293;</span>
+                                <span class="text-sm font-bold text-amber-400">15-day streak</span>
+                            </div>
+                            <div class="progress-bar mb-2">
+                                <div class="progress-fill bg-emerald-500" style="width: 100%"></div>
+                            </div>
+                            <p class="text-xs text-gray-500">100% this week</p>
+                        </div>
+
+                        <!-- Insights Preview -->
+                        <div class="glass rounded-2xl p-4">
+                            <div class="flex items-center gap-2 mb-2">
+                                <svg class="w-4 h-4 text-primary-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                                </svg>
+                                <span class="text-sm font-medium">You've completed 28 check-ins</span>
+                            </div>
+                            <button class="text-xs text-primary-400 font-medium">View patterns in Insights &rarr;</button>
+                        </div>
+                    </div>
+
+                    <div class="bubble-nav">
+                        <div class="bubble-container">
+                            <button class="bubble-item active">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path></svg>
+                                <span class="label">Home</span>
+                            </button>
+                            <button class="bubble-item">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+                                <span class="label">Journal</span>
+                            </button>
+                            <button class="bubble-item">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path></svg>
+                                <span class="label">Insights</span>
+                            </button>
+                            <button class="bubble-item">
+                                <svg class="icon" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                                <span class="label">Profile</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- SECTION 4: CHECK-IN FLOW -->
+    <!-- ============================================== -->
+    <section id="flow" class="max-w-7xl mx-auto mb-24">
+        <h2 class="text-2xl font-bold mb-2 flex items-center gap-3">
+            <span class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-sm">4</span>
+            Check-in Flow Screens
+        </h2>
+        <p class="text-gray-400 mb-8">The actual check-in experience with swipe cards</p>
+
+        <div class="flex gap-6 overflow-x-auto pb-4">
+            <!-- Morning Questions -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">4.1 Morning Check-in Questions</p>
+                <div class="phone-frame">
+                    <div class="screen-content px-5 pt-6">
+                        <!-- Progress -->
+                        <div class="flex items-center justify-between mb-6">
+                            <button class="w-10 h-10 rounded-full glass flex items-center justify-center">
+                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                            <div class="flex gap-1">
+                                <div class="w-8 h-1 rounded-full bg-orange-400"></div>
+                                <div class="w-8 h-1 rounded-full bg-gray-700"></div>
+                                <div class="w-8 h-1 rounded-full bg-gray-700"></div>
+                            </div>
+                            <span class="text-sm text-gray-500">1/3</span>
+                        </div>
+
+                        <!-- Question Card -->
+                        <div class="question-card rounded-3xl p-6 mb-4" style="min-height: 360px;">
+                            <div class="text-center mb-6">
+                                <span class="text-4xl">&#9728;&#65039;</span>
+                            </div>
+                            <h2 class="text-xl font-bold text-center mb-4">What's your #1 focus for today?</h2>
+                            <p class="text-gray-400 text-sm text-center mb-6">The one thing that would make today a success</p>
+
+                            <textarea
+                                placeholder="e.g., Ship the auth feature, Review 3 PRs, 1:1 with manager..."
+                                class="w-full h-32 p-4 rounded-xl bg-gray-800/50 border border-gray-700 focus:border-primary-500 focus:outline-none resize-none text-sm"
+                            ></textarea>
+                        </div>
+
+                        <button class="w-full py-4 rounded-2xl hero-morning font-semibold text-white">
+                            Continue
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Evening Questions -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">4.2 Evening Check-in Questions</p>
+                <div class="phone-frame">
+                    <div class="screen-content px-5 pt-6">
+                        <!-- Progress -->
+                        <div class="flex items-center justify-between mb-6">
+                            <button class="w-10 h-10 rounded-full glass flex items-center justify-center">
+                                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                            <div class="flex gap-1">
+                                <div class="w-8 h-1 rounded-full bg-purple-400"></div>
+                                <div class="w-8 h-1 rounded-full bg-purple-400"></div>
+                                <div class="w-8 h-1 rounded-full bg-gray-700"></div>
+                            </div>
+                            <span class="text-sm text-gray-500">2/3</span>
+                        </div>
+
+                        <!-- Question Card -->
+                        <div class="question-card rounded-3xl p-6 mb-4" style="min-height: 360px;">
+                            <div class="text-center mb-6">
+                                <span class="text-4xl">&#127775;</span>
+                            </div>
+                            <h2 class="text-xl font-bold text-center mb-4">What went well today?</h2>
+                            <p class="text-gray-400 text-sm text-center mb-6">Celebrate your wins, big or small</p>
+
+                            <textarea
+                                placeholder="e.g., Fixed that tricky bug, got positive feedback..."
+                                class="w-full h-32 p-4 rounded-xl bg-gray-800/50 border border-gray-700 focus:border-primary-500 focus:outline-none resize-none text-sm"
+                            ></textarea>
+                        </div>
+
+                        <button class="w-full py-4 rounded-2xl hero-evening font-semibold text-white">
+                            Continue
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Check-in Complete -->
+            <div class="flex-shrink-0">
+                <p class="text-sm text-gray-500 mb-3">4.3 Check-in Complete</p>
+                <div class="phone-frame">
+                    <div class="screen-content px-5 pt-6">
+                        <div class="flex flex-col items-center justify-center h-full text-center" style="padding-bottom: 100px;">
+                            <!-- Celebration Icon -->
+                            <div class="w-24 h-24 rounded-full hero-completed flex items-center justify-center mb-6 celebrate">
+                                <svg class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+
+                            <h1 class="text-2xl font-bold mb-2">Evening check-in complete!</h1>
+                            <p class="text-gray-400 mb-8">Great reflection. See you tomorrow morning.</p>
+
+                            <!-- Stats Card -->
+                            <div class="glass rounded-2xl p-5 w-full mb-6">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="flex items-center gap-2">
+                                        <span class="text-xl">&#128293;</span>
+                                        <span class="font-bold">5-day streak</span>
+                                    </div>
+                                    <span class="text-emerald-400 font-medium">+1</span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill bg-emerald-500" style="width: 71%"></div>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-2">5/7 this week</p>
+                            </div>
+
+                            <button class="w-full py-4 rounded-2xl hero-completed font-semibold text-white mb-3">
+                                Done
+                            </button>
+                            <button class="text-primary-400 text-sm font-medium">
+                                View in Journal
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================== -->
+    <!-- DESIGN SPECS REFERENCE -->
+    <!-- ============================================== -->
+    <section class="max-w-7xl mx-auto mb-24">
+        <h2 class="text-2xl font-bold mb-6">Design Specs Reference</h2>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Colors -->
+            <div class="glass rounded-2xl p-6">
+                <h3 class="font-bold mb-4">Color Gradients</h3>
+                <div class="space-y-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-xl hero-morning"></div>
+                        <div>
+                            <p class="font-medium text-sm">Morning</p>
+                            <p class="text-xs text-gray-500">Orange &rarr; Yellow</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-xl hero-evening"></div>
+                        <div>
+                            <p class="font-medium text-sm">Evening</p>
+                            <p class="text-xs text-gray-500">Purple &rarr; Blue</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-xl hero-completed"></div>
+                        <div>
+                            <p class="font-medium text-sm">Completed</p>
+                            <p class="text-xs text-gray-500">Green &rarr; Teal</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-xl hero-streak"></div>
+                        <div>
+                            <p class="font-medium text-sm">Streak</p>
+                            <p class="text-xs text-gray-500">Amber &rarr; Pink</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Metrics -->
+            <div class="glass rounded-2xl p-6">
+                <h3 class="font-bold mb-4">Before &rarr; After</h3>
+                <div class="space-y-3 text-sm">
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Sections</span>
+                        <span><span class="text-red-400">5</span> &rarr; <span class="text-emerald-400">2</span></span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Time to action</span>
+                        <span><span class="text-red-400">2-3s</span> &rarr; <span class="text-emerald-400">&lt;1s</span></span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Screen for action</span>
+                        <span><span class="text-red-400">35%</span> &rarr; <span class="text-emerald-400">60%</span></span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-gray-400">Redundant elements</span>
+                        <span><span class="text-red-400">3</span> &rarr; <span class="text-emerald-400">0</span></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Accessibility -->
+            <div class="glass rounded-2xl p-6">
+                <h3 class="font-bold mb-4">Accessibility</h3>
+                <ul class="space-y-2 text-sm text-gray-400">
+                    <li class="flex items-center gap-2">
+                        <span class="text-emerald-400">&#10003;</span>
+                        Color contrast 4.5:1 minimum
+                    </li>
+                    <li class="flex items-center gap-2">
+                        <span class="text-emerald-400">&#10003;</span>
+                        Touch targets 44x44pt+
+                    </li>
+                    <li class="flex items-center gap-2">
+                        <span class="text-emerald-400">&#10003;</span>
+                        VoiceOver labels
+                    </li>
+                    <li class="flex items-center gap-2">
+                        <span class="text-emerald-400">&#10003;</span>
+                        Reduced motion support
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Demo JavaScript -->
+    <script>
+        let currentState = 'evening';
+
+        const states = {
+            morning: {
+                greeting: 'Good morning,',
+                heroClass: 'hero-morning',
+                icon: '<svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>',
+                title: 'Morning Check-in',
+                subtitle: 'Set your focus for the day ahead',
+                context: 'This morning • ~3 min'
+            },
+            evening: {
+                greeting: 'Good evening,',
+                heroClass: 'hero-evening',
+                icon: '<svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>',
+                title: 'Evening Check-in',
+                subtitle: 'Reflect and set up tomorrow',
+                context: 'This evening • ~3 min'
+            },
+            completed: {
+                greeting: 'Great work,',
+                heroClass: 'hero-completed',
+                icon: '<svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>',
+                title: 'All done today!',
+                subtitle: 'Great work on both check-ins',
+                context: 'See you tomorrow morning'
+            }
+        };
+
+        function setState(state) {
+            currentState = state;
+            updateDemo();
+        }
+
+        function cycleState() {
+            const order = ['morning', 'evening', 'completed'];
+            const idx = order.indexOf(currentState);
+            currentState = order[(idx + 1) % order.length];
+            updateDemo();
+        }
+
+        function updateDemo() {
+            const s = states[currentState];
+            document.getElementById('demo-greeting').textContent = s.greeting;
+
+            const hero = document.getElementById('demo-hero');
+            hero.className = 'hero-card ' + s.heroClass + ' rounded-3xl p-6 mb-4';
+            hero.classList.add('animate-scale-in');
+            setTimeout(() => hero.classList.remove('animate-scale-in'), 300);
+
+            document.getElementById('demo-icon').innerHTML = s.icon;
+            document.getElementById('demo-title').textContent = s.title;
+            document.getElementById('demo-subtitle').textContent = s.subtitle;
+            document.getElementById('demo-context').textContent = s.context;
+        }
+    </script>
+</body>
+</html>
