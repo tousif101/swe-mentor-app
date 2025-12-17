@@ -31,7 +31,9 @@ export function InsightsPreview({
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: 'rgba(139, 92, 246, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(139, 92, 246, 0.2)',
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,
