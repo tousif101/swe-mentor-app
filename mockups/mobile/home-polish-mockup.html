@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=390, initial-scale=1.0">
+  <title>Home Screen Polish - Glassmorphism + Momentum</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+      background: linear-gradient(180deg, #0a0a1a 0%, #1a1a2e 50%, #0f0f23 100%);
+      min-height: 100vh;
+      color: white;
+      overflow-x: hidden;
+    }
+
+    .phone-frame {
+      width: 390px;
+      margin: 20px auto;
+      background: #0f0d23;
+      border-radius: 40px;
+      padding: 20px;
+      min-height: 844px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Ambient glow background */
+    .ambient-glow {
+      position: absolute;
+      top: -100px;
+      left: -100px;
+      width: 300px;
+      height: 300px;
+      background: radial-gradient(circle, rgba(139, 92, 246, 0.15) 0%, transparent 70%);
+      pointer-events: none;
+      animation: pulse-glow 4s ease-in-out infinite;
+    }
+
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.5; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.1); }
+    }
+
+    .content {
+      position: relative;
+      z-index: 1;
+      padding-top: 40px;
+    }
+
+    /* Header */
+    .header {
+      margin-bottom: 24px;
+    }
+
+    .greeting {
+      font-size: 14px;
+      color: #9ca3af;
+      margin-bottom: 4px;
+    }
+
+    .title {
+      font-size: 28px;
+      font-weight: 700;
+      color: white;
+    }
+
+    /* ============================================
+       HERO CARD - Glassmorphism + Gradient
+       ============================================ */
+    .hero-card {
+      position: relative;
+      border-radius: 24px;
+      padding: 32px 24px;
+      margin-bottom: 12px;
+      min-height: 260px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+    }
+
+    .hero-card:hover {
+      transform: scale(0.98);
+    }
+
+    .hero-card:active {
+      transform: scale(0.96);
+    }
+
+    /* Morning variant - softer amber tones */
+    .hero-card.morning {
+      background: linear-gradient(135deg, #d97706 0%, #f59e0b 50%, #fbbf24 100%);
+      box-shadow: 0 20px 60px rgba(217, 119, 6, 0.25);
+    }
+
+    /* Evening variant */
+    .hero-card.evening {
+      background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 50%, #3b82f6 100%);
+      box-shadow: 0 20px 60px rgba(139, 92, 246, 0.3);
+    }
+
+    /* Completed variant */
+    .hero-card.completed {
+      background: linear-gradient(135deg, #10b981 0%, #14b8a6 50%, #06b6d4 100%);
+      box-shadow: 0 20px 60px rgba(16, 185, 129, 0.3);
+    }
+
+    /* Glass overlay on hero */
+    .hero-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 50%);
+      pointer-events: none;
+    }
+
+    .hero-icon-circle {
+      width: 80px;
+      height: 80px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+      font-size: 36px;
+      animation: icon-float 3s ease-in-out infinite;
+    }
+
+    @keyframes icon-float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+
+    .hero-title {
+      font-size: 24px;
+      font-weight: 700;
+      color: white;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .hero-subtitle {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.8);
+      text-align: center;
+    }
+
+    .hero-context {
+      text-align: center;
+      color: #6b7280;
+      font-size: 13px;
+      margin-top: 12px;
+      margin-bottom: 20px;
+    }
+
+    /* ============================================
+       CONTINUE WHERE LEFT OFF - Glass Card
+       ============================================ */
+    .continue-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .continue-card:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(139, 92, 246, 0.3);
+    }
+
+    .continue-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+    }
+
+    .continue-content {
+      flex: 1;
+    }
+
+    .continue-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: white;
+      margin-bottom: 2px;
+    }
+
+    .continue-subtitle {
+      font-size: 13px;
+      color: #9ca3af;
+    }
+
+    .continue-arrow {
+      color: #6b7280;
+      font-size: 18px;
+    }
+
+    /* ============================================
+       STREAK CELEBRATION - Glass + Animation
+       ============================================ */
+    .streak-card {
+      position: relative;
+      background: linear-gradient(135deg, rgba(249, 115, 22, 0.15) 0%, rgba(239, 68, 68, 0.15) 100%);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(249, 115, 22, 0.3);
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 16px;
+      overflow: hidden;
+    }
+
+    /* Animated gradient border effect */
+    .streak-card::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(90deg, #f97316, #ef4444, #f97316);
+      background-size: 200% 100%;
+      border-radius: 22px;
+      z-index: -1;
+      animation: gradient-shift 3s linear infinite;
+      opacity: 0.5;
+    }
+
+    @keyframes gradient-shift {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 200% 50%; }
+    }
+
+    .streak-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .streak-count {
+      font-size: 20px;
+      font-weight: 700;
+      color: white;
+    }
+
+    .streak-fire {
+      font-size: 28px;
+      animation: fire-pulse 1s ease-in-out infinite;
+    }
+
+    @keyframes fire-pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.15); }
+    }
+
+    /* Week dots */
+    .week-dots {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .week-dot {
+      flex: 1;
+      height: 36px;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.4);
+      transition: all 0.3s ease;
+    }
+
+    .week-dot.filled {
+      background: rgba(255, 255, 255, 0.9);
+      color: #f97316;
+      animation: dot-pop 0.3s ease backwards;
+    }
+
+    .week-dot:nth-child(1).filled { animation-delay: 0.05s; }
+    .week-dot:nth-child(2).filled { animation-delay: 0.1s; }
+    .week-dot:nth-child(3).filled { animation-delay: 0.15s; }
+    .week-dot:nth-child(4).filled { animation-delay: 0.2s; }
+    .week-dot:nth-child(5).filled { animation-delay: 0.25s; }
+
+    @keyframes dot-pop {
+      0% { transform: scale(0.8); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .week-dot.today {
+      border: 2px solid rgba(255, 255, 255, 0.6);
+    }
+
+    .streak-message {
+      font-size: 14px;
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    /* ============================================
+       WEEK PROGRESS - Glass Card
+       ============================================ */
+    .progress-card {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .progress-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .progress-count {
+      font-size: 14px;
+      color: #9ca3af;
+    }
+
+    .progress-bar-bg {
+      height: 8px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .progress-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #8b5cf6 0%, #a78bfa 100%);
+      border-radius: 4px;
+      width: 71%; /* 5/7 days */
+      transition: width 0.5s ease;
+    }
+
+    .progress-link {
+      display: block;
+      text-align: right;
+      margin-top: 12px;
+      font-size: 13px;
+      color: #8b5cf6;
+      text-decoration: none;
+    }
+
+    /* ============================================
+       INSIGHTS PREVIEW - Glass Card
+       ============================================ */
+    .insights-card {
+      background: rgba(139, 92, 246, 0.1);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      border-radius: 16px;
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .insights-card:hover {
+      background: rgba(139, 92, 246, 0.15);
+    }
+
+    .insights-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: rgba(139, 92, 246, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .insights-content {
+      flex: 1;
+    }
+
+    .insights-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: white;
+    }
+
+    .insights-subtitle {
+      font-size: 12px;
+      color: #a78bfa;
+    }
+
+    /* ============================================
+       TIP CARD - For new users
+       ============================================ */
+    .tip-card {
+      background: rgba(16, 185, 129, 0.1);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(16, 185, 129, 0.2);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 16px;
+      display: flex;
+      gap: 12px;
+    }
+
+    .tip-icon {
+      font-size: 20px;
+    }
+
+    .tip-content {
+      flex: 1;
+    }
+
+    .tip-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: white;
+      margin-bottom: 4px;
+    }
+
+    .tip-text {
+      font-size: 13px;
+      color: #9ca3af;
+      line-height: 1.4;
+    }
+
+    /* ============================================
+       CONFETTI (for milestone celebrations)
+       ============================================ */
+    .confetti-container {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      opacity: 0;
+    }
+
+    .confetti.active {
+      animation: confetti-fall 2s ease-out forwards;
+    }
+
+    @keyframes confetti-fall {
+      0% {
+        opacity: 1;
+        transform: translateY(-20px) rotate(0deg);
+      }
+      100% {
+        opacity: 0;
+        transform: translateY(400px) rotate(720deg);
+      }
+    }
+
+    /* Section labels */
+    .section-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: #6b7280;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 12px;
+      margin-top: 8px;
+    }
+
+    /* Demo controls */
+    .demo-controls {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      gap: 8px;
+      background: rgba(0,0,0,0.8);
+      padding: 12px;
+      border-radius: 12px;
+      z-index: 100;
+    }
+
+    .demo-btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .demo-btn.primary {
+      background: #8b5cf6;
+      color: white;
+    }
+
+    .demo-btn.secondary {
+      background: rgba(255,255,255,0.1);
+      color: white;
+    }
+
+    .demo-btn:hover {
+      transform: scale(1.05);
+    }
+
+    /* Hide elements based on state */
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="phone-frame" id="phone">
+    <div class="ambient-glow"></div>
+    <div class="confetti-container" id="confetti"></div>
+
+    <div class="content">
+      <!-- Header -->
+      <div class="header">
+        <div class="greeting" id="greeting">Good morning, Tousif</div>
+        <div class="title" id="title">Ready to check in?</div>
+      </div>
+
+      <!-- Hero Card -->
+      <div class="hero-card morning" id="hero" onclick="handleHeroClick()">
+        <div class="hero-icon-circle" id="hero-icon">
+          <span id="hero-emoji">&#9728;&#65039;</span>
+        </div>
+        <div class="hero-title" id="hero-title">Morning Check-in</div>
+        <div class="hero-subtitle" id="hero-subtitle">Set your focus for the day ahead</div>
+      </div>
+      <div class="hero-context" id="hero-context">This morning &bull; ~3 min</div>
+
+      <!-- Continue Where Left Off (shown when partially complete) -->
+      <div class="continue-card hidden" id="continue-card" onclick="handleContinue()">
+        <div class="continue-icon">&#127769;</div>
+        <div class="continue-content">
+          <div class="continue-title">Continue evening reflection</div>
+          <div class="continue-subtitle">You started this 2 hours ago</div>
+        </div>
+        <div class="continue-arrow">&#8250;</div>
+      </div>
+
+      <!-- Tip Card (shown for new users) -->
+      <div class="tip-card hidden" id="tip-card">
+        <div class="tip-icon">&#128161;</div>
+        <div class="tip-content">
+          <div class="tip-title">Quick tip</div>
+          <div class="tip-text">Morning check-ins help you set intentions. Evening ones help you reflect and improve.</div>
+        </div>
+      </div>
+
+      <!-- Week Progress (shown after 3+ check-ins) -->
+      <div class="progress-card hidden" id="progress-card">
+        <div class="progress-header">
+          <div class="progress-title">&#128202; This Week</div>
+          <div class="progress-count">5/7 days</div>
+        </div>
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill"></div>
+        </div>
+        <a href="#" class="progress-link">View Insights &#8594;</a>
+      </div>
+
+      <!-- Streak Celebration (shown for 3+ day streaks) -->
+      <div class="streak-card hidden" id="streak-card">
+        <div class="streak-header">
+          <div class="streak-count" id="streak-count">5-day streak!</div>
+          <div class="streak-fire">&#128293;</div>
+        </div>
+        <div class="week-dots">
+          <div class="week-dot filled">M</div>
+          <div class="week-dot filled">T</div>
+          <div class="week-dot filled">W</div>
+          <div class="week-dot filled">T</div>
+          <div class="week-dot filled today">F</div>
+          <div class="week-dot">S</div>
+          <div class="week-dot">S</div>
+        </div>
+        <div class="streak-message" id="streak-message">Keep it going!</div>
+      </div>
+
+      <!-- Insights Preview (shown for established users) -->
+      <div class="insights-card hidden" id="insights-card">
+        <div class="insights-icon">&#128161;</div>
+        <div class="insights-content">
+          <div class="insights-title">23 check-ins completed</div>
+          <div class="insights-subtitle">View patterns in Insights &#8594;</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Demo Controls -->
+  <div class="demo-controls">
+    <button class="demo-btn secondary" onclick="showState('new')">New User</button>
+    <button class="demo-btn secondary" onclick="showState('first')">First Done</button>
+    <button class="demo-btn secondary" onclick="showState('building')">Building</button>
+    <button class="demo-btn primary" onclick="showState('established')">Established</button>
+    <button class="demo-btn secondary" onclick="showState('continue')">Continue</button>
+    <button class="demo-btn secondary" onclick="triggerConfetti()">&#127881; Confetti</button>
+  </div>
+
+  <script>
+    // Demo state management
+    function showState(state) {
+      const hero = document.getElementById('hero');
+      const heroIcon = document.getElementById('hero-emoji');
+      const heroTitle = document.getElementById('hero-title');
+      const heroSubtitle = document.getElementById('hero-subtitle');
+      const heroContext = document.getElementById('hero-context');
+      const title = document.getElementById('title');
+      const tipCard = document.getElementById('tip-card');
+      const progressCard = document.getElementById('progress-card');
+      const streakCard = document.getElementById('streak-card');
+      const insightsCard = document.getElementById('insights-card');
+      const continueCard = document.getElementById('continue-card');
+
+      // Reset all
+      tipCard.classList.add('hidden');
+      progressCard.classList.add('hidden');
+      streakCard.classList.add('hidden');
+      insightsCard.classList.add('hidden');
+      continueCard.classList.add('hidden');
+      hero.className = 'hero-card';
+
+      switch(state) {
+        case 'new':
+          title.textContent = "Welcome! Let's begin";
+          hero.classList.add('morning');
+          heroIcon.innerHTML = '&#9728;&#65039;';
+          heroTitle.textContent = 'Morning Check-in';
+          heroSubtitle.textContent = 'Start your first reflection';
+          heroContext.textContent = 'Your journey begins here';
+          break;
+
+        case 'first':
+          title.textContent = 'Nice start!';
+          hero.classList.add('evening');
+          heroIcon.innerHTML = '&#127769;';
+          heroTitle.textContent = 'Evening Check-in';
+          heroSubtitle.textContent = 'Reflect on your day';
+          heroContext.textContent = 'This evening &bull; ~3 min';
+          tipCard.classList.remove('hidden');
+          break;
+
+        case 'building':
+          title.textContent = 'Building momentum';
+          hero.classList.add('morning');
+          heroIcon.innerHTML = '&#9728;&#65039;';
+          heroTitle.textContent = 'Morning Check-in';
+          heroSubtitle.textContent = 'Set your focus for the day';
+          heroContext.textContent = 'This morning &bull; ~3 min';
+          progressCard.classList.remove('hidden');
+          break;
+
+        case 'established':
+          title.textContent = 'Keep it going!';
+          hero.classList.add('morning');
+          heroIcon.innerHTML = '&#9728;&#65039;';
+          heroTitle.textContent = 'Morning Check-in';
+          heroSubtitle.textContent = 'Set your focus for the day';
+          heroContext.textContent = 'This morning &bull; ~3 min';
+          progressCard.classList.remove('hidden');
+          streakCard.classList.remove('hidden');
+          insightsCard.classList.remove('hidden');
+          break;
+
+        case 'continue':
+          title.textContent = 'Welcome back';
+          hero.classList.add('completed');
+          heroIcon.innerHTML = '&#9989;';
+          heroTitle.textContent = 'Morning done!';
+          heroSubtitle.textContent = 'You set your intentions earlier';
+          heroContext.textContent = 'Completed at 8:30 AM';
+          continueCard.classList.remove('hidden');
+          progressCard.classList.remove('hidden');
+          break;
+      }
+    }
+
+    function handleHeroClick() {
+      const hero = document.getElementById('hero');
+      hero.style.transform = 'scale(0.96)';
+      setTimeout(() => {
+        hero.style.transform = 'scale(1)';
+      }, 150);
+    }
+
+    function handleContinue() {
+      alert('Navigate to Evening Check-in (partial completion restored)');
+    }
+
+    function triggerConfetti() {
+      const container = document.getElementById('confetti');
+      const colors = ['#f97316', '#fbbf24', '#ef4444', '#8b5cf6', '#10b981'];
+
+      for (let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + '%';
+        confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+        confetti.style.width = (Math.random() * 8 + 6) + 'px';
+        confetti.style.height = (Math.random() * 8 + 6) + 'px';
+        confetti.style.animationDelay = (Math.random() * 0.5) + 's';
+        confetti.style.animationDuration = (Math.random() * 1 + 1.5) + 's';
+        container.appendChild(confetti);
+
+        setTimeout(() => confetti.classList.add('active'), 10);
+        setTimeout(() => confetti.remove(), 3000);
+      }
+    }
+
+    // Start with established user state
+    showState('established');
+  </script>
+</body>
+</html>

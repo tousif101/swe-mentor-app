@@ -1,5 +1,5 @@
-import React from 'react'
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
+import React, { useEffect, useRef } from 'react'
+import { View, Text, TouchableOpacity, StyleSheet, Animated } from 'react-native'
 
 type WeekProgressProps = {
   daysCompleted: number // 0-7
@@ -8,6 +8,15 @@ type WeekProgressProps = {
 
 export function WeekProgress({ daysCompleted, onViewInsights }: WeekProgressProps) {
   const progressPercent = Math.round((daysCompleted / 7) * 100)
+  const progressAnim = useRef(new Animated.Value(0)).current
+
+  useEffect(() => {
+    Animated.timing(progressAnim, {
+      toValue: progressPercent,
+      duration: 800,
+      useNativeDriver: false, // width animation can't use native driver
+    }).start()
+  }, [progressPercent, progressAnim])
 
   return (
     <View style={styles.container}>
@@ -21,10 +30,15 @@ export function WeekProgress({ daysCompleted, onViewInsights }: WeekProgressProp
 
       {/* Progress Bar */}
       <View style={styles.progressBar}>
-        <View
+        <Animated.View
           style={[
             styles.progressFill,
-            { width: `${progressPercent}%` },
+            {
+              width: progressAnim.interpolate({
+                inputRange: [0, 100],
+                outputRange: ['0%', '100%'],
+              }),
+            },
           ]}
         />
       </View>
@@ -42,6 +56,8 @@ export function WeekProgress({ daysCompleted, onViewInsights }: WeekProgressProp
 const styles = StyleSheet.create({
   container: {
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
     borderRadius: 16,
     padding: 16,
     marginBottom: 12,

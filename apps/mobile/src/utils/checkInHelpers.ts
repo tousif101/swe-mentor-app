@@ -1,5 +1,17 @@
 import { supabase } from '../lib/supabase'
 
+/**
+ * Get today's date in local timezone as YYYY-MM-DD string.
+ * This ensures morning and evening check-ins on the same calendar day
+ * are stored with the same date, regardless of UTC offset.
+ */
+export function getLocalDateString(date: Date = new Date()): string {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  return `${year}-${month}-${day}`
+}
+
 type SaveCheckInParams = {
   userId: string
   checkInType: 'morning' | 'evening'
@@ -38,7 +50,7 @@ export async function saveCheckIn(params: SaveCheckInParams) {
     tomorrowCarry,
   } = params
 
-  const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD format
+  const today = getLocalDateString()
 
   // 1. Check if check-in already exists for today
   const { data: existingCheckIn } = await supabase
@@ -243,7 +255,7 @@ export async function getTodayCheckIn(
   userId: string,
   checkInType: 'morning' | 'evening'
 ) {
-  const today = new Date().toISOString().split('T')[0]
+  const today = getLocalDateString()
 
   const { data, error } = await supabase
     .from('check_ins')
@@ -303,14 +315,14 @@ export type JourneyStageData = {
 }
 
 /**
- * Get the start of the current week (Monday)
+ * Get the start of the current week (Monday) in local timezone
  */
 function getWeekStart(): string {
   const now = new Date()
   const day = now.getDay()
   const diff = now.getDate() - day + (day === 0 ? -6 : 1) // Adjust when day is Sunday
   const monday = new Date(now.setDate(diff))
-  return monday.toISOString().split('T')[0]
+  return getLocalDateString(monday)
 }
 
 /**
@@ -318,7 +330,7 @@ function getWeekStart(): string {
  */
 export async function getWeekCheckInDays(userId: string): Promise<number> {
   const weekStart = getWeekStart()
-  const today = new Date().toISOString().split('T')[0]
+  const today = getLocalDateString()
 
   const { data, error } = await supabase
     .from('check_ins')

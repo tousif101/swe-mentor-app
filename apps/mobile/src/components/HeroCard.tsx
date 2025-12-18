@@ -1,10 +1,11 @@
-import React from 'react'
+import React, { useEffect, useRef } from 'react'
 import {
   View,
   Text,
   TouchableOpacity,
   StyleSheet,
   Animated,
+  Easing,
 } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
@@ -19,7 +20,7 @@ type HeroCardProps = {
 
 const heroConfig = {
   morning: {
-    colors: ['#F97316', '#FBBF24', '#FCD34D'] as const,
+    colors: ['#d97706', '#f59e0b', '#fbbf24'] as const,
     icon: 'sunny' as const,
     title: 'Morning Check-in',
     subtitle: 'Set your focus for the day ahead',
@@ -44,6 +45,31 @@ const heroConfig = {
 export function HeroCard({ state, onPress, disabled }: HeroCardProps) {
   const config = heroConfig[state]
   const scaleAnim = React.useRef(new Animated.Value(1)).current
+  const floatAnim = useRef(new Animated.Value(0)).current
+
+  useEffect(() => {
+    const loopAnimation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(floatAnim, {
+          toValue: -4,
+          duration: 1500,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(floatAnim, {
+          toValue: 0,
+          duration: 1500,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ])
+    )
+    loopAnimation.start()
+
+    return () => {
+      loopAnimation.stop()
+    }
+  }, [floatAnim])
 
   const handlePressIn = () => {
     Animated.spring(scaleAnim, {
@@ -77,11 +103,21 @@ export function HeroCard({ state, onPress, disabled }: HeroCardProps) {
             end={{ x: 1, y: 1 }}
             style={styles.gradient}
           >
+            {/* Glass shine overlay */}
+            <LinearGradient
+              colors={['rgba(255,255,255,0.2)', 'rgba(255,255,255,0)']}
+              style={styles.shineOverlay}
+            />
             <View style={styles.content}>
               {/* Icon Circle */}
-              <View style={styles.iconCircle}>
+              <Animated.View
+                style={[
+                  styles.iconCircle,
+                  { transform: [{ translateY: floatAnim }] }
+                ]}
+              >
                 <Ionicons name={config.icon} size={40} color="white" />
-              </View>
+              </Animated.View>
 
               {/* Title & Subtitle */}
               <Text style={styles.title}>{config.title}</Text>
@@ -114,6 +150,15 @@ const styles = StyleSheet.create({
     borderRadius: 24,
     padding: 24,
     minHeight: 280,
+  },
+  shineOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: '50%',
+    borderTopLeftRadius: 24,
+    borderTopRightRadius: 24,
   },
   content: {
     flex: 1,

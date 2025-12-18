@@ -24,6 +24,8 @@ import {
   InsightsPreview,
   TipCard,
   StreakCelebration,
+  ContinueCard,
+  Confetti,
   type HeroState,
 } from '../../components'
 import type { HomeStackParamList } from '../../navigation/HomeStackNavigator'
@@ -35,6 +37,11 @@ export function HomeScreen() {
   const { profile } = useProfileContext()
   const [isLoading, setIsLoading] = useState(true)
   const [journeyData, setJourneyData] = useState<JourneyStageData | null>(null)
+  const [showConfetti, setShowConfetti] = useState(false)
+  const [partialCheckIn, setPartialCheckIn] = useState<{
+    type: 'morning' | 'evening'
+    startedAt: string
+  } | null>(null)
 
   const loadData = useCallback(async () => {
     setIsLoading(true)
@@ -47,6 +54,12 @@ export function HomeScreen() {
 
       const data = await getUserJourneyStage(userData.user.id)
       setJourneyData(data)
+
+      // Check for streak milestones to trigger confetti
+      const streak = data.streakData.current_streak
+      if (streak === 7 || streak === 30 || streak === 100) {
+        setShowConfetti(true)
+      }
     } catch (err) {
       console.error('Error loading home data:', err)
     } finally {
@@ -101,7 +114,7 @@ export function HomeScreen() {
   const handleHeroPress = () => {
     if (heroState === 'completed') {
       // Navigate to Journal tab
-      // For now, do nothing or show a toast
+      navigation.getParent()?.navigate('JournalTab')
       return
     }
 
@@ -129,57 +142,93 @@ export function HomeScreen() {
   }
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* Header */}
-      <View style={styles.header}>
-        <View>
-          <Text style={styles.greetingPrefix}>{greeting.prefix}</Text>
-          <Text style={styles.greetingName}>{greeting.name}</Text>
+    <View style={styles.screenContainer}>
+      {/* Ambient Glow */}
+      <View style={styles.ambientGlow} />
+
+      {/* Confetti overlay */}
+      <Confetti active={showConfetti} onComplete={() => setShowConfetti(false)} />
+
+      <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+        {/* Header */}
+        <View style={styles.header}>
+          <View>
+            <Text style={styles.greetingPrefix}>{greeting.prefix}</Text>
+            <Text style={styles.greetingName}>{greeting.name}</Text>
+          </View>
+
+          <View style={styles.headerIcons}>
+            <TouchableOpacity style={styles.iconButton}>
+              <Ionicons name="notifications-outline" size={20} color="#9CA3AF" />
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.iconButton}>
+              <Ionicons name="settings-outline" size={20} color="#9CA3AF" />
+            </TouchableOpacity>
+          </View>
         </View>
 
-        <View style={styles.headerIcons}>
-          <TouchableOpacity style={styles.iconButton}>
-            <Ionicons name="notifications-outline" size={20} color="#9CA3AF" />
-          </TouchableOpacity>
-          <TouchableOpacity style={styles.iconButton}>
-            <Ionicons name="settings-outline" size={20} color="#9CA3AF" />
-          </TouchableOpacity>
-        </View>
-      </View>
+        {/* Hero Card - Always shown */}
+        <HeroCard state={heroState} onPress={handleHeroPress} />
 
-      {/* Hero Card - Always shown */}
-      <HeroCard state={heroState} onPress={handleHeroPress} />
+        {/* Continue Card - Show if user has partial check-in */}
+        {partialCheckIn && (
+          <ContinueCard
+            type={partialCheckIn.type}
+            startedAt={partialCheckIn.startedAt}
+            onPress={() => {
+              if (partialCheckIn.type === 'morning') {
+                navigation.navigate('MorningCheckIn')
+              } else {
+                navigation.navigate('EveningCheckIn')
+              }
+            }}
+          />
+        )}
 
-      {/* Tip Card - Only for first_done stage */}
-      {showTip && <TipCard />}
+        {/* Tip Card - Only for first_done stage */}
+        {showTip && <TipCard />}
 
-      {/* Week Progress - For building and established stages */}
-      {showWeekProgress && (
-        <WeekProgress
-          daysCompleted={journeyData?.weekProgress ?? 0}
-          onViewInsights={handleViewInsights}
-        />
-      )}
+        {/* Week Progress - For building and established stages */}
+        {showWeekProgress && (
+          <WeekProgress
+            daysCompleted={journeyData?.weekProgress ?? 0}
+            onViewInsights={handleViewInsights}
+          />
+        )}
 
-      {/* Streak Celebration - For established users with 3+ day streak */}
-      {showStreak && (
-        <StreakCelebration
-          currentStreak={journeyData?.streakData.current_streak ?? 0}
-        />
-      )}
+        {/* Streak Celebration - For established users with 3+ day streak */}
+        {showStreak && (
+          <StreakCelebration
+            currentStreak={journeyData?.streakData.current_streak ?? 0}
+          />
+        )}
 
-      {/* Insights Preview - For established users */}
-      {showInsights && (
-        <InsightsPreview
-          totalCheckIns={journeyData?.streakData.total_check_ins ?? 0}
-          onViewInsights={handleViewInsights}
-        />
-      )}
-    </ScrollView>
+        {/* Insights Preview - For established users */}
+        {showInsights && (
+          <InsightsPreview
+            totalCheckIns={journeyData?.streakData.total_check_ins ?? 0}
+            onViewInsights={handleViewInsights}
+          />
+        )}
+      </ScrollView>
+    </View>
   )
 }
 
 const styles = StyleSheet.create({
+  screenContainer: {
+    flex: 1,
+    backgroundColor: '#030712',
+  },
+  ambientGlow: {
+    position: 'absolute',
+    top: -100,
+    left: -100,
+    width: 300,
+    height: 300,
+    borderRadius: 150,
+    backgroundColor: 'rgba(139, 92, 246, 0.08)',
+  },
   container: {
     flex: 1,
     backgroundColor: '#030712', // gray-950

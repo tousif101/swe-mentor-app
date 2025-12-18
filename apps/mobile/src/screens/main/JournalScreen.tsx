@@ -1,49 +1,201 @@
-import { View, Text, ScrollView } from 'react-native'
-import { Ionicons } from '@expo/vector-icons'
+import React, { useState, useCallback, useMemo } from 'react'
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  ActivityIndicator,
+  RefreshControl,
+} from 'react-native'
+import { useFocusEffect, useNavigation } from '@react-navigation/native'
+import { DayCard, JournalSearch, JournalEmptyState } from '../../components'
+import {
+  fetchAllCheckIns,
+  groupCheckInsByDay,
+  getUniqueFocusAreas,
+  filterCheckIns,
+  type CheckIn,
+  type DayGroup,
+} from '../../utils'
+import { useAuth } from '../../hooks/useAuth'
+import { getTimeOfDay } from '../../utils/checkInHelpers'
 
 export function JournalScreen() {
-  return (
-    <ScrollView className="flex-1 bg-gray-950">
+  const { user } = useAuth()
+  const navigation = useNavigation()
+
+  const [checkIns, setCheckIns] = useState<CheckIn[]>([])
+  const [loading, setLoading] = useState(true)
+  const [refreshing, setRefreshing] = useState(false)
+
+  // Filter state
+  const [searchQuery, setSearchQuery] = useState('')
+  const [selectedTag, setSelectedTag] = useState<string | null>(null)
+
+  const loadCheckIns = useCallback(async () => {
+    if (!user?.id) return
+
+    try {
+      const data = await fetchAllCheckIns(user.id)
+      setCheckIns(data)
+    } catch (error) {
+      console.error('Failed to load check-ins:', error)
+    } finally {
+      setLoading(false)
+      setRefreshing(false)
+    }
+  }, [user?.id])
+
+  useFocusEffect(
+    useCallback(() => {
+      loadCheckIns()
+    }, [loadCheckIns])
+  )
+
+  const handleRefresh = useCallback(() => {
+    setRefreshing(true)
+    loadCheckIns()
+  }, [loadCheckIns])
+
+  // Derived data
+  const availableTags = useMemo(() => getUniqueFocusAreas(checkIns), [checkIns])
+
+  const filteredCheckIns = useMemo(
+    () => filterCheckIns(checkIns, { focusArea: selectedTag, searchQuery }),
+    [checkIns, selectedTag, searchQuery]
+  )
+
+  const dayGroups = useMemo(
+    () => groupCheckInsByDay(filteredCheckIns),
+    [filteredCheckIns]
+  )
+
+  const handleHashtagPress = (tag: string) => {
+    setSelectedTag(tag)
+  }
+
+  const handleClearFilters = () => {
+    setSearchQuery('')
+    setSelectedTag(null)
+  }
+
+  const handleStartCheckIn = () => {
+    const timeOfDay = getTimeOfDay()
+    if (timeOfDay === 'morning') {
+      navigation.navigate('MorningCheckIn' as never)
+    } else {
+      navigation.navigate('EveningCheckIn' as never)
+    }
+  }
+
+  const renderItem = ({ item }: { item: DayGroup }) => (
+    <DayCard dayGroup={item} onHashtagPress={handleHashtagPress} />
+  )
+
+  const renderEmpty = () => {
+    if (loading) return null
+
+    if (checkIns.length === 0) {
+      return <JournalEmptyState type="no-entries" onAction={handleStartCheckIn} />
+    }
+
+    if (dayGroups.length === 0) {
+      return <JournalEmptyState type="no-results" onAction={handleClearFilters} />
+    }
+
+    return null
+  }
+
+  const renderHeader = () => (
+    <>
       {/* Header */}
-      <View className="px-6 pt-16 pb-8">
-        <Text className="text-white text-3xl font-bold">Journal</Text>
-        <Text className="text-gray-400 text-base mt-2">
-          Your past check-ins and reflections
+      <View style={styles.header}>
+        <Text style={styles.title}>Journal</Text>
+        <Text style={styles.subtitle}>Your past check-ins and reflections</Text>
+      </View>
+
+      {/* Search & Filters - only show if has entries */}
+      {checkIns.length > 0 && (
+        <JournalSearch
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          selectedTag={selectedTag}
+          availableTags={availableTags}
+          onTagSelect={setSelectedTag}
+        />
+      )}
+
+      {/* Results count */}
+      {(searchQuery || selectedTag) && dayGroups.length > 0 && (
+        <Text style={styles.resultsCount}>
+          {dayGroups.length} {dayGroups.length === 1 ? 'entry' : 'entries'} match
         </Text>
+      )}
+    </>
+  )
+
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#8b5cf6" />
       </View>
+    )
+  }
 
-      {/* Content */}
-      <View className="px-6">
-        {/* Placeholder Card */}
-        <View className="bg-gray-900 rounded-2xl p-6 border border-gray-800 mb-6">
-          <View className="items-center justify-center py-12">
-            <View className="w-16 h-16 bg-primary-600/20 rounded-full items-center justify-center mb-4">
-              <Ionicons name="book" size={32} color="#8b5cf6" />
-            </View>
-            <Text className="text-white text-xl font-semibold mb-2">
-              Journal Tab
-            </Text>
-            <Text className="text-gray-400 text-center">
-              View your past entries and reflections
-            </Text>
-          </View>
-        </View>
-
-        {/* Timeline Preview Placeholder */}
-        <View className="mb-6">
-          <Text className="text-white text-lg font-semibold mb-4">
-            Recent Entries
-          </Text>
-
-          {/* Empty State */}
-          <View className="bg-gray-900 rounded-xl p-8 border border-gray-800 items-center">
-            <Ionicons name="calendar-outline" size={48} color="#6b7280" />
-            <Text className="text-gray-500 text-center mt-4">
-              No entries yet. Complete your first check-in to get started!
-            </Text>
-          </View>
-        </View>
-      </View>
-    </ScrollView>
+  return (
+    <View style={styles.container}>
+      <FlatList
+        data={dayGroups}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.date}
+        ListHeaderComponent={renderHeader}
+        ListEmptyComponent={renderEmpty}
+        contentContainerStyle={styles.listContent}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor="#8b5cf6"
+            colors={['#8b5cf6']}
+          />
+        }
+      />
+    </View>
   )
 }
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#0f0d23',
+  },
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: '#0f0d23',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  listContent: {
+    padding: 24,
+    paddingTop: 60,
+    paddingBottom: 100,
+  },
+  header: {
+    marginBottom: 24,
+  },
+  title: {
+    color: '#ffffff',
+    fontSize: 28,
+    fontWeight: 'bold',
+  },
+  subtitle: {
+    color: '#9ca3af',
+    fontSize: 16,
+    marginTop: 4,
+  },
+  resultsCount: {
+    color: '#6b7280',
+    fontSize: 14,
+    marginBottom: 16,
+  },
+})
