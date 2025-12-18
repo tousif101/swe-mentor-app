@@ -1,9 +1,12 @@
 // apps/mobile/src/components/journal/DayCard.tsx
-import React, { useState } from 'react'
+import React, { useState, useCallback } from 'react'
 import { View, Text, Pressable, StyleSheet, LayoutAnimation } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import type { DayGroup, DayStatus } from '../../utils/journalHelpers'
 import { getDayStatus, formatJournalDate } from '../../utils/journalHelpers'
+import { formatFocusAreaTag } from '../../utils/formatters'
+
+type IoniconsName = keyof typeof Ionicons.glyphMap
 
 type DayCardProps = {
   dayGroup: DayGroup
@@ -23,31 +26,33 @@ export function DayCard({ dayGroup, onHashtagPress, defaultExpanded = false }: D
   const status = getDayStatus(dayGroup)
   const config = statusConfig[status]
 
-  const handlePress = () => {
-    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
-    setExpanded(!expanded)
-  }
-
   const focusArea = dayGroup.morning?.focus_area
   const goalPreview = dayGroup.morning?.daily_goal || 'No goal set'
+
+  const handlePress = useCallback(() => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut)
+    setExpanded(!expanded)
+  }, [expanded])
+
+  const handleHashtagPress = useCallback((e: any) => {
+    e.stopPropagation()
+    if (focusArea) {
+      onHashtagPress(focusArea)
+    }
+  }, [focusArea, onHashtagPress])
 
   return (
     <Pressable onPress={handlePress} style={styles.container}>
       {/* Header Row */}
       <View style={styles.header}>
         <Text style={styles.dateText}>{formatJournalDate(dayGroup.date)}</Text>
-        <Ionicons name={config.icon as any} size={20} color={config.color} />
+        <Ionicons name={config.icon as IoniconsName} size={20} color={config.color} />
       </View>
 
       {/* Hashtag */}
       {focusArea && (
-        <Pressable
-          onPress={(e) => {
-            e.stopPropagation?.()
-            onHashtagPress(focusArea)
-          }}
-        >
-          <Text style={styles.hashtag}>#{focusArea.toLowerCase().replace(/\s+/g, '-')}</Text>
+        <Pressable onPress={handleHashtagPress}>
+          <Text style={styles.hashtag}>{formatFocusAreaTag(focusArea)}</Text>
         </Pressable>
       )}
 
@@ -102,7 +107,7 @@ export function DayCard({ dayGroup, onHashtagPress, defaultExpanded = false }: D
                   <Text style={styles.fieldValue}>{dayGroup.evening.blocker}</Text>
                 </View>
               )}
-              {dayGroup.evening.energy_level && (
+              {dayGroup.evening.energy_level != null && (
                 <View style={styles.field}>
                   <Text style={styles.fieldLabel}>Energy</Text>
                   <Text style={styles.fieldValue}>{dayGroup.evening.energy_level}/5</Text>
@@ -124,7 +129,7 @@ export function DayCard({ dayGroup, onHashtagPress, defaultExpanded = false }: D
       )}
 
       {/* Energy indicator for collapsed view with evening */}
-      {!expanded && dayGroup.evening?.energy_level && (
+      {!expanded && dayGroup.evening?.energy_level != null && (
         <View style={styles.energyBadge}>
           <Ionicons name="flash" size={12} color="#f59e0b" />
           <Text style={styles.energyText}>{dayGroup.evening.energy_level}/5</Text>

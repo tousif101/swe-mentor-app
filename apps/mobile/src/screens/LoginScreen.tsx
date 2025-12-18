@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import {
   View,
   Text,
@@ -32,6 +32,7 @@ export function LoginScreen({ navigation }: Props) {
   const [showPassword, setShowPassword] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<FormErrors>({})
+  const passwordRef = useRef<TextInput>(null)
 
   const handleLogin = async () => {
     setErrors({})
@@ -95,6 +96,8 @@ export function LoginScreen({ navigation }: Props) {
             autoComplete="off"
             textContentType="none"
             autoCorrect={false}
+            returnKeyType="next"
+            onSubmitEditing={() => passwordRef.current?.focus()}
             className="w-full px-4 py-3.5 rounded-xl bg-gray-800 border border-gray-700 text-white"
           />
           {errors.email && (
@@ -106,6 +109,7 @@ export function LoginScreen({ navigation }: Props) {
         <View className="mb-4">
           <View className="flex-row items-center bg-gray-800 border border-gray-700 rounded-xl">
             <TextInput
+              ref={passwordRef}
               value={password}
               onChangeText={setPassword}
               placeholder="Enter your password"
@@ -115,6 +119,8 @@ export function LoginScreen({ navigation }: Props) {
               textContentType="none"
               autoCapitalize="none"
               autoCorrect={false}
+              returnKeyType="go"
+              onSubmitEditing={handleLogin}
               className="flex-1 px-4 py-3.5 text-white"
             />
             <Pressable

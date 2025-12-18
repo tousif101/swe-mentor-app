@@ -11,11 +11,13 @@ export function WeekProgress({ daysCompleted, onViewInsights }: WeekProgressProp
   const progressAnim = useRef(new Animated.Value(0)).current
 
   useEffect(() => {
-    Animated.timing(progressAnim, {
+    const animation = Animated.timing(progressAnim, {
       toValue: progressPercent,
       duration: 800,
       useNativeDriver: false, // width animation can't use native driver
-    }).start()
+    })
+    animation.start()
+    return () => animation.stop()
   }, [progressPercent, progressAnim])
 
   return (

@@ -14,12 +14,14 @@ import {
 } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
+import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { useProfileContext } from '../../contexts'
 import { supabase } from '../../lib/supabase'
 import { saveCheckIn } from '../../utils/checkInHelpers'
+import { HomeStackParamList } from '../../navigation/HomeStackNavigator'
 
 type Props = {
-  navigation: any
+  navigation: NativeStackNavigationProp<HomeStackParamList, 'EveningCheckIn'>
 }
 
 const ENERGY_LEVELS = [1, 2, 3, 4, 5]

@@ -67,8 +67,8 @@ describe('magicLinkSchema', () => {
 describe('signupSchema', () => {
   const validData = {
     email: 'test@example.com',
-    password: 'Password1',
-    confirmPassword: 'Password1',
+    password: 'Password1!',
+    confirmPassword: 'Password1!',
   }
 
   it('validates correct signup data', () => {
@@ -106,13 +106,13 @@ describe('signupSchema', () => {
   it('rejects password without lowercase letter', () => {
     const result = signupSchema.safeParse({
       ...validData,
-      password: 'PASSWORD1',
-      confirmPassword: 'PASSWORD1',
+      password: 'PASSWORD1!',
+      confirmPassword: 'PASSWORD1!',
     })
     expect(result.success).toBe(false)
     if (!result.success) {
       expect(result.error.flatten().fieldErrors.password).toContain(
-        'Password must contain a lowercase letter'
+        'Must contain a lowercase letter'
       )
     }
   })
@@ -120,13 +120,13 @@ describe('signupSchema', () => {
   it('rejects password without uppercase letter', () => {
     const result = signupSchema.safeParse({
       ...validData,
-      password: 'password1',
-      confirmPassword: 'password1',
+      password: 'password1!',
+      confirmPassword: 'password1!',
     })
     expect(result.success).toBe(false)
     if (!result.success) {
       expect(result.error.flatten().fieldErrors.password).toContain(
-        'Password must contain an uppercase letter'
+        'Must contain an uppercase letter'
       )
     }
   })
@@ -134,13 +134,13 @@ describe('signupSchema', () => {
   it('rejects password without number', () => {
     const result = signupSchema.safeParse({
       ...validData,
-      password: 'Passwordd',
-      confirmPassword: 'Passwordd',
+      password: 'Password!',
+      confirmPassword: 'Password!',
     })
     expect(result.success).toBe(false)
     if (!result.success) {
       expect(result.error.flatten().fieldErrors.password).toContain(
-        'Password must contain a number'
+        'Must contain a number'
       )
     }
   })

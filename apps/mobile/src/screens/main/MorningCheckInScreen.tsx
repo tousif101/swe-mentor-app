@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import {
   View,
   Text,
@@ -12,10 +12,12 @@ import {
 } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
+import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { useProfileContext } from '../../contexts'
 import { ChipSelector, type Chip } from '../../components/ChipSelector'
 import { supabase } from '../../lib/supabase'
 import { saveCheckIn } from '../../utils/checkInHelpers'
+import { HomeStackParamList } from '../../navigation/HomeStackNavigator'
 
 // Default focus areas if user doesn't have any defined
 const DEFAULT_FOCUS_AREAS: Chip[] = [
@@ -28,7 +30,7 @@ const DEFAULT_FOCUS_AREAS: Chip[] = [
 ]
 
 type MorningCheckInScreenProps = {
-  navigation: any
+  navigation: NativeStackNavigationProp<HomeStackParamList, 'MorningCheckIn'>
 }
 
 export function MorningCheckInScreen({ navigation }: MorningCheckInScreenProps) {
@@ -49,13 +51,16 @@ export function MorningCheckInScreen({ navigation }: MorningCheckInScreenProps) 
       : 'Good evening'
 
   // Convert user's focus_areas to chips, or use defaults
-  const focusAreaChips: Chip[] =
-    profile?.focus_areas && profile.focus_areas.length > 0
-      ? profile.focus_areas.map((area) => ({
-          label: area.charAt(0).toUpperCase() + area.slice(1).replace(/_/g, ' '),
-          value: area,
-        }))
-      : DEFAULT_FOCUS_AREAS
+  const focusAreaChips: Chip[] = useMemo(
+    () =>
+      profile?.focus_areas && profile.focus_areas.length > 0
+        ? profile.focus_areas.map((area) => ({
+            label: area.charAt(0).toUpperCase() + area.slice(1).replace(/_/g, ' '),
+            value: area,
+          }))
+        : DEFAULT_FOCUS_AREAS,
+    [profile?.focus_areas]
+  )
 
   const validateForm = () => {
     const newErrors: { focusArea?: string; dailyGoal?: string } = {}

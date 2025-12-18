@@ -321,7 +321,8 @@ function getWeekStart(): string {
   const now = new Date()
   const day = now.getDay()
   const diff = now.getDate() - day + (day === 0 ? -6 : 1) // Adjust when day is Sunday
-  const monday = new Date(now.setDate(diff))
+  const monday = new Date(now)
+  monday.setDate(diff)
   return getLocalDateString(monday)
 }
 
