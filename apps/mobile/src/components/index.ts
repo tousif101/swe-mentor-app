@@ -1,6 +1,7 @@
 export { ProgressBar } from './ProgressBar'
 export { ChipSelector } from './ChipSelector'
 export type { Chip } from './ChipSelector'
+export { CustomTabBar } from './CustomTabBar'
 
 // Progressive Disclosure Components
 export { HeroCard } from './HeroCard'

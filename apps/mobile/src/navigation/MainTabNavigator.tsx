@@ -1,9 +1,10 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
-import { Ionicons } from '@expo/vector-icons'
+import { getFocusedRouteNameFromRoute } from '@react-navigation/native'
 import { HomeStackNavigator } from './HomeStackNavigator'
 import { JournalScreen } from '../screens/main/JournalScreen'
 import { InsightsScreen } from '../screens/main/InsightsScreen'
 import { ProfileScreen } from '../screens/main/ProfileScreen'
+import { CustomTabBar } from '../components/CustomTabBar'
 
 export type MainTabParamList = {
   HomeTab: undefined
@@ -14,67 +15,31 @@ export type MainTabParamList = {
 
 const Tab = createBottomTabNavigator<MainTabParamList>()
 
+// Screens where tab bar should be hidden
+const HIDDEN_TAB_BAR_SCREENS = ['MorningCheckIn', 'EveningCheckIn']
+
 export function MainTabNavigator() {
   return (
     <Tab.Navigator
+      tabBar={(props) => {
+        // Check if current route should hide tab bar
+        const route = props.state.routes[props.state.index]
+        const focusedRouteName = getFocusedRouteNameFromRoute(route)
+
+        if (focusedRouteName && HIDDEN_TAB_BAR_SCREENS.includes(focusedRouteName)) {
+          return null
+        }
+
+        return <CustomTabBar {...props} />
+      }}
       screenOptions={{
         headerShown: false,
-        tabBarStyle: {
-          backgroundColor: '#0F0D23',
-          borderTopColor: '#1f1b33',
-          borderTopWidth: 1,
-          height: 88,
-          paddingBottom: 24,
-          paddingTop: 8,
-        },
-        tabBarActiveTintColor: '#8b5cf6',
-        tabBarInactiveTintColor: '#6b7280',
-        tabBarLabelStyle: {
-          fontSize: 12,
-          fontWeight: '600',
-        },
       }}
     >
-      <Tab.Screen
-        name="HomeTab"
-        component={HomeStackNavigator}
-        options={{
-          tabBarLabel: 'Home',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="home" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="JournalTab"
-        component={JournalScreen}
-        options={{
-          tabBarLabel: 'Journal',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="book" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="InsightsTab"
-        component={InsightsScreen}
-        options={{
-          tabBarLabel: 'Insights',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="bulb" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="ProfileTab"
-        component={ProfileScreen}
-        options={{
-          tabBarLabel: 'Profile',
-          tabBarIcon: ({ color, size }) => (
-            <Ionicons name="person" size={size} color={color} />
-          ),
-        }}
-      />
+      <Tab.Screen name="HomeTab" component={HomeStackNavigator} />
+      <Tab.Screen name="JournalTab" component={JournalScreen} />
+      <Tab.Screen name="InsightsTab" component={InsightsScreen} />
+      <Tab.Screen name="ProfileTab" component={ProfileScreen} />
     </Tab.Navigator>
   )
 }

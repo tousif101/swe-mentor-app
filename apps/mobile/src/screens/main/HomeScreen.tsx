@@ -114,7 +114,7 @@ export function HomeScreen() {
   const handleHeroPress = () => {
     if (heroState === 'completed') {
       // Navigate to Journal tab
-      // For now, do nothing or show a toast
+      navigation.getParent()?.navigate('JournalTab')
       return
     }
 
