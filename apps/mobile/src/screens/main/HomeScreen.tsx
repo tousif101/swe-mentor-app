@@ -18,6 +18,7 @@ import {
   type JourneyStageData,
 } from '../../utils/checkInHelpers'
 import { useProfileContext } from '../../contexts'
+import { logger } from '../../utils/logger'
 import {
   HeroCard,
   WeekProgress,
@@ -29,6 +30,7 @@ import {
   type HeroState,
 } from '../../components'
 import type { HomeStackParamList } from '../../navigation/HomeStackNavigator'
+import { STREAK_MILESTONES } from '../../constants'
 
 type NavigationProp = NativeStackNavigationProp<HomeStackParamList, 'Home'>
 
@@ -39,44 +41,45 @@ export function HomeScreen() {
   const [journeyData, setJourneyData] = useState<JourneyStageData | null>(null)
   const [showConfetti, setShowConfetti] = useState(false)
 
-  const loadData = useCallback(async () => {
-    let cancelled = false
-    setIsLoading(true)
-
-    try {
-      const { data: userData, error: userError } = await supabase.auth.getUser()
-      if (userError || !userData.user) {
-        throw new Error('Unable to load user session')
-      }
-
-      const data = await getUserJourneyStage(userData.user.id)
-
-      if (!cancelled) {
-        setJourneyData(data)
-
-        // Check for streak milestones to trigger confetti
-        const streak = data.streakData.current_streak
-        if (streak === 7 || streak === 30 || streak === 100) {
-          setShowConfetti(true)
-        }
-      }
-    } catch (err) {
-      console.error('Error loading home data:', err)
-    } finally {
-      if (!cancelled) {
-        setIsLoading(false)
-      }
-    }
-
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
   useFocusEffect(
     useCallback(() => {
+      const controller = new AbortController()
+
+      const loadData = async () => {
+        setIsLoading(true)
+        try {
+          const { data: userData, error: userError } = await supabase.auth.getUser()
+          if (controller.signal.aborted) return
+
+          if (userError || !userData.user) {
+            throw new Error('Unable to load user session')
+          }
+
+          const data = await getUserJourneyStage(userData.user.id)
+
+          if (!controller.signal.aborted) {
+            setJourneyData(data)
+
+            // Check for streak milestones to trigger confetti
+            const streak = data.streakData.current_streak
+            if (STREAK_MILESTONES.includes(streak as typeof STREAK_MILESTONES[number])) {
+              setShowConfetti(true)
+            }
+          }
+        } catch (err) {
+          if (!controller.signal.aborted) {
+            logger.error('Error loading home data:', err)
+          }
+        } finally {
+          if (!controller.signal.aborted) {
+            setIsLoading(false)
+          }
+        }
+      }
+
       loadData()
-    }, [loadData])
+      return () => controller.abort()
+    }, [])
   )
 
   // Determine what to show based on journey stage

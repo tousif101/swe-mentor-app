@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import type { Profile } from '@swe-mentor/shared'
+import { logger } from '../utils/logger'
 
 type ProfileState = {
   profile: Profile | null
@@ -82,7 +83,7 @@ export function useProfile(userId: string | null) {
                 profile: payload.new as Profile,
               }))
             } else {
-              console.error('[useProfile] Invalid profile payload received:', payload)
+              logger.error('[useProfile] Invalid profile payload received:', payload)
             }
           }
         }

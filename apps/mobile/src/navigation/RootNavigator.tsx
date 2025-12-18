@@ -73,7 +73,8 @@ function RootNavigatorContent() {
 export function RootNavigator() {
   const { user, isLoading: authLoading } = useAuth()
 
-  // Show loading while checking auth
+  // Gate ProfileProvider on auth completion to prevent race conditions
+  // ProfileProvider should only initialize after auth state is determined
   if (authLoading) {
     return <LoadingScreen />
   }

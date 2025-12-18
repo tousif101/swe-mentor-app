@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase'
+import { logger } from './logger'
 
 /**
  * Get today's date in local timezone as YYYY-MM-DD string.
@@ -341,7 +342,7 @@ export async function getWeekCheckInDays(userId: string): Promise<number> {
     .lte('check_in_date', today)
 
   if (error) {
-    console.error('Error fetching week check-ins:', error)
+    logger.error('Error fetching week check-ins:', error)
     return 0
   }
 

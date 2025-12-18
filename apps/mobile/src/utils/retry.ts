@@ -1,15 +1,28 @@
 export async function withRetry<T>(
   fn: () => Promise<T>,
-  maxRetries = 3,
-  delayMs = 1000
+  options: {
+    maxRetries?: number
+    initialDelayMs?: number
+    backoffMultiplier?: number
+  } = {}
 ): Promise<T> {
-  for (let i = 0; i < maxRetries; i++) {
+  const { maxRetries = 3, initialDelayMs = 1000, backoffMultiplier = 2 } = options
+  let lastError: unknown
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
       return await fn()
     } catch (error) {
-      if (i === maxRetries - 1) throw error
-      await new Promise(resolve => setTimeout(resolve, delayMs * (i + 1)))
+      lastError = error
+      if (attempt === maxRetries - 1) {
+        throw error
+      }
+      // Exponential backoff: 1000ms, 2000ms, 4000ms, etc.
+      const delay = initialDelayMs * Math.pow(backoffMultiplier, attempt)
+      await new Promise(resolve => setTimeout(resolve, delay))
     }
   }
-  throw new Error('Max retries exceeded')
+
+  // This satisfies TypeScript - lastError is guaranteed to be set if we reach here
+  throw lastError
 }

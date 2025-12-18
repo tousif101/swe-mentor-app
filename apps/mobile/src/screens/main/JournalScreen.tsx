@@ -22,6 +22,7 @@ import {
 } from '../../utils'
 import { useAuth } from '../../hooks/useAuth'
 import { getTimeOfDay } from '../../utils/checkInHelpers'
+import { logger } from '../../utils/logger'
 
 type JournalScreenNavigationProp = NativeStackNavigationProp<HomeStackParamList>
 
@@ -46,7 +47,7 @@ export function JournalScreen() {
       setCheckIns(data)
       setError(null)
     } catch (error) {
-      console.error('Failed to load check-ins:', error)
+      logger.error('Failed to load check-ins:', error)
       setError('Failed to load journal entries')
     } finally {
       setLoading(false)

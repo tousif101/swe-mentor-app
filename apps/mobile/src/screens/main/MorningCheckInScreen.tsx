@@ -18,6 +18,7 @@ import { ChipSelector, type Chip } from '../../components/ChipSelector'
 import { supabase } from '../../lib/supabase'
 import { saveCheckIn } from '../../utils/checkInHelpers'
 import { HomeStackParamList } from '../../navigation/HomeStackNavigator'
+import { logger } from '../../utils/logger'
 
 // Default focus areas if user doesn't have any defined
 const DEFAULT_FOCUS_AREAS: Chip[] = [
@@ -111,7 +112,7 @@ export function MorningCheckInScreen({ navigation }: MorningCheckInScreenProps) 
         ]
       )
     } catch (error) {
-      console.error('Error saving check-in:', error)
+      logger.error('Error saving check-in:', error)
       Alert.alert(
         'Error',
         'Failed to save your check-in. Please try again.',

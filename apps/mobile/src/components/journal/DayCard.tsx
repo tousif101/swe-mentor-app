@@ -1,6 +1,6 @@
 // apps/mobile/src/components/journal/DayCard.tsx
 import React, { useState, useCallback } from 'react'
-import { View, Text, Pressable, StyleSheet, LayoutAnimation } from 'react-native'
+import { View, Text, Pressable, StyleSheet, LayoutAnimation, GestureResponderEvent } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import type { DayGroup, DayStatus } from '../../utils/journalHelpers'
 import { getDayStatus, formatJournalDate } from '../../utils/journalHelpers'
@@ -34,7 +34,7 @@ export function DayCard({ dayGroup, onHashtagPress, defaultExpanded = false }: D
     setExpanded(!expanded)
   }, [expanded])
 
-  const handleHashtagPress = useCallback((e: any) => {
+  const handleHashtagPress = useCallback((e: GestureResponderEvent) => {
     e.stopPropagation()
     if (focusArea) {
       onHashtagPress(focusArea)

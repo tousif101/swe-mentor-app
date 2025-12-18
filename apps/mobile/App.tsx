@@ -20,9 +20,15 @@ function ErrorFallback({ resetErrorBoundary }: { resetErrorBoundary: () => void 
   )
 }
 
+function handleError(error: Error, info: { componentStack: string }) {
+  console.error('[ErrorBoundary] Caught error:', error)
+  console.error('[ErrorBoundary] Component stack:', info.componentStack)
+  // TODO: Send to crash reporting service (Sentry, etc.)
+}
+
 export default function App() {
   return (
-    <ErrorBoundary FallbackComponent={ErrorFallback}>
+    <ErrorBoundary FallbackComponent={ErrorFallback} onError={handleError}>
       <SafeAreaProvider>
         <RootNavigator />
         <StatusBar style="light" />
