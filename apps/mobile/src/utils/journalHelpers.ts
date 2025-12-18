@@ -93,3 +93,38 @@ export function filterCheckIns(
     return true
   })
 }
+
+export type DayStatus = 'completed' | 'partial' | 'missed' | 'pending'
+
+/**
+ * Determines the status of a day based on goal completion.
+ */
+export function getDayStatus(group: DayGroup): DayStatus {
+  if (!group.evening) {
+    return 'pending'
+  }
+
+  switch (group.evening.goal_completed) {
+    case 'yes':
+      return 'completed'
+    case 'partially':
+      return 'partial'
+    case 'no':
+      return 'missed'
+    default:
+      return 'pending'
+  }
+}
+
+/**
+ * Formats a date string as "Dec 17 · Wednesday"
+ */
+export function formatJournalDate(dateString: string): string {
+  const date = new Date(dateString + 'T12:00:00') // Use noon to avoid timezone issues
+
+  const month = date.toLocaleDateString('en-US', { month: 'short' })
+  const day = date.getDate()
+  const weekday = date.toLocaleDateString('en-US', { weekday: 'long' })
+
+  return `${month} ${day} · ${weekday}`
+}
