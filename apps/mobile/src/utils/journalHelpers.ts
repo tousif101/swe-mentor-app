@@ -1,4 +1,5 @@
 import type { Tables } from '@swe-mentor/shared'
+import { supabase } from '../lib/supabase'
 
 export type CheckIn = Tables<'check_ins'>
 
@@ -127,4 +128,22 @@ export function formatJournalDate(dateString: string): string {
   const weekday = date.toLocaleDateString('en-US', { weekday: 'long' })
 
   return `${month} ${day} · ${weekday}`
+}
+
+/**
+ * Fetches all check-ins for a user, ordered by date descending.
+ */
+export async function fetchAllCheckIns(userId: string): Promise<CheckIn[]> {
+  const { data, error } = await supabase
+    .from('check_ins')
+    .select('*')
+    .eq('user_id', userId)
+    .order('check_in_date', { ascending: false })
+    .order('check_in_type', { ascending: false })
+
+  if (error) {
+    throw error
+  }
+
+  return data || []
 }
