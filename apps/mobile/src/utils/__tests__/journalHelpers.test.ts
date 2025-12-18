@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { groupCheckInsByDay, getUniqueFocusAreas, type DayGroup, type CheckIn } from '../journalHelpers'
+import { groupCheckInsByDay, getUniqueFocusAreas, filterCheckIns, type DayGroup, type CheckIn } from '../journalHelpers'
 
 describe('groupCheckInsByDay', () => {
   it('groups morning and evening check-ins for the same day', () => {
@@ -148,5 +148,93 @@ describe('getUniqueFocusAreas', () => {
     const result = getUniqueFocusAreas(checkIns)
 
     expect(result).toEqual(['Alpha', 'Middle', 'Zebra'])
+  })
+})
+
+describe('filterCheckIns', () => {
+  const sampleCheckIns = [
+    {
+      id: '1',
+      focus_area: 'System Design',
+      daily_goal: 'Build API endpoints',
+      quick_win: 'Finished auth module',
+      blocker: 'Database migration issues',
+      tomorrow_carry: 'Write integration tests',
+    },
+    {
+      id: '2',
+      focus_area: 'Communication',
+      daily_goal: 'Prepare presentation',
+      quick_win: 'Got feedback from team',
+      blocker: null,
+      tomorrow_carry: 'Schedule meeting',
+    },
+    {
+      id: '3',
+      focus_area: 'System Design',
+      daily_goal: 'Review architecture',
+      quick_win: null,
+      blocker: 'Unclear requirements',
+      tomorrow_carry: null,
+    },
+  ] as CheckIn[]
+
+  it('filters by focus area (hashtag)', () => {
+    const result = filterCheckIns(sampleCheckIns, { focusArea: 'Communication' })
+
+    expect(result).toHaveLength(1)
+    expect(result[0].id).toBe('2')
+  })
+
+  it('filters by search query in daily_goal', () => {
+    const result = filterCheckIns(sampleCheckIns, { searchQuery: 'API' })
+
+    expect(result).toHaveLength(1)
+    expect(result[0].id).toBe('1')
+  })
+
+  it('filters by search query in quick_win', () => {
+    const result = filterCheckIns(sampleCheckIns, { searchQuery: 'feedback' })
+
+    expect(result).toHaveLength(1)
+    expect(result[0].id).toBe('2')
+  })
+
+  it('filters by search query in blocker', () => {
+    const result = filterCheckIns(sampleCheckIns, { searchQuery: 'migration' })
+
+    expect(result).toHaveLength(1)
+    expect(result[0].id).toBe('1')
+  })
+
+  it('filters by search query in tomorrow_carry', () => {
+    const result = filterCheckIns(sampleCheckIns, { searchQuery: 'integration' })
+
+    expect(result).toHaveLength(1)
+    expect(result[0].id).toBe('1')
+  })
+
+  it('combines focus area and search query (AND logic)', () => {
+    const result = filterCheckIns(sampleCheckIns, {
+      focusArea: 'System Design',
+      searchQuery: 'architecture',
+    })
+
+    expect(result).toHaveLength(1)
+    expect(result[0].id).toBe('3')
+  })
+
+  it('search is case-insensitive', () => {
+    const result = filterCheckIns(sampleCheckIns, { searchQuery: 'API' })
+    const resultLower = filterCheckIns(sampleCheckIns, { searchQuery: 'api' })
+
+    expect(result).toHaveLength(1)
+    expect(resultLower).toHaveLength(1)
+  })
+
+  it('returns all when no filters', () => {
+    const result = filterCheckIns(sampleCheckIns, {})
+
+    expect(result).toHaveLength(3)
   })
 })

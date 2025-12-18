@@ -48,3 +48,48 @@ export function getUniqueFocusAreas(checkIns: CheckIn[]): string[] {
 
   return Array.from(focusAreas).sort()
 }
+
+export type FilterOptions = {
+  focusArea?: string | null
+  searchQuery?: string | null
+}
+
+/**
+ * Filters check-ins by focus area and/or search query.
+ * Search query matches against: daily_goal, quick_win, blocker, tomorrow_carry
+ * Uses AND logic when both filters are provided.
+ */
+export function filterCheckIns(
+  checkIns: CheckIn[],
+  options: FilterOptions
+): CheckIn[] {
+  const { focusArea, searchQuery } = options
+
+  return checkIns.filter((checkIn) => {
+    // Filter by focus area
+    if (focusArea && checkIn.focus_area !== focusArea) {
+      return false
+    }
+
+    // Filter by search query
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase()
+      const searchableFields = [
+        checkIn.daily_goal,
+        checkIn.quick_win,
+        checkIn.blocker,
+        checkIn.tomorrow_carry,
+      ]
+
+      const matches = searchableFields.some(
+        (field) => field && field.toLowerCase().includes(query)
+      )
+
+      if (!matches) {
+        return false
+      }
+    }
+
+    return true
+  })
+}
