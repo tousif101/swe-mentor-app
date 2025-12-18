@@ -11,3 +11,6 @@ export { TipCard } from './TipCard'
 export { StreakCelebration } from './StreakCelebration'
 export { ContinueCard } from './ContinueCard'
 export { Confetti } from './Confetti'
+
+// Journal Components
+export * from './journal'
