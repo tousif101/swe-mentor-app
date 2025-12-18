@@ -33,3 +33,18 @@ export function groupCheckInsByDay(checkIns: CheckIn[]): DayGroup[] {
     (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
   )
 }
+
+/**
+ * Extracts unique focus areas from check-ins, sorted alphabetically.
+ */
+export function getUniqueFocusAreas(checkIns: CheckIn[]): string[] {
+  const focusAreas = new Set<string>()
+
+  for (const checkIn of checkIns) {
+    if (checkIn.focus_area) {
+      focusAreas.add(checkIn.focus_area)
+    }
+  }
+
+  return Array.from(focusAreas).sort()
+}

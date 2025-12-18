@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { groupCheckInsByDay, type DayGroup } from '../journalHelpers'
+import { groupCheckInsByDay, getUniqueFocusAreas, type DayGroup, type CheckIn } from '../journalHelpers'
 
 describe('groupCheckInsByDay', () => {
   it('groups morning and evening check-ins for the same day', () => {
@@ -106,5 +106,47 @@ describe('groupCheckInsByDay', () => {
   it('returns empty array for empty input', () => {
     const result = groupCheckInsByDay([])
     expect(result).toEqual([])
+  })
+})
+
+describe('getUniqueFocusAreas', () => {
+  it('extracts unique focus areas from check-ins', () => {
+    const checkIns = [
+      { focus_area: 'System Design' },
+      { focus_area: 'Communication' },
+      { focus_area: 'System Design' },
+      { focus_area: null },
+      { focus_area: 'Code Review' },
+    ] as CheckIn[]
+
+    const result = getUniqueFocusAreas(checkIns)
+
+    expect(result).toHaveLength(3)
+    expect(result).toContain('System Design')
+    expect(result).toContain('Communication')
+    expect(result).toContain('Code Review')
+  })
+
+  it('returns empty array when no focus areas', () => {
+    const checkIns = [
+      { focus_area: null },
+      { focus_area: null },
+    ] as CheckIn[]
+
+    const result = getUniqueFocusAreas(checkIns)
+
+    expect(result).toEqual([])
+  })
+
+  it('sorts focus areas alphabetically', () => {
+    const checkIns = [
+      { focus_area: 'Zebra' },
+      { focus_area: 'Alpha' },
+      { focus_area: 'Middle' },
+    ] as CheckIn[]
+
+    const result = getUniqueFocusAreas(checkIns)
+
+    expect(result).toEqual(['Alpha', 'Middle', 'Zebra'])
   })
 })
