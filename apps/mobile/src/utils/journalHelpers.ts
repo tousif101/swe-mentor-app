@@ -14,6 +14,10 @@ export type DayGroup = {
  * Returns array sorted by date descending (newest first).
  */
 export function groupCheckInsByDay(checkIns: CheckIn[]): DayGroup[] {
+  if (!checkIns || checkIns.length === 0) {
+    return []
+  }
+
   const groupMap = new Map<string, DayGroup>()
 
   for (const checkIn of checkIns) {
@@ -134,6 +138,10 @@ export function formatJournalDate(dateString: string): string {
  * Fetches all check-ins for a user, ordered by date descending.
  */
 export async function fetchAllCheckIns(userId: string): Promise<CheckIn[]> {
+  if (!userId || typeof userId !== 'string') {
+    throw new Error('Invalid userId provided')
+  }
+
   const { data, error } = await supabase
     .from('check_ins')
     .select('*')

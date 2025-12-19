@@ -18,6 +18,7 @@ import {
   type JourneyStageData,
 } from '../../utils/checkInHelpers'
 import { useProfileContext } from '../../contexts'
+import { logger } from '../../utils/logger'
 import {
   HeroCard,
   WeekProgress,
@@ -29,6 +30,7 @@ import {
   type HeroState,
 } from '../../components'
 import type { HomeStackParamList } from '../../navigation/HomeStackNavigator'
+import { STREAK_MILESTONES } from '../../constants'
 
 type NavigationProp = NativeStackNavigationProp<HomeStackParamList, 'Home'>
 
@@ -38,39 +40,46 @@ export function HomeScreen() {
   const [isLoading, setIsLoading] = useState(true)
   const [journeyData, setJourneyData] = useState<JourneyStageData | null>(null)
   const [showConfetti, setShowConfetti] = useState(false)
-  const [partialCheckIn, setPartialCheckIn] = useState<{
-    type: 'morning' | 'evening'
-    startedAt: string
-  } | null>(null)
-
-  const loadData = useCallback(async () => {
-    setIsLoading(true)
-
-    try {
-      const { data: userData, error: userError } = await supabase.auth.getUser()
-      if (userError || !userData.user) {
-        throw new Error('Unable to load user session')
-      }
-
-      const data = await getUserJourneyStage(userData.user.id)
-      setJourneyData(data)
-
-      // Check for streak milestones to trigger confetti
-      const streak = data.streakData.current_streak
-      if (streak === 7 || streak === 30 || streak === 100) {
-        setShowConfetti(true)
-      }
-    } catch (err) {
-      console.error('Error loading home data:', err)
-    } finally {
-      setIsLoading(false)
-    }
-  }, [])
 
   useFocusEffect(
     useCallback(() => {
+      const controller = new AbortController()
+
+      const loadData = async () => {
+        setIsLoading(true)
+        try {
+          const { data: userData, error: userError } = await supabase.auth.getUser()
+          if (controller.signal.aborted) return
+
+          if (userError || !userData.user) {
+            throw new Error('Unable to load user session')
+          }
+
+          const data = await getUserJourneyStage(userData.user.id)
+
+          if (!controller.signal.aborted) {
+            setJourneyData(data)
+
+            // Check for streak milestones to trigger confetti
+            const streak = data.streakData.current_streak
+            if (STREAK_MILESTONES.includes(streak as typeof STREAK_MILESTONES[number])) {
+              setShowConfetti(true)
+            }
+          }
+        } catch (err) {
+          if (!controller.signal.aborted) {
+            logger.error('Error loading home data:', err)
+          }
+        } finally {
+          if (!controller.signal.aborted) {
+            setIsLoading(false)
+          }
+        }
+      }
+
       loadData()
-    }, [loadData])
+      return () => controller.abort()
+    }, [])
   )
 
   // Determine what to show based on journey stage
@@ -82,7 +91,7 @@ export function HomeScreen() {
   const showInsights = stage === 'established'
 
   // Determine hero state
-  const getHeroState = (): HeroState => {
+  const getHeroState = useCallback((): HeroState => {
     if (!journeyData) return 'morning'
 
     const { todayMorning, todayEvening } = journeyData
@@ -106,12 +115,12 @@ export function HomeScreen() {
     }
 
     return 'morning'
-  }
+  }, [journeyData])
 
   const heroState = getHeroState()
 
   // Handle hero press
-  const handleHeroPress = () => {
+  const handleHeroPress = useCallback(() => {
     if (heroState === 'completed') {
       // Navigate to Journal tab
       navigation.getParent()?.navigate('JournalTab')
@@ -123,15 +132,15 @@ export function HomeScreen() {
     } else {
       navigation.navigate('EveningCheckIn')
     }
-  }
+  }, [heroState, navigation])
 
   // Get greeting
   const greeting = getGreeting(stage, profile?.name ?? undefined)
 
   // Navigate to Insights tab
-  const handleViewInsights = () => {
+  const handleViewInsights = useCallback(() => {
     navigation.getParent()?.navigate('InsightsTab')
-  }
+  }, [navigation])
 
   if (isLoading) {
     return (
@@ -169,21 +178,6 @@ export function HomeScreen() {
 
         {/* Hero Card - Always shown */}
         <HeroCard state={heroState} onPress={handleHeroPress} />
-
-        {/* Continue Card - Show if user has partial check-in */}
-        {partialCheckIn && (
-          <ContinueCard
-            type={partialCheckIn.type}
-            startedAt={partialCheckIn.startedAt}
-            onPress={() => {
-              if (partialCheckIn.type === 'morning') {
-                navigation.navigate('MorningCheckIn')
-              } else {
-                navigation.navigate('EveningCheckIn')
-              }
-            }}
-          />
-        )}
 
         {/* Tip Card - Only for first_done stage */}
         {showTip && <TipCard />}

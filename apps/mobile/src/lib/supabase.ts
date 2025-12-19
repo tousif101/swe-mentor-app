@@ -1,12 +1,16 @@
 import * as SecureStore from 'expo-secure-store'
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from '@swe-mentor/shared'
+import { logger } from '../utils/logger'
 
-// HARDCODED FOR DEBUGGING - TODO: restore env var usage once Metro caching issue is resolved
-const supabaseUrl = 'http://192.168.5.124:54321'
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6ImFub24iLCJleHAiOjE5ODM4MTI5OTZ9.CRXP1A7WOeoJeXxjNni43kdQwgnWNReilDMblYTn_I0'
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || 'http://localhost:54321'
+const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || ''
 
-console.log('[Supabase] Using hardcoded config:', supabaseUrl)
+if (!process.env.EXPO_PUBLIC_SUPABASE_URL || !process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY) {
+  logger.warn('[Supabase] Missing environment variables. Using defaults.')
+}
+
+logger.info('[Supabase] Using config:', supabaseUrl)
 
 // SecureStore adapter with error handling
 // SecureStore can fail on certain devices/simulators, so we handle errors gracefully
@@ -15,7 +19,7 @@ const secureStoreAdapter = {
     try {
       return await SecureStore.getItemAsync(key)
     } catch (error) {
-      console.error('[Supabase] SecureStore getItem failed:', error)
+      logger.error('[Supabase] SecureStore getItem failed for key:', key, 'Error:', error)
       return null
     }
   },
@@ -23,14 +27,14 @@ const secureStoreAdapter = {
     try {
       await SecureStore.setItemAsync(key, value)
     } catch (error) {
-      console.error('[Supabase] SecureStore setItem failed:', error)
+      logger.error('[Supabase] SecureStore setItem failed for key:', key, 'Error:', error)
     }
   },
   removeItem: async (key: string): Promise<void> => {
     try {
       await SecureStore.deleteItemAsync(key)
     } catch (error) {
-      console.error('[Supabase] SecureStore removeItem failed:', error)
+      logger.error('[Supabase] SecureStore removeItem failed for key:', key, 'Error:', error)
     }
   },
 }

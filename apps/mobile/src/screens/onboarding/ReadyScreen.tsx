@@ -14,6 +14,7 @@ import { ROLE_CONFIG, getFocusAreas, type DbRole } from '../../lib/roleMapping'
 import { supabase } from '../../lib/supabase'
 import { useProfileContext } from '../../contexts'
 import type { OnboardingStackParamList } from '../../navigation/OnboardingNavigator'
+import { logger } from '../../utils/logger'
 
 type Props = {
   navigation: NativeStackNavigationProp<OnboardingStackParamList, 'Ready'>
@@ -56,7 +57,7 @@ export function ReadyScreen({ navigation, route }: Props) {
         .eq('id', user.id)
 
       if (updateError) {
-        console.error('Profile update error:', updateError)
+        logger.error('Profile update error:', updateError)
         setError('Failed to save your profile. Please try again.')
         setIsLoading(false)
         return
@@ -77,7 +78,7 @@ export function ReadyScreen({ navigation, route }: Props) {
           })
 
         if (reminderError) {
-          console.error('Reminder settings error:', reminderError)
+          logger.error('Reminder settings error:', reminderError)
           // Don't block onboarding if reminder settings fail
         }
       }
@@ -85,7 +86,7 @@ export function ReadyScreen({ navigation, route }: Props) {
       // Refetch profile to trigger navigation to main app
       await refetch()
     } catch (err) {
-      console.error('Error completing onboarding:', err)
+      logger.error('Error completing onboarding:', err)
       setError('Something went wrong. Please try again.')
     } finally {
       setIsLoading(false)

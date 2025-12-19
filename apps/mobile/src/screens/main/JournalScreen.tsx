@@ -6,8 +6,11 @@ import {
   StyleSheet,
   ActivityIndicator,
   RefreshControl,
+  Pressable,
 } from 'react-native'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import type { HomeStackParamList } from '../../navigation/HomeStackNavigator'
 import { DayCard, JournalSearch, JournalEmptyState } from '../../components'
 import {
   fetchAllCheckIns,
@@ -19,14 +22,18 @@ import {
 } from '../../utils'
 import { useAuth } from '../../hooks/useAuth'
 import { getTimeOfDay } from '../../utils/checkInHelpers'
+import { logger } from '../../utils/logger'
+
+type JournalScreenNavigationProp = NativeStackNavigationProp<HomeStackParamList>
 
 export function JournalScreen() {
   const { user } = useAuth()
-  const navigation = useNavigation()
+  const navigation = useNavigation<JournalScreenNavigationProp>()
 
   const [checkIns, setCheckIns] = useState<CheckIn[]>([])
   const [loading, setLoading] = useState(true)
   const [refreshing, setRefreshing] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   // Filter state
   const [searchQuery, setSearchQuery] = useState('')
@@ -38,8 +45,10 @@ export function JournalScreen() {
     try {
       const data = await fetchAllCheckIns(user.id)
       setCheckIns(data)
+      setError(null)
     } catch (error) {
-      console.error('Failed to load check-ins:', error)
+      logger.error('Failed to load check-ins:', error)
+      setError('Failed to load journal entries')
     } finally {
       setLoading(false)
       setRefreshing(false)
@@ -70,27 +79,27 @@ export function JournalScreen() {
     [filteredCheckIns]
   )
 
-  const handleHashtagPress = (tag: string) => {
+  const handleHashtagPress = useCallback((tag: string) => {
     setSelectedTag(tag)
-  }
+  }, [])
 
-  const handleClearFilters = () => {
+  const handleClearFilters = useCallback(() => {
     setSearchQuery('')
     setSelectedTag(null)
-  }
+  }, [])
 
-  const handleStartCheckIn = () => {
+  const handleStartCheckIn = useCallback(() => {
     const timeOfDay = getTimeOfDay()
     if (timeOfDay === 'morning') {
-      navigation.navigate('MorningCheckIn' as never)
+      navigation.navigate('MorningCheckIn')
     } else {
-      navigation.navigate('EveningCheckIn' as never)
+      navigation.navigate('EveningCheckIn')
     }
-  }
+  }, [navigation])
 
-  const renderItem = ({ item }: { item: DayGroup }) => (
+  const renderItem = useCallback(({ item }: { item: DayGroup }) => (
     <DayCard dayGroup={item} onHashtagPress={handleHashtagPress} />
-  )
+  ), [handleHashtagPress])
 
   const renderEmpty = () => {
     if (loading) return null
@@ -106,7 +115,7 @@ export function JournalScreen() {
     return null
   }
 
-  const renderHeader = () => (
+  const renderHeader = useCallback(() => (
     <>
       {/* Header */}
       <View style={styles.header}>
@@ -132,12 +141,23 @@ export function JournalScreen() {
         </Text>
       )}
     </>
-  )
+  ), [checkIns.length, searchQuery, selectedTag, availableTags, dayGroups.length])
 
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#8b5cf6" />
+      </View>
+    )
+  }
+
+  if (error) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>{error}</Text>
+        <Pressable style={styles.retryButton} onPress={loadCheckIns}>
+          <Text style={styles.retryButtonText}>Retry</Text>
+        </Pressable>
       </View>
     )
   }
@@ -197,5 +217,29 @@ const styles = StyleSheet.create({
     color: '#6b7280',
     fontSize: 14,
     marginBottom: 16,
+  },
+  errorContainer: {
+    flex: 1,
+    backgroundColor: '#0f0d23',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 24,
+  },
+  errorText: {
+    color: '#ef4444',
+    fontSize: 16,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
+  retryButton: {
+    backgroundColor: '#8b5cf6',
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 12,
+  },
+  retryButtonText: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '600',
   },
 })

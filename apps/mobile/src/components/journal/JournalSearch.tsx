@@ -2,6 +2,7 @@
 import React from 'react'
 import { View, TextInput, Pressable, Text, ScrollView, StyleSheet } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
+import { formatFocusAreaTag } from '../../utils/formatters'
 
 type JournalSearchProps = {
   searchQuery: string
@@ -18,10 +19,6 @@ export function JournalSearch({
   availableTags,
   onTagSelect,
 }: JournalSearchProps) {
-  const formatTagLabel = (tag: string): string => {
-    return '#' + tag.toLowerCase().replace(/\s+/g, '-')
-  }
-
   return (
     <View style={styles.container}>
       {/* Search Input */}
@@ -63,7 +60,7 @@ export function JournalSearch({
             onPress={() => onTagSelect(selectedTag === tag ? null : tag)}
           >
             <Text style={[styles.chipText, selectedTag === tag && styles.chipTextActive]}>
-              {formatTagLabel(tag)}
+              {formatFocusAreaTag(tag)}
             </Text>
           </Pressable>
         ))}

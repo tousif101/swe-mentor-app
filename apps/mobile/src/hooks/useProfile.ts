@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import type { Profile } from '@swe-mentor/shared'
+import { logger } from '../utils/logger'
 
 type ProfileState = {
   profile: Profile | null
@@ -70,16 +71,27 @@ export function useProfile(userId: string | null) {
         },
         (payload) => {
           if (payload.eventType === 'UPDATE' || payload.eventType === 'INSERT') {
-            setState((prev) => ({
-              ...prev,
-              profile: payload.new as Profile,
-            }))
+            // Validate payload.new exists and has expected shape before casting
+            if (
+              payload.new &&
+              typeof payload.new === 'object' &&
+              'id' in payload.new &&
+              'email' in payload.new
+            ) {
+              setState((prev) => ({
+                ...prev,
+                profile: payload.new as Profile,
+              }))
+            } else {
+              logger.error('[useProfile] Invalid profile payload received:', payload)
+            }
           }
         }
       )
       .subscribe()
 
     return () => {
+      channel.unsubscribe()
       supabase.removeChannel(channel)
     }
   }, [userId])

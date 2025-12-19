@@ -14,15 +14,17 @@ import {
 } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
+import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { useProfileContext } from '../../contexts'
 import { supabase } from '../../lib/supabase'
 import { saveCheckIn } from '../../utils/checkInHelpers'
+import { HomeStackParamList } from '../../navigation/HomeStackNavigator'
+import { logger } from '../../utils/logger'
+import { ENERGY_LEVELS } from '../../constants'
 
 type Props = {
-  navigation: any
+  navigation: NativeStackNavigationProp<HomeStackParamList, 'EveningCheckIn'>
 }
-
-const ENERGY_LEVELS = [1, 2, 3, 4, 5]
 
 export function EveningCheckInScreen({ navigation }: Props) {
   const { profile } = useProfileContext()
@@ -104,7 +106,7 @@ export function EveningCheckInScreen({ navigation }: Props) {
 
       setShowCelebration(true)
     } catch (error) {
-      console.error('Error saving check-in:', error)
+      logger.error('Error saving check-in:', error)
       Alert.alert(
         'Error',
         'Failed to save your check-in. Please try again.',
@@ -121,8 +123,10 @@ export function EveningCheckInScreen({ navigation }: Props) {
   }
 
   useEffect(() => {
+    let animation: Animated.CompositeAnimation | null = null
+
     if (showCelebration) {
-      Animated.parallel([
+      animation = Animated.parallel([
         Animated.spring(celebrationScale, {
           toValue: 1,
           useNativeDriver: true,
@@ -132,12 +136,20 @@ export function EveningCheckInScreen({ navigation }: Props) {
           duration: 200,
           useNativeDriver: true,
         }),
-      ]).start()
+      ])
+      animation.start()
     } else {
       celebrationScale.setValue(0.9)
       celebrationOpacity.setValue(0)
     }
-  }, [showCelebration, celebrationOpacity, celebrationScale])
+
+    return () => {
+      animation?.stop()
+      // Also stop any running animations on the values themselves
+      celebrationScale.stopAnimation()
+      celebrationOpacity.stopAnimation()
+    }
+  }, [showCelebration, celebrationScale, celebrationOpacity])
 
   return (
     <KeyboardAvoidingView

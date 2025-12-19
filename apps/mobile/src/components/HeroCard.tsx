@@ -65,10 +65,7 @@ export function HeroCard({ state, onPress, disabled }: HeroCardProps) {
       ])
     )
     loopAnimation.start()
-
-    return () => {
-      loopAnimation.stop()
-    }
+    return () => loopAnimation.stop()
   }, [floatAnim])
 
   const handlePressIn = () => {

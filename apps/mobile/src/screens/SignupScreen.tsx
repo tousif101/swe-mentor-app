@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import {
   View,
   Text,
@@ -36,6 +36,8 @@ export function SignupScreen({ navigation }: Props) {
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<FormErrors>({})
   const [isSuccess, setIsSuccess] = useState(false)
+  const passwordRef = useRef<TextInput>(null)
+  const confirmPasswordRef = useRef<TextInput>(null)
 
   const handleSignup = async () => {
     setErrors({})
@@ -131,6 +133,8 @@ export function SignupScreen({ navigation }: Props) {
             autoComplete="off"
             textContentType="none"
             autoCorrect={false}
+            returnKeyType="next"
+            onSubmitEditing={() => passwordRef.current?.focus()}
             className="w-full px-4 py-3.5 rounded-xl bg-gray-800 border border-gray-700 text-white"
           />
           {errors.email && (
@@ -142,6 +146,7 @@ export function SignupScreen({ navigation }: Props) {
         <View className="mb-4">
           <View className="flex-row items-center bg-gray-800 border border-gray-700 rounded-xl">
             <TextInput
+              ref={passwordRef}
               value={password}
               onChangeText={setPassword}
               placeholder="Create a password"
@@ -151,6 +156,8 @@ export function SignupScreen({ navigation }: Props) {
               textContentType="none"
               autoCapitalize="none"
               autoCorrect={false}
+              returnKeyType="next"
+              onSubmitEditing={() => confirmPasswordRef.current?.focus()}
               className="flex-1 px-4 py-3.5 text-white"
             />
             <Pressable
@@ -173,6 +180,7 @@ export function SignupScreen({ navigation }: Props) {
         <View className="mb-4">
           <View className="flex-row items-center bg-gray-800 border border-gray-700 rounded-xl">
             <TextInput
+              ref={confirmPasswordRef}
               value={confirmPassword}
               onChangeText={setConfirmPassword}
               placeholder="Confirm your password"
@@ -182,6 +190,8 @@ export function SignupScreen({ navigation }: Props) {
               textContentType="none"
               autoCapitalize="none"
               autoCorrect={false}
+              returnKeyType="go"
+              onSubmitEditing={handleSignup}
               className="flex-1 px-4 py-3.5 text-white"
             />
             <Pressable

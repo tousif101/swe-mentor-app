@@ -75,7 +75,8 @@ export function Confetti({ active, onComplete }: ConfettiProps) {
       ])
     })
 
-    Animated.stagger(20, animations).start(() => {
+    const animation = Animated.stagger(20, animations)
+    animation.start(() => {
       // Reset positions for next trigger
       pieces.forEach((piece, index) => {
         const newX = Math.random() * SCREEN_WIDTH
@@ -87,7 +88,8 @@ export function Confetti({ active, onComplete }: ConfettiProps) {
       })
       onComplete?.()
     })
-  }, [active, pieces, initialX, onComplete])
+    return () => animation.stop()
+  }, [active, onComplete])
 
   if (!active) return null
 
