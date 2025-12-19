@@ -468,3 +468,44 @@ export function formatTimeAgo(date: Date): string {
     return 'yesterday'
   }
 }
+
+/**
+ * Get incomplete (draft) check-in for today
+ * Returns null if no incomplete check-in exists
+ */
+export async function getIncompleteCheckIn(
+  userId: string,
+  checkInType: 'morning' | 'evening'
+): Promise<{
+  id: string
+  created_at: string
+  focus_area?: string | null
+  daily_goal?: string | null
+  goal_completed?: string | null
+  quick_win?: string | null
+  blocker?: string | null
+  energy_level?: number | null
+  tomorrow_carry?: string | null
+} | null> {
+  const today = getLocalDateString()
+
+  const { data, error } = await supabase
+    .from('check_ins')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('check_in_type', checkInType)
+    .eq('check_in_date', today)
+    .is('completed_at', null)
+    .single()
+
+  if (error) {
+    // No incomplete check-in found
+    if (error.code === 'PGRST116') {
+      return null
+    }
+    logger.error('Error fetching incomplete check-in:', error)
+    return null
+  }
+
+  return data
+}
