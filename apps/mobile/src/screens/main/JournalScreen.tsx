@@ -150,9 +150,9 @@ export function JournalScreen() {
   const handleStartCheckIn = useCallback(() => {
     const timeOfDay = getTimeOfDay()
     if (timeOfDay === 'morning') {
-      navigation.navigate('MorningCheckIn')
+      navigation.navigate('MorningCheckIn', undefined)
     } else {
-      navigation.navigate('EveningCheckIn')
+      navigation.navigate('EveningCheckIn', undefined)
     }
   }, [navigation])
 

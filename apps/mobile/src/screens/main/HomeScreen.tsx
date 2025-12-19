@@ -85,7 +85,9 @@ export function HomeScreen() {
             if (incompleteMorning && !data.todayMorning) {
               setPartialCheckIn({
                 type: 'morning',
-                startedAt: formatTimeAgo(new Date(incompleteMorning.created_at)),
+                startedAt: incompleteMorning.created_at
+                  ? formatTimeAgo(new Date(incompleteMorning.created_at))
+                  : 'just now',
                 checkInId: incompleteMorning.id,
                 prefill: {
                   focus_area: incompleteMorning.focus_area,
@@ -95,7 +97,9 @@ export function HomeScreen() {
             } else if (incompleteEvening && !data.todayEvening) {
               setPartialCheckIn({
                 type: 'evening',
-                startedAt: formatTimeAgo(new Date(incompleteEvening.created_at)),
+                startedAt: incompleteEvening.created_at
+                  ? formatTimeAgo(new Date(incompleteEvening.created_at))
+                  : 'just now',
                 checkInId: incompleteEvening.id,
                 prefill: {
                   goal_completed: incompleteEvening.goal_completed,

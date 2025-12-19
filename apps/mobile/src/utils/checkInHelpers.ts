@@ -478,7 +478,7 @@ export async function getIncompleteCheckIn(
   checkInType: 'morning' | 'evening'
 ): Promise<{
   id: string
-  created_at: string
+  created_at: string | null
   focus_area?: string | null
   daily_goal?: string | null
   goal_completed?: string | null
