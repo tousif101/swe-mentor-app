@@ -15,6 +15,8 @@ import {
   getUserJourneyStage,
   getTimeOfDay,
   getGreeting,
+  getIncompleteCheckIn,
+  formatTimeAgo,
   type JourneyStageData,
 } from '../../utils/checkInHelpers'
 import { useProfileContext } from '../../contexts'
@@ -40,6 +42,12 @@ export function HomeScreen() {
   const [isLoading, setIsLoading] = useState(true)
   const [journeyData, setJourneyData] = useState<JourneyStageData | null>(null)
   const [showConfetti, setShowConfetti] = useState(false)
+  const [partialCheckIn, setPartialCheckIn] = useState<{
+    type: 'morning' | 'evening'
+    startedAt: string
+    checkInId: string
+    prefill: Record<string, unknown>
+  } | null>(null)
 
   useFocusEffect(
     useCallback(() => {
@@ -64,6 +72,45 @@ export function HomeScreen() {
             const streak = data.streakData.current_streak
             if (STREAK_MILESTONES.includes(streak as typeof STREAK_MILESTONES[number])) {
               setShowConfetti(true)
+            }
+
+            // Check for incomplete (draft) check-ins
+            const [incompleteMorning, incompleteEvening] = await Promise.all([
+              getIncompleteCheckIn(userData.user.id, 'morning'),
+              getIncompleteCheckIn(userData.user.id, 'evening'),
+            ])
+
+            // Determine which partial check-in to show (if any)
+            // Only show if the corresponding completed check-in doesn't exist
+            if (incompleteMorning && !data.todayMorning) {
+              setPartialCheckIn({
+                type: 'morning',
+                startedAt: incompleteMorning.created_at
+                  ? formatTimeAgo(new Date(incompleteMorning.created_at))
+                  : 'just now',
+                checkInId: incompleteMorning.id,
+                prefill: {
+                  focus_area: incompleteMorning.focus_area,
+                  daily_goal: incompleteMorning.daily_goal,
+                },
+              })
+            } else if (incompleteEvening && !data.todayEvening) {
+              setPartialCheckIn({
+                type: 'evening',
+                startedAt: incompleteEvening.created_at
+                  ? formatTimeAgo(new Date(incompleteEvening.created_at))
+                  : 'just now',
+                checkInId: incompleteEvening.id,
+                prefill: {
+                  goal_completed: incompleteEvening.goal_completed,
+                  quick_win: incompleteEvening.quick_win,
+                  blocker: incompleteEvening.blocker,
+                  energy_level: incompleteEvening.energy_level,
+                  tomorrow_carry: incompleteEvening.tomorrow_carry,
+                },
+              })
+            } else {
+              setPartialCheckIn(null)
             }
           }
         } catch (err) {
@@ -144,14 +191,14 @@ export function HomeScreen() {
 
   if (isLoading) {
     return (
-      <View style={styles.loadingContainer}>
+      <View testID="home-screen-loading" style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#8B5CF6" />
       </View>
     )
   }
 
   return (
-    <View style={styles.screenContainer}>
+    <View testID="home-screen" style={styles.screenContainer}>
       {/* Ambient Glow */}
       <View style={styles.ambientGlow} />
 
@@ -161,7 +208,7 @@ export function HomeScreen() {
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
         {/* Header */}
         <View style={styles.header}>
-          <View>
+          <View testID="home-greeting">
             <Text style={styles.greetingPrefix}>{greeting.prefix}</Text>
             <Text style={styles.greetingName}>{greeting.name}</Text>
           </View>
@@ -178,6 +225,36 @@ export function HomeScreen() {
 
         {/* Hero Card - Always shown */}
         <HeroCard state={heroState} onPress={handleHeroPress} />
+
+        {/* ContinueCard - Show when there's an incomplete check-in */}
+        {partialCheckIn && (
+          <ContinueCard
+            type={partialCheckIn.type}
+            startedAt={partialCheckIn.startedAt}
+            onPress={() => {
+              if (partialCheckIn.type === 'morning') {
+                navigation.navigate('MorningCheckIn', {
+                  checkInId: partialCheckIn.checkInId,
+                  prefill: partialCheckIn.prefill as {
+                    focus_area?: string | null
+                    daily_goal?: string | null
+                  },
+                })
+              } else {
+                navigation.navigate('EveningCheckIn', {
+                  checkInId: partialCheckIn.checkInId,
+                  prefill: partialCheckIn.prefill as {
+                    goal_completed?: string | null
+                    quick_win?: string | null
+                    blocker?: string | null
+                    energy_level?: number | null
+                    tomorrow_carry?: string | null
+                  },
+                })
+              }
+            }}
+          />
+        )}
 
         {/* Tip Card - Only for first_done stage */}
         {showTip && <TipCard />}

@@ -7,10 +7,16 @@ import {
   ActivityIndicator,
   RefreshControl,
   Pressable,
+  ActionSheetIOS,
+  Platform,
+  Alert,
 } from 'react-native'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
+import type { CompositeNavigationProp } from '@react-navigation/native'
+import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs'
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import type { HomeStackParamList } from '../../navigation/HomeStackNavigator'
+import type { MainTabParamList } from '../../navigation/MainTabNavigator'
 import { DayCard, JournalSearch, JournalEmptyState } from '../../components'
 import {
   fetchAllCheckIns,
@@ -24,7 +30,11 @@ import { useAuth } from '../../hooks/useAuth'
 import { getTimeOfDay } from '../../utils/checkInHelpers'
 import { logger } from '../../utils/logger'
 
-type JournalScreenNavigationProp = NativeStackNavigationProp<HomeStackParamList>
+// Composite type for navigating from Tab to nested HomeStack
+type JournalScreenNavigationProp = CompositeNavigationProp<
+  BottomTabNavigationProp<MainTabParamList, 'JournalTab'>,
+  NativeStackNavigationProp<HomeStackParamList>
+>
 
 export function JournalScreen() {
   const { user } = useAuth()
@@ -88,18 +98,83 @@ export function JournalScreen() {
     setSelectedTag(null)
   }, [])
 
+  const handleEditPress = useCallback((dayGroup: DayGroup) => {
+    const hasMorning = !!dayGroup.morning
+    const hasEvening = !!dayGroup.evening
+
+    const navigateToEdit = (type: 'morning' | 'evening') => {
+      if (type === 'morning' && dayGroup.morning) {
+        // Navigate to HomeTab stack, then to MorningCheckIn screen
+        navigation.navigate('HomeTab', {
+          screen: 'MorningCheckIn',
+          params: {
+            checkInId: dayGroup.morning.id,
+            returnTo: 'JournalTab',
+            prefill: {
+              focus_area: dayGroup.morning.focus_area,
+              daily_goal: dayGroup.morning.daily_goal,
+            },
+          },
+        })
+      } else if (type === 'evening' && dayGroup.evening) {
+        navigation.navigate('HomeTab', {
+          screen: 'EveningCheckIn',
+          params: {
+            checkInId: dayGroup.evening.id,
+            returnTo: 'JournalTab',
+            prefill: {
+              goal_completed: dayGroup.evening.goal_completed,
+              quick_win: dayGroup.evening.quick_win,
+              blocker: dayGroup.evening.blocker,
+              energy_level: dayGroup.evening.energy_level,
+              tomorrow_carry: dayGroup.evening.tomorrow_carry,
+            },
+          },
+        })
+      }
+    }
+
+    if (hasMorning && hasEvening) {
+      // Show action sheet to choose
+      if (Platform.OS === 'ios') {
+        ActionSheetIOS.showActionSheetWithOptions(
+          {
+            title: 'Edit which check-in?',
+            options: ['Edit Morning Check-in', 'Edit Evening Reflection', 'Cancel'],
+            cancelButtonIndex: 2,
+          },
+          (buttonIndex) => {
+            if (buttonIndex === 0) navigateToEdit('morning')
+            else if (buttonIndex === 1) navigateToEdit('evening')
+          }
+        )
+      } else {
+        // Android: use Alert as simple alternative
+        Alert.alert('Edit which check-in?', undefined, [
+          { text: 'Morning Check-in', onPress: () => navigateToEdit('morning') },
+          { text: 'Evening Reflection', onPress: () => navigateToEdit('evening') },
+          { text: 'Cancel', style: 'cancel' },
+        ])
+      }
+    } else if (hasMorning) {
+      navigateToEdit('morning')
+    } else if (hasEvening) {
+      navigateToEdit('evening')
+    }
+  }, [navigation])
+
   const handleStartCheckIn = useCallback(() => {
     const timeOfDay = getTimeOfDay()
     if (timeOfDay === 'morning') {
-      navigation.navigate('MorningCheckIn')
+      navigation.navigate('HomeTab', { screen: 'MorningCheckIn', params: undefined })
     } else {
-      navigation.navigate('EveningCheckIn')
+      navigation.navigate('HomeTab', { screen: 'EveningCheckIn', params: undefined })
     }
   }, [navigation])
 
   const renderItem = useCallback(({ item }: { item: DayGroup }) => (
-    <DayCard dayGroup={item} onHashtagPress={handleHashtagPress} />
-  ), [handleHashtagPress])
+    <DayCard dayGroup={item} onHashtagPress={handleHashtagPress} onEditPress={handleEditPress} />
+  ), [handleHashtagPress, handleEditPress])
 
   const renderEmpty = () => {
     if (loading) return null

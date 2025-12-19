@@ -1,0 +1,189 @@
+# Maestro E2E Test: Home Page Cards & Interactions
+# Tests hero card, week progress, continue card, and stats cards
+# Run with: maestro test .maestro/home-page-cards.yaml
+#
+# Prerequisites: User must be logged in and onboarded
+
+appId: host.exp.Exponent
+
+---
+
+# Navigate to Home tab
+- tapOn: "Home"
+- assertVisible:
+    text: "Welcome"
+    timeout: 3000
+
+---
+
+# Test 1: Hero Card - Morning state
+# When morning check-in not done
+- assertVisible:
+    id: "hero-card"
+
+# Verify morning CTA is shown
+- assertVisible:
+    text: "Start Morning Check-in|Begin Morning Check-in"
+
+# Verify greeting is shown
+- assertVisible:
+    text: "Good morning|Good evening|Good afternoon"
+
+# Tap hero card to start check-in
+- tapOn:
+    id: "hero-card"
+
+# Should navigate to morning check-in screen
+- assertVisible:
+    text: "Morning Check-in"
+    timeout: 3000
+
+# Go back
+- tapOn: "Back"
+
+---
+
+# Test 2: Week Progress Card
+- assertVisible:
+    id: "week-progress-card"
+
+# Verify 7 days are shown
+- assertVisible:
+    id: "day-indicator-0"
+- assertVisible:
+    id: "day-indicator-6"
+
+# Tap on a specific day to view details
+- tapOn:
+    id: "day-indicator-3"  # Wednesday
+
+# Should show day details or navigate to journal for that day
+- assertVisible:
+    text: "Wed|Wednesday"
+    timeout: 2000
+
+# Go back if navigated
+- tapOn: "Back|Close"
+
+---
+
+# Test 3: Continue Card (Draft check-in)
+# This appears when there's an incomplete check-in
+- scroll
+
+# If continue card exists
+- runFlow:
+    when:
+      visible: "Continue where you left off"
+    commands:
+      - assertVisible:
+          id: "continue-card"
+
+      # Verify timestamp is shown
+      - assertVisible:
+          text: "minutes ago|hours ago|just now"
+
+      # Tap to continue
+      - tapOn:
+          id: "continue-card"
+
+      # Should navigate to check-in screen with prefilled data
+      - assertVisible:
+          text: "Morning Check-in|Evening Check-in"
+          timeout: 3000
+
+      - tapOn: "Back"
+
+---
+
+# Test 4: Stats Cards (Streak, Total Check-ins)
+- tapOn: "Home"
+- scroll
+
+# Verify streak card
+- assertVisible:
+    id: "streak-card"
+
+# Verify streak count is shown
+- assertVisible:
+    text: "day streak|days streak"
+
+# Verify total check-ins card
+- assertVisible:
+    id: "total-check-ins-card"
+
+# Verify count is shown
+- assertVisible:
+    text: "check-ins|check-in"
+
+---
+
+# Test 5: Journey Stage Badges
+# Progressive disclosure based on user's journey
+
+# New users (0 check-ins)
+- runFlow:
+    when:
+      visible: "Welcome, there! Let's begin"
+    commands:
+      - assertVisible: "Start your first check-in"
+
+# First done (1-2 check-ins)
+- runFlow:
+    when:
+      visible: "Great start"
+    commands:
+      - assertVisible: "Keep the momentum"
+
+# Building (3-7 check-ins)
+- runFlow:
+    when:
+      visible: "Good to see you"
+    commands:
+      - assertVisible: "You're building a habit"
+
+# Established (8+ check-ins or 5+ streak)
+- runFlow:
+    when:
+      visible: "Amazing work"
+    commands:
+      - assertVisible: "You're on fire"
+
+---
+
+# Test 6: Hero Card - Completed state
+# After completing both check-ins
+- runFlow:
+    when:
+      visible: "All done for today!"
+    commands:
+      - assertVisible:
+          id: "hero-card-completed"
+
+      # Verify checkmarks are shown
+      - assertVisible:
+          id: "morning-checkmark"
+      - assertVisible:
+          id: "evening-checkmark"
+
+      # Verify motivational message
+      - assertVisible:
+          text: "Great work|Awesome|Well done"
+
+---
+
+# Test 7: Refresh / Pull to Refresh
+- tapOn: "Home"
+- swipe:
+    direction: DOWN
+    duration: 500
+
+# Should show loading indicator briefly
+- assertVisible:
+    id: "refresh-indicator"
+    timeout: 1000
+
+# Data should reload
+- assertVisible:
+    id: "hero-card"
+    timeout: 3000

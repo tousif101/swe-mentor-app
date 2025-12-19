@@ -1,0 +1,235 @@
+# Maestro E2E Test: Full User Journey
+# Complete end-to-end test covering the main user flow
+# Run with: maestro test .maestro/full-user-journey.yaml
+#
+# This test covers:
+# 1. Login/Onboarding
+# 2. Home page exploration
+# 3. Morning check-in
+# 4. Evening check-in
+# 5. Journal viewing and editing
+# 6. Search and filtering
+
+appId: host.exp.Exponent
+
+env:
+  TEST_EMAIL: ""  # Set via CLI
+  TEST_PASSWORD: ""  # Set via CLI
+
+---
+
+# ============================================
+# 1. LOGIN & ONBOARDING
+# ============================================
+
+- tapOn: "Sign in"
+- assertVisible: "Welcome back"
+- tapOn: "Enter your email"
+- inputText: ${TEST_EMAIL}
+- tapOn: "Enter your password"
+- inputText: ${TEST_PASSWORD}
+- tapOn: "Sign in"
+
+# Wait for home screen
+- extendedWaitUntil:
+    visible: "Welcome"
+    timeout: 10000
+
+---
+
+# ============================================
+# 2. HOME PAGE EXPLORATION
+# ============================================
+
+- assertVisible:
+    id: "hero-card"
+
+# Check week progress
+- assertVisible:
+    id: "week-progress-card"
+
+# Scroll to see stats cards
+- scroll
+- assertVisible:
+    id: "streak-card"
+
+---
+
+# ============================================
+# 3. MORNING CHECK-IN
+# ============================================
+
+- tapOn: "Home"
+- tapOn:
+    text: "Start Morning Check-in|Begin Morning Check-in"
+
+- extendedWaitUntil:
+    visible: "Morning Check-in"
+    timeout: 3000
+
+# Select focus area
+- tapOn: "System Design"
+
+# Input daily goal
+- tapOn:
+    id: "daily-goal-input"
+- inputText: "E2E test - Master suite run"
+
+# Save
+- tapOn: "Save Changes"
+- assertVisible:
+    text: "Check-in Complete!"
+    timeout: 3000
+- tapOn: "OK"
+
+# Verify we're back on home
+- assertVisible:
+    text: "Welcome"
+    timeout: 2000
+
+---
+
+# ============================================
+# 4. EVENING CHECK-IN
+# ============================================
+
+- tapOn:
+    text: "Start Evening Reflection|Begin Evening Check-in"
+
+- extendedWaitUntil:
+    visible: "Evening Check-in"
+    timeout: 3000
+
+# Answer goal completion
+- tapOn: "Yes, completely"
+
+# Quick win
+- tapOn:
+    id: "quick-win-input"
+- inputText: "Completed full E2E test suite"
+
+# Tomorrow's carry
+- tapOn:
+    id: "tomorrow-carry-input"
+- inputText: "Continue improving test coverage"
+
+# Save
+- tapOn: "Save Changes"
+
+# Celebration modal
+- assertVisible:
+    text: "Great work today!"
+    timeout: 3000
+- tapOn: "Close|Done|OK"
+
+---
+
+# ============================================
+# 5. JOURNAL VIEWING
+# ============================================
+
+- tapOn: "Journal"
+- assertVisible:
+    text: "Journal"
+    timeout: 3000
+
+# Wait for entries
+- extendedWaitUntil:
+    visible:
+      id: "day-card-*"
+    timeout: 5000
+
+# Verify today's entry is visible
+- assertVisible: "E2E test - Master suite run"
+
+---
+
+# ============================================
+# 6. JOURNAL EDITING
+# ============================================
+
+# Tap edit on the first entry (today's entry)
+- tapOn:
+    id: "edit-button-*"
+
+# Wait for edit screen
+- extendedWaitUntil:
+    visible:
+      text: "Edit Morning Check-in|Edit Evening Reflection"
+    timeout: 3000
+
+# Modify the text
+- tapOn:
+    id: "daily-goal-input|quick-win-input"
+- inputText: " - EDITED"
+
+# Save changes
+- tapOn: "Save Changes"
+
+# Verify success
+- assertVisible:
+    text: "Changes Saved!"
+    timeout: 3000
+- tapOn: "OK"
+
+# Should stay on Journal tab
+- assertVisible:
+    text: "Journal"
+    timeout: 2000
+
+# Verify edited text is visible
+- assertVisible:
+    text: "EDITED"
+
+---
+
+# ============================================
+# 7. JOURNAL SEARCH
+# ============================================
+
+- tapOn:
+    id: "journal-search-input"
+- inputText: "E2E test"
+
+# Should show filtered results
+- assertVisible:
+    text: "E2E test"
+
+# Results count
+- assertVisible:
+    text: "entries match|entry matches"
+
+# Clear search
+- clearText:
+    id: "journal-search-input"
+
+---
+
+# ============================================
+# 8. JOURNAL FILTER BY TAG
+# ============================================
+
+# Tap on system-design filter chip
+- tapOn: "#system-design"
+
+# Verify filtered
+- assertVisible:
+    id: "filter-chip-system-design-selected"
+
+# Should show only system-design entries
+- assertVisible:
+    text: "entries match"
+
+# Clear filter
+- tapOn: "All"
+
+---
+
+# ============================================
+# SUCCESS!
+# ============================================
+
+- assertVisible:
+    text: "Journal"
+
+# Test completed successfully!

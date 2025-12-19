@@ -87,6 +87,7 @@ export function LoginScreen({ navigation }: Props) {
         {/* Email Input */}
         <View className="mb-4">
           <TextInput
+            testID="email-input"
             value={email}
             onChangeText={setEmail}
             placeholder="Enter your email"
@@ -109,6 +110,7 @@ export function LoginScreen({ navigation }: Props) {
         <View className="mb-4">
           <View className="flex-row items-center bg-gray-800 border border-gray-700 rounded-xl">
             <TextInput
+              testID="password-input"
               ref={passwordRef}
               value={password}
               onChangeText={setPassword}
@@ -148,6 +150,7 @@ export function LoginScreen({ navigation }: Props) {
 
         {/* Submit Button */}
         <Pressable
+          testID="sign-in-button"
           onPress={handleLogin}
           disabled={isLoading}
           className="w-full py-3.5 rounded-xl bg-primary-600 items-center mb-4"

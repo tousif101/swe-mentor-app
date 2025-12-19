@@ -5,8 +5,25 @@ import { EveningCheckInScreen } from '../screens/main/EveningCheckInScreen'
 
 export type HomeStackParamList = {
   Home: undefined
-  MorningCheckIn: undefined
-  EveningCheckIn: undefined
+  MorningCheckIn: {
+    checkInId?: string
+    returnTo?: 'JournalTab' | 'HomeTab'
+    prefill?: {
+      focus_area?: string | null
+      daily_goal?: string | null
+    }
+  } | undefined
+  EveningCheckIn: {
+    checkInId?: string
+    returnTo?: 'JournalTab' | 'HomeTab'
+    prefill?: {
+      goal_completed?: string | null
+      quick_win?: string | null
+      blocker?: string | null
+      energy_level?: number | null
+      tomorrow_carry?: string | null
+    }
+  } | undefined
 }
 
 const Stack = createNativeStackNavigator<HomeStackParamList>()

@@ -1,13 +1,13 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
-import { getFocusedRouteNameFromRoute } from '@react-navigation/native'
-import { HomeStackNavigator } from './HomeStackNavigator'
+import { getFocusedRouteNameFromRoute, NavigatorScreenParams } from '@react-navigation/native'
+import { HomeStackNavigator, HomeStackParamList } from './HomeStackNavigator'
 import { JournalScreen } from '../screens/main/JournalScreen'
 import { InsightsScreen } from '../screens/main/InsightsScreen'
 import { ProfileScreen } from '../screens/main/ProfileScreen'
 import { CustomTabBar } from '../components/CustomTabBar'
 
 export type MainTabParamList = {
-  HomeTab: undefined
+  HomeTab: NavigatorScreenParams<HomeStackParamList> | undefined
   JournalTab: undefined
   InsightsTab: undefined
   ProfileTab: undefined

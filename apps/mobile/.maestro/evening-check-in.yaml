@@ -1,0 +1,106 @@
+# Maestro E2E Test: Evening Check-in Input Flow
+# Tests creating a new evening reflection with all fields
+# Run with: maestro test .maestro/evening-check-in.yaml
+#
+# Prerequisites: User must be logged in, onboarded, and completed morning check-in
+
+appId: host.exp.Exponent
+
+---
+
+# Start from Home tab
+- tapOn: "Home"
+- assertVisible:
+    text: "Welcome"
+    timeout: 3000
+
+# Tap on evening check-in card
+- tapOn:
+    text: "Start Evening Reflection|Begin Evening Check-in"
+
+# Wait for evening check-in screen
+- extendedWaitUntil:
+    visible: "Evening Check-in"
+    timeout: 3000
+
+# Answer "Did you complete your goal?"
+- assertVisible: "Did you complete your goal?"
+- tapOn: "Yes, completely"
+
+# Quick win should be visible
+- assertVisible: "What was your quick win?"
+- tapOn:
+    id: "quick-win-input"
+- inputText: "Successfully set up automated E2E tests"
+
+# Tomorrow's carry forward
+- assertVisible: "What will you carry forward tomorrow?"
+- tapOn:
+    id: "tomorrow-carry-input"
+- inputText: "Expand test coverage to all features"
+
+# Save the check-in
+- tapOn: "Save Changes"
+
+# Should show celebration modal (confetti!)
+- assertVisible:
+    text: "Great work today!"
+    timeout: 3000
+
+# Close celebration
+- tapOn: "Close|Done|OK"
+
+# Should return to home screen
+- assertVisible:
+    text: "Welcome"
+    timeout: 2000
+
+# Verify both check-ins are completed
+- assertVisible:
+    id: "evening-check-in-completed"
+    timeout: 2000
+
+---
+
+# Test with "Partially" answer
+- tapOn: "Home"
+- tapOn: "Start Evening Reflection"
+
+# Select partially
+- tapOn: "Partially"
+
+# Blocker field should appear
+- assertVisible: "What blocked you?"
+- tapOn:
+    id: "blocker-input"
+- inputText: "Needed more time for testing"
+
+# Energy level slider should appear
+- assertVisible: "Energy level"
+- scroll
+
+# Save
+- tapOn: "Save Changes"
+- tapOn: "Close|Done|OK"
+
+---
+
+# Test with "No" answer
+- tapOn: "Home"
+- tapOn: "Start Evening Reflection"
+
+# Select No
+- tapOn: "No, didn't make progress"
+
+# Blocker and energy level should appear
+- assertVisible: "What blocked you?"
+- tapOn:
+    id: "blocker-input"
+- inputText: "Had unexpected meetings"
+
+# Energy level
+- assertVisible: "Energy level"
+
+# Save
+- tapOn: "Save Changes"
+- tapOn: "Close|Done|OK"

@@ -16,6 +16,7 @@ export function getLocalDateString(date: Date = new Date()): string {
 type SaveCheckInParams = {
   userId: string
   checkInType: 'morning' | 'evening'
+  checkInId?: string // If provided, update this specific check-in (edit mode)
   focusArea?: string
   dailyGoal?: string
   goalCompleted?: 'yes' | 'partially' | 'no'
@@ -42,6 +43,7 @@ export async function saveCheckIn(params: SaveCheckInParams) {
   const {
     userId,
     checkInType,
+    checkInId: editCheckInId, // ID for editing existing check-in
     focusArea,
     dailyGoal,
     goalCompleted,
@@ -51,21 +53,22 @@ export async function saveCheckIn(params: SaveCheckInParams) {
     tomorrowCarry,
   } = params
 
+  // DIAGNOSTIC: Log what we received
+  logger.info('[saveCheckIn] Called with params:', {
+    checkInType,
+    editCheckInId,
+    isEditMode: !!editCheckInId,
+    focusArea,
+    dailyGoal,
+  })
+
   const today = getLocalDateString()
 
-  // 1. Check if check-in already exists for today
-  const { data: existingCheckIn } = await supabase
-    .from('check_ins')
-    .select('id')
-    .eq('user_id', userId)
-    .eq('check_in_type', checkInType)
-    .eq('check_in_date', today)
-    .single()
+  let resultCheckInId: string
 
-  let checkInId: string
-
-  if (existingCheckIn) {
-    // Update existing check-in
+  // If editing a specific check-in (edit mode), update by ID directly
+  if (editCheckInId) {
+    logger.info('[saveCheckIn] EDIT MODE - updating check-in:', editCheckInId)
     const { data, error } = await supabase
       .from('check_ins')
       .update({
@@ -76,19 +79,56 @@ export async function saveCheckIn(params: SaveCheckInParams) {
         blocker: blocker,
         energy_level: energyLevel,
         tomorrow_carry: tomorrowCarry,
-        completed_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
+        // Note: Don't update completed_at in edit mode - it's already set
       })
-      .eq('id', existingCheckIn.id)
+      .eq('id', editCheckInId)
       .select('id')
       .single()
 
     if (error) {
+      logger.error('[saveCheckIn] EDIT MODE - update failed:', error)
       throw error
     }
 
-    checkInId = data.id
+    logger.info('[saveCheckIn] EDIT MODE - update successful:', data.id)
+    resultCheckInId = data.id
   } else {
+    logger.info('[saveCheckIn] NEW CHECK-IN MODE - checking for existing check-in')
+    // Check if check-in already exists for today (new check-in flow)
+    const { data: existingCheckIn } = await supabase
+      .from('check_ins')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('check_in_type', checkInType)
+      .eq('check_in_date', today)
+      .single()
+
+    if (existingCheckIn) {
+      // Update existing check-in for today
+      const { data, error } = await supabase
+        .from('check_ins')
+        .update({
+          focus_area: focusArea,
+          daily_goal: dailyGoal,
+          goal_completed: goalCompleted,
+          quick_win: quickWin,
+          blocker: blocker,
+          energy_level: energyLevel,
+          tomorrow_carry: tomorrowCarry,
+          completed_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', existingCheckIn.id)
+        .select('id')
+        .single()
+
+      if (error) {
+        throw error
+      }
+
+      resultCheckInId = data.id
+    } else {
     // Create new check-in
     const { data, error } = await supabase
       .from('check_ins')
@@ -113,13 +153,14 @@ export async function saveCheckIn(params: SaveCheckInParams) {
       throw error
     }
 
-    checkInId = data.id
+    resultCheckInId = data.id
   }
+}
 
   // 2. Update user streaks
   await updateUserStreak(userId, today, checkInType)
 
-  return checkInId
+  return resultCheckInId
 }
 
 /**
@@ -446,5 +487,163 @@ export function getGreeting(
       return { prefix: 'Amazing work,', name: `${name}!` }
     default:
       return { prefix: 'Hello,', name }
+  }
+}
+
+/**
+ * Format a date as a relative time string (e.g., "5 minutes ago")
+ */
+export function formatTimeAgo(date: Date): string {
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffMinutes = Math.floor(diffMs / (1000 * 60))
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+
+  if (diffMinutes < 1) {
+    return 'just now'
+  } else if (diffMinutes < 60) {
+    return `${diffMinutes} ${diffMinutes === 1 ? 'minute' : 'minutes'} ago`
+  } else if (diffHours < 24) {
+    return `${diffHours} ${diffHours === 1 ? 'hour' : 'hours'} ago`
+  } else {
+    return 'yesterday'
+  }
+}
+
+/**
+ * Get incomplete (draft) check-in for today
+ * Returns null if no incomplete check-in exists
+ */
+export async function getIncompleteCheckIn(
+  userId: string,
+  checkInType: 'morning' | 'evening'
+): Promise<{
+  id: string
+  created_at: string | null
+  focus_area?: string | null
+  daily_goal?: string | null
+  goal_completed?: string | null
+  quick_win?: string | null
+  blocker?: string | null
+  energy_level?: number | null
+  tomorrow_carry?: string | null
+} | null> {
+  const today = getLocalDateString()
+
+  const { data, error } = await supabase
+    .from('check_ins')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('check_in_type', checkInType)
+    .eq('check_in_date', today)
+    .is('completed_at', null)
+    .single()
+
+  if (error) {
+    // No incomplete check-in found
+    if (error.code === 'PGRST116') {
+      return null
+    }
+    logger.error('Error fetching incomplete check-in:', error)
+    return null
+  }
+
+  return data
+}
+
+type SaveDraftParams = {
+  userId: string
+  checkInType: 'morning' | 'evening'
+  focusArea?: string
+  dailyGoal?: string
+  goalCompleted?: 'yes' | 'partially' | 'no'
+  quickWin?: string
+  blocker?: string
+  energyLevel?: number
+  tomorrowCarry?: string
+}
+
+/**
+ * Create or update a draft check-in (incomplete)
+ * Uses upsert pattern to handle race conditions
+ * Returns the check-in ID or null on failure
+ */
+export async function createOrUpdateDraft(
+  params: SaveDraftParams
+): Promise<string | null> {
+  const {
+    userId,
+    checkInType,
+    focusArea,
+    dailyGoal,
+    goalCompleted,
+    quickWin,
+    blocker,
+    energyLevel,
+    tomorrowCarry,
+  } = params
+
+  const today = getLocalDateString()
+
+  try {
+    // First check if draft already exists
+    const existing = await getIncompleteCheckIn(userId, checkInType)
+
+    if (existing) {
+      // Update existing draft
+      const { data, error } = await supabase
+        .from('check_ins')
+        .update({
+          focus_area: focusArea,
+          daily_goal: dailyGoal,
+          goal_completed: goalCompleted,
+          quick_win: quickWin,
+          blocker: blocker,
+          energy_level: energyLevel,
+          tomorrow_carry: tomorrowCarry,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', existing.id)
+        .is('completed_at', null) // Safety guard
+        .select('id')
+        .single()
+
+      if (error) {
+        logger.error('Error updating draft:', error)
+        return existing.id // Return existing ID even if update failed
+      }
+
+      return data.id
+    } else {
+      // Create new draft
+      const { data, error } = await supabase
+        .from('check_ins')
+        .insert({
+          user_id: userId,
+          check_in_type: checkInType,
+          check_in_date: today,
+          input_method: 'app',
+          focus_area: focusArea,
+          daily_goal: dailyGoal,
+          goal_completed: goalCompleted,
+          quick_win: quickWin,
+          blocker: blocker,
+          energy_level: energyLevel,
+          tomorrow_carry: tomorrowCarry,
+          // Note: completed_at is NOT set - this is a draft
+        })
+        .select('id')
+        .single()
+
+      if (error) {
+        logger.error('Error creating draft:', error)
+        return null
+      }
+
+      return data.id
+    }
+  } catch (error) {
+    logger.error('Draft save failed:', error)
+    return null
   }
 }

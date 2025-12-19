@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import {
   View,
   Text,
@@ -13,12 +13,15 @@ import {
 import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import { useRoute, RouteProp } from '@react-navigation/native'
 import { useProfileContext } from '../../contexts'
 import { ChipSelector, type Chip } from '../../components/ChipSelector'
 import { supabase } from '../../lib/supabase'
-import { saveCheckIn } from '../../utils/checkInHelpers'
+import { saveCheckIn, createOrUpdateDraft } from '../../utils/checkInHelpers'
 import { HomeStackParamList } from '../../navigation/HomeStackNavigator'
 import { logger } from '../../utils/logger'
+
+type MorningCheckInRouteProp = RouteProp<HomeStackParamList, 'MorningCheckIn'>
 
 // Default focus areas if user doesn't have any defined
 const DEFAULT_FOCUS_AREAS: Chip[] = [
@@ -36,11 +39,28 @@ type MorningCheckInScreenProps = {
 
 export function MorningCheckInScreen({ navigation }: MorningCheckInScreenProps) {
   const { profile } = useProfileContext()
+  const route = useRoute<MorningCheckInRouteProp>()
+  const { checkInId, prefill, returnTo } = route.params ?? {}
+  const isEditMode = !!checkInId
 
-  const [focusArea, setFocusArea] = useState<string | null>(null)
-  const [dailyGoal, setDailyGoal] = useState('')
+  // DIAGNOSTIC: Log route params
+  useEffect(() => {
+    logger.info('[MorningCheckIn] Screen loaded with params:', {
+      checkInId,
+      isEditMode,
+      prefill,
+    })
+  }, [checkInId, isEditMode, prefill])
+
+  const [focusArea, setFocusArea] = useState<string | null>(prefill?.focus_area ?? null)
+  const [dailyGoal, setDailyGoal] = useState(prefill?.daily_goal ?? '')
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<{ focusArea?: string; dailyGoal?: string }>({})
+
+  // Track draft ID for auto-save
+  const [draftId, setDraftId] = useState<string | null>(checkInId ?? null)
+  const isFirstInteraction = useRef(true)
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
 
   // Get greeting based on time of day
   const currentTime = new Date().getHours()
@@ -78,6 +98,58 @@ export function MorningCheckInScreen({ navigation }: MorningCheckInScreenProps) 
     return Object.keys(newErrors).length === 0
   }
 
+  // Auto-save function
+  const autoSave = useCallback(async (focus: string | null, goal: string) => {
+    // Skip if no meaningful data yet
+    if (!focus && !goal.trim()) return
+
+    // Skip auto-save in edit mode (already has completed_at)
+    if (isEditMode) return
+
+    const { data: userData } = await supabase.auth.getUser()
+    if (!userData.user) return
+
+    const id = await createOrUpdateDraft({
+      userId: userData.user.id,
+      checkInType: 'morning',
+      focusArea: focus ?? undefined,
+      dailyGoal: goal.trim() || undefined,
+    })
+
+    if (id && !draftId) {
+      setDraftId(id)
+    }
+  }, [isEditMode, draftId])
+
+  // Trigger auto-save on field changes (debounced)
+  useEffect(() => {
+    // Skip on initial mount with prefilled data
+    if (isFirstInteraction.current && (prefill?.focus_area || prefill?.daily_goal)) {
+      isFirstInteraction.current = false
+      return
+    }
+    isFirstInteraction.current = false
+
+    // Only auto-save if we have meaningful data
+    if (!focusArea && !dailyGoal.trim()) return
+
+    // Clear existing timeout
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current)
+    }
+
+    // Debounce save by 2 seconds
+    saveTimeoutRef.current = setTimeout(() => {
+      autoSave(focusArea, dailyGoal)
+    }, 2000)
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+      }
+    }
+  }, [focusArea, dailyGoal, autoSave, prefill])
+
   const handleSubmit = async () => {
     if (!validateForm()) {
       return
@@ -93,21 +165,41 @@ export function MorningCheckInScreen({ navigation }: MorningCheckInScreenProps) 
         throw new Error('User not authenticated')
       }
 
+      // DIAGNOSTIC: Log what we're about to save
+      logger.info('[MorningCheckIn] About to call saveCheckIn with:', {
+        checkInType: 'morning',
+        checkInId: draftId ?? undefined,
+        draftId,
+        isEditMode,
+        focusArea,
+        dailyGoal: dailyGoal.trim(),
+      })
+
       await saveCheckIn({
         userId: userData.user.id,
         checkInType: 'morning',
+        checkInId: draftId ?? undefined,
         focusArea: focusArea!,
         dailyGoal: dailyGoal.trim(),
       })
 
       // Success - navigate back or show success message
       Alert.alert(
-        'Check-in Complete!',
-        'Your morning intentions have been saved. Have a great day!',
+        isEditMode ? 'Changes Saved!' : 'Check-in Complete!',
+        isEditMode
+          ? 'Your morning check-in has been updated.'
+          : 'Your morning intentions have been saved. Have a great day!',
         [
           {
             text: 'OK',
-            onPress: () => navigation.goBack(),
+            onPress: () => {
+              if (returnTo) {
+                // Navigate to specific tab if returnTo is specified
+                navigation.getParent()?.navigate(returnTo)
+              } else {
+                navigation.goBack()
+              }
+            },
           },
         ]
       )
@@ -142,7 +234,7 @@ export function MorningCheckInScreen({ navigation }: MorningCheckInScreenProps) 
             {greeting}, {profile?.name || 'there'}!
           </Text>
           <Text className="text-white text-3xl font-bold mb-2">
-            Morning Check-in
+            {isEditMode ? 'Edit Morning Check-in' : 'Morning Check-in'}
           </Text>
           <Text className="text-gray-400 text-sm leading-5">
             Set your intentions for the day ahead
@@ -237,7 +329,7 @@ export function MorningCheckInScreen({ navigation }: MorningCheckInScreenProps) 
               <ActivityIndicator color="white" />
             ) : (
               <Text className="text-white font-semibold text-lg">
-                Complete Check-in
+                {isEditMode ? 'Save Changes' : 'Complete Check-in'}
               </Text>
             )}
           </LinearGradient>

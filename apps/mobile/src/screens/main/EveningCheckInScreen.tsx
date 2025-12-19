@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import {
   View,
   Text,
@@ -15,12 +15,16 @@ import {
 import { LinearGradient } from 'expo-linear-gradient'
 import { Ionicons } from '@expo/vector-icons'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
+import { useRoute, RouteProp } from '@react-navigation/native'
 import { useProfileContext } from '../../contexts'
 import { supabase } from '../../lib/supabase'
 import { saveCheckIn } from '../../utils/checkInHelpers'
 import { HomeStackParamList } from '../../navigation/HomeStackNavigator'
 import { logger } from '../../utils/logger'
 import { ENERGY_LEVELS } from '../../constants'
+import { createOrUpdateDraft } from '../../utils'
+
+type EveningCheckInRouteProp = RouteProp<HomeStackParamList, 'EveningCheckIn'>
 
 type Props = {
   navigation: NativeStackNavigationProp<HomeStackParamList, 'EveningCheckIn'>
@@ -28,14 +32,21 @@ type Props = {
 
 export function EveningCheckInScreen({ navigation }: Props) {
   const { profile } = useProfileContext()
+  const route = useRoute<EveningCheckInRouteProp>()
+  const { checkInId, prefill, returnTo } = route.params ?? {}
+  const isEditMode = !!checkInId
+
+  // Track draft ID for auto-save
+  const [draftId, setDraftId] = useState<string | null>(checkInId ?? null)
+  const isFirstInteraction = useRef(true)
 
   const [goalCompleted, setGoalCompleted] = useState<
     'yes' | 'partially' | 'no' | null
-  >(null)
-  const [quickWin, setQuickWin] = useState('')
-  const [blocker, setBlocker] = useState('')
-  const [energyLevel, setEnergyLevel] = useState<number | null>(null)
-  const [tomorrowCarry, setTomorrowCarry] = useState('')
+  >((prefill?.goal_completed as 'yes' | 'partially' | 'no') ?? null)
+  const [quickWin, setQuickWin] = useState(prefill?.quick_win ?? '')
+  const [blocker, setBlocker] = useState(prefill?.blocker ?? '')
+  const [energyLevel, setEnergyLevel] = useState<number | null>(prefill?.energy_level ?? null)
+  const [tomorrowCarry, setTomorrowCarry] = useState(prefill?.tomorrow_carry ?? '')
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<{
     goalCompleted?: string
@@ -48,7 +59,36 @@ export function EveningCheckInScreen({ navigation }: Props) {
   const celebrationScale = useRef(new Animated.Value(0.9)).current
   const celebrationOpacity = useRef(new Animated.Value(0)).current
 
+  // Debounce timer ref
+  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+
   const greeting = 'Good evening'
+
+  // Auto-save function
+  const autoSave = useCallback(async () => {
+    // Skip if no meaningful data yet (first meaningful interaction: goalCompleted OR quickWin has content)
+    if (!goalCompleted && !quickWin.trim()) return
+
+    // Skip auto-save in edit mode
+    if (isEditMode) return
+
+    const { data: userData } = await supabase.auth.getUser()
+    if (!userData.user) return
+
+    const id = await createOrUpdateDraft({
+      userId: userData.user.id,
+      checkInType: 'evening',
+      goalCompleted: goalCompleted ?? undefined,
+      quickWin: quickWin.trim() || undefined,
+      blocker: blocker.trim() || undefined,
+      energyLevel: energyLevel ?? undefined,
+      tomorrowCarry: tomorrowCarry.trim() || undefined,
+    })
+
+    if (id && !draftId) {
+      setDraftId(id)
+    }
+  }, [isEditMode, draftId, goalCompleted, quickWin, blocker, energyLevel, tomorrowCarry])
 
   const validateForm = () => {
     const newErrors: {
@@ -97,6 +137,7 @@ export function EveningCheckInScreen({ navigation }: Props) {
       await saveCheckIn({
         userId: userData.user.id,
         checkInType: 'evening',
+        checkInId: draftId ?? undefined,
         goalCompleted: goalCompleted!,
         quickWin: quickWin.trim(),
         blocker: goalCompleted === 'yes' ? undefined : blocker.trim(),
@@ -104,7 +145,24 @@ export function EveningCheckInScreen({ navigation }: Props) {
         tomorrowCarry: tomorrowCarry.trim() || undefined,
       })
 
-      setShowCelebration(true)
+      // Skip celebration modal in edit mode - just show Alert
+      if (isEditMode) {
+        Alert.alert('Changes Saved!', 'Your evening reflection has been updated.', [
+          {
+            text: 'OK',
+            onPress: () => {
+              if (returnTo) {
+                // Navigate to specific tab if returnTo is specified
+                navigation.getParent()?.navigate(returnTo)
+              } else {
+                navigation.goBack()
+              }
+            },
+          },
+        ])
+      } else {
+        setShowCelebration(true)
+      }
     } catch (error) {
       logger.error('Error saving check-in:', error)
       Alert.alert(
@@ -121,6 +179,35 @@ export function EveningCheckInScreen({ navigation }: Props) {
     setShowCelebration(false)
     navigation.goBack()
   }
+
+  // Trigger auto-save on field changes (debounced)
+  useEffect(() => {
+    // Skip on initial mount with prefilled data
+    if (isFirstInteraction.current && prefill) {
+      isFirstInteraction.current = false
+      return
+    }
+    isFirstInteraction.current = false
+
+    // Only auto-save if we have meaningful data
+    if (!goalCompleted && !quickWin.trim()) return
+
+    // Clear existing timeout
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current)
+    }
+
+    // Debounce save by 2 seconds
+    saveTimeoutRef.current = setTimeout(() => {
+      autoSave()
+    }, 2000)
+
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current)
+      }
+    }
+  }, [goalCompleted, quickWin, blocker, energyLevel, tomorrowCarry, autoSave, prefill])
 
   useEffect(() => {
     let animation: Animated.CompositeAnimation | null = null
@@ -170,7 +257,7 @@ export function EveningCheckInScreen({ navigation }: Props) {
             {greeting}, {profile?.name || 'there'}!
           </Text>
           <Text className="text-white text-3xl font-bold mb-2">
-            Evening Check-in
+            {isEditMode ? 'Edit Evening Check-in' : 'Evening Check-in'}
           </Text>
           <Text className="text-gray-400 text-sm leading-5">
             Reflect on your day and set up tomorrow for success
@@ -361,7 +448,7 @@ export function EveningCheckInScreen({ navigation }: Props) {
               <ActivityIndicator color="white" />
             ) : (
               <Text className="text-white font-semibold text-lg">
-                Complete Check-in
+                {isEditMode ? 'Save Changes' : 'Complete Check-in'}
               </Text>
             )}
           </LinearGradient>
