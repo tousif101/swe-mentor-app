@@ -448,3 +448,23 @@ export function getGreeting(
       return { prefix: 'Hello,', name }
   }
 }
+
+/**
+ * Format a date as a relative time string (e.g., "5 minutes ago")
+ */
+export function formatTimeAgo(date: Date): string {
+  const now = new Date()
+  const diffMs = now.getTime() - date.getTime()
+  const diffMinutes = Math.floor(diffMs / (1000 * 60))
+  const diffHours = Math.floor(diffMs / (1000 * 60 * 60))
+
+  if (diffMinutes < 1) {
+    return 'just now'
+  } else if (diffMinutes < 60) {
+    return `${diffMinutes} ${diffMinutes === 1 ? 'minute' : 'minutes'} ago`
+  } else if (diffHours < 24) {
+    return `${diffHours} ${diffHours === 1 ? 'hour' : 'hours'} ago`
+  } else {
+    return 'yesterday'
+  }
+}
