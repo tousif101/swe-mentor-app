@@ -565,7 +565,7 @@ type SaveDraftParams = {
 
 /**
  * Create or update a draft check-in (incomplete)
- * Uses upsert pattern to handle race conditions
+ * Uses upsert pattern to handle race conditions atomically
  * Returns the check-in ID or null on failure
  */
 export async function createOrUpdateDraft(
@@ -586,39 +586,12 @@ export async function createOrUpdateDraft(
   const today = getLocalDateString()
 
   try {
-    // First check if draft already exists
-    const existing = await getIncompleteCheckIn(userId, checkInType)
-
-    if (existing) {
-      // Update existing draft
-      const { data, error } = await supabase
-        .from('check_ins')
-        .update({
-          focus_area: focusArea,
-          daily_goal: dailyGoal,
-          goal_completed: goalCompleted,
-          quick_win: quickWin,
-          blocker: blocker,
-          energy_level: energyLevel,
-          tomorrow_carry: tomorrowCarry,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', existing.id)
-        .is('completed_at', null) // Safety guard
-        .select('id')
-        .single()
-
-      if (error) {
-        logger.error('Error updating draft:', error)
-        return existing.id // Return existing ID even if update failed
-      }
-
-      return data.id
-    } else {
-      // Create new draft
-      const { data, error } = await supabase
-        .from('check_ins')
-        .insert({
+    // Use upsert to handle race conditions atomically
+    // This requires a unique constraint on (user_id, check_in_type, check_in_date)
+    const { data, error } = await supabase
+      .from('check_ins')
+      .upsert(
+        {
           user_id: userId,
           check_in_type: checkInType,
           check_in_date: today,
@@ -630,18 +603,23 @@ export async function createOrUpdateDraft(
           blocker: blocker,
           energy_level: energyLevel,
           tomorrow_carry: tomorrowCarry,
+          updated_at: new Date().toISOString(),
           // Note: completed_at is NOT set - this is a draft
-        })
-        .select('id')
-        .single()
+        },
+        {
+          onConflict: 'user_id,check_in_type,check_in_date',
+          ignoreDuplicates: false,
+        }
+      )
+      .select('id')
+      .single()
 
-      if (error) {
-        logger.error('Error creating draft:', error)
-        return null
-      }
-
-      return data.id
+    if (error) {
+      logger.error('Error upserting draft:', error)
+      return null
     }
+
+    return data.id
   } catch (error) {
     logger.error('Draft save failed:', error)
     return null

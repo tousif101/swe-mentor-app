@@ -36,18 +36,38 @@ import { STREAK_MILESTONES } from '../../constants'
 
 type NavigationProp = NativeStackNavigationProp<HomeStackParamList, 'Home'>
 
+type MorningPrefill = {
+  focus_area?: string | null
+  daily_goal?: string | null
+}
+
+type EveningPrefill = {
+  goal_completed?: string | null
+  quick_win?: string | null
+  blocker?: string | null
+  energy_level?: number | null
+  tomorrow_carry?: string | null
+}
+
+type PartialCheckIn = {
+  type: 'morning'
+  startedAt: string
+  checkInId: string
+  prefill: MorningPrefill
+} | {
+  type: 'evening'
+  startedAt: string
+  checkInId: string
+  prefill: EveningPrefill
+}
+
 export function HomeScreen() {
   const navigation = useNavigation<NavigationProp>()
   const { profile } = useProfileContext()
   const [isLoading, setIsLoading] = useState(true)
   const [journeyData, setJourneyData] = useState<JourneyStageData | null>(null)
   const [showConfetti, setShowConfetti] = useState(false)
-  const [partialCheckIn, setPartialCheckIn] = useState<{
-    type: 'morning' | 'evening'
-    startedAt: string
-    checkInId: string
-    prefill: Record<string, unknown>
-  } | null>(null)
+  const [partialCheckIn, setPartialCheckIn] = useState<PartialCheckIn | null>(null)
 
   useFocusEffect(
     useCallback(() => {
@@ -235,21 +255,12 @@ export function HomeScreen() {
               if (partialCheckIn.type === 'morning') {
                 navigation.navigate('MorningCheckIn', {
                   checkInId: partialCheckIn.checkInId,
-                  prefill: partialCheckIn.prefill as {
-                    focus_area?: string | null
-                    daily_goal?: string | null
-                  },
+                  prefill: partialCheckIn.prefill,
                 })
               } else {
                 navigation.navigate('EveningCheckIn', {
                   checkInId: partialCheckIn.checkInId,
-                  prefill: partialCheckIn.prefill as {
-                    goal_completed?: string | null
-                    quick_win?: string | null
-                    blocker?: string | null
-                    energy_level?: number | null
-                    tomorrow_carry?: string | null
-                  },
+                  prefill: partialCheckIn.prefill,
                 })
               }
             }}

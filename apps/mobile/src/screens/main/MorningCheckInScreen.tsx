@@ -20,6 +20,7 @@ import { supabase } from '../../lib/supabase'
 import { saveCheckIn, createOrUpdateDraft } from '../../utils/checkInHelpers'
 import { HomeStackParamList } from '../../navigation/HomeStackNavigator'
 import { logger } from '../../utils/logger'
+import { AUTO_SAVE_DEBOUNCE_MS } from '../../constants'
 
 type MorningCheckInRouteProp = RouteProp<HomeStackParamList, 'MorningCheckIn'>
 
@@ -61,6 +62,7 @@ export function MorningCheckInScreen({ navigation }: MorningCheckInScreenProps) 
   const [draftId, setDraftId] = useState<string | null>(checkInId ?? null)
   const isFirstInteraction = useRef(true)
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const isMountedRef = useRef(true)
 
   // Get greeting based on time of day
   const currentTime = new Date().getHours()
@@ -106,20 +108,41 @@ export function MorningCheckInScreen({ navigation }: MorningCheckInScreenProps) 
     // Skip auto-save in edit mode (already has completed_at)
     if (isEditMode) return
 
-    const { data: userData } = await supabase.auth.getUser()
-    if (!userData.user) return
+    // Check if still mounted
+    if (!isMountedRef.current) return
 
-    const id = await createOrUpdateDraft({
-      userId: userData.user.id,
-      checkInType: 'morning',
-      focusArea: focus ?? undefined,
-      dailyGoal: goal.trim() || undefined,
-    })
+    try {
+      const { data: userData, error } = await supabase.auth.getUser()
+      if (error || !userData.user) {
+        logger.warn('Auto-save skipped: user not authenticated')
+        return
+      }
 
-    if (id && !draftId) {
-      setDraftId(id)
+      // Check if still mounted after async operation
+      if (!isMountedRef.current) return
+
+      const id = await createOrUpdateDraft({
+        userId: userData.user.id,
+        checkInType: 'morning',
+        focusArea: focus ?? undefined,
+        dailyGoal: goal.trim() || undefined,
+      })
+
+      // Check if still mounted before updating state
+      if (id && !draftId && isMountedRef.current) {
+        setDraftId(id)
+      }
+    } catch (error) {
+      logger.error('Auto-save failed:', error)
     }
   }, [isEditMode, draftId])
+
+  // Track component unmount
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false
+    }
+  }, [])
 
   // Trigger auto-save on field changes (debounced)
   useEffect(() => {
@@ -141,7 +164,7 @@ export function MorningCheckInScreen({ navigation }: MorningCheckInScreenProps) 
     // Debounce save by 2 seconds
     saveTimeoutRef.current = setTimeout(() => {
       autoSave(focusArea, dailyGoal)
-    }, 2000)
+    }, AUTO_SAVE_DEBOUNCE_MS)
 
     return () => {
       if (saveTimeoutRef.current) {

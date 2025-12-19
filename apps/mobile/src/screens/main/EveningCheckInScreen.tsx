@@ -21,13 +21,17 @@ import { supabase } from '../../lib/supabase'
 import { saveCheckIn } from '../../utils/checkInHelpers'
 import { HomeStackParamList } from '../../navigation/HomeStackNavigator'
 import { logger } from '../../utils/logger'
-import { ENERGY_LEVELS } from '../../constants'
+import { ENERGY_LEVELS, AUTO_SAVE_DEBOUNCE_MS } from '../../constants'
 import { createOrUpdateDraft } from '../../utils'
 
 type EveningCheckInRouteProp = RouteProp<HomeStackParamList, 'EveningCheckIn'>
 
 type Props = {
   navigation: NativeStackNavigationProp<HomeStackParamList, 'EveningCheckIn'>
+}
+
+const isValidGoalCompleted = (value: unknown): value is 'yes' | 'partially' | 'no' => {
+  return value === 'yes' || value === 'partially' || value === 'no'
 }
 
 export function EveningCheckInScreen({ navigation }: Props) {
@@ -39,10 +43,11 @@ export function EveningCheckInScreen({ navigation }: Props) {
   // Track draft ID for auto-save
   const [draftId, setDraftId] = useState<string | null>(checkInId ?? null)
   const isFirstInteraction = useRef(true)
+  const isMountedRef = useRef(true)
 
   const [goalCompleted, setGoalCompleted] = useState<
     'yes' | 'partially' | 'no' | null
-  >((prefill?.goal_completed as 'yes' | 'partially' | 'no') ?? null)
+  >(isValidGoalCompleted(prefill?.goal_completed) ? prefill.goal_completed : null)
   const [quickWin, setQuickWin] = useState(prefill?.quick_win ?? '')
   const [blocker, setBlocker] = useState(prefill?.blocker ?? '')
   const [energyLevel, setEnergyLevel] = useState<number | null>(prefill?.energy_level ?? null)
@@ -72,21 +77,35 @@ export function EveningCheckInScreen({ navigation }: Props) {
     // Skip auto-save in edit mode
     if (isEditMode) return
 
-    const { data: userData } = await supabase.auth.getUser()
-    if (!userData.user) return
+    // Check if still mounted
+    if (!isMountedRef.current) return
 
-    const id = await createOrUpdateDraft({
-      userId: userData.user.id,
-      checkInType: 'evening',
-      goalCompleted: goalCompleted ?? undefined,
-      quickWin: quickWin.trim() || undefined,
-      blocker: blocker.trim() || undefined,
-      energyLevel: energyLevel ?? undefined,
-      tomorrowCarry: tomorrowCarry.trim() || undefined,
-    })
+    try {
+      const { data: userData, error } = await supabase.auth.getUser()
+      if (error || !userData.user) {
+        logger.warn('Auto-save skipped: user not authenticated')
+        return
+      }
 
-    if (id && !draftId) {
-      setDraftId(id)
+      // Check if still mounted after async operation
+      if (!isMountedRef.current) return
+
+      const id = await createOrUpdateDraft({
+        userId: userData.user.id,
+        checkInType: 'evening',
+        goalCompleted: goalCompleted ?? undefined,
+        quickWin: quickWin.trim() || undefined,
+        blocker: blocker.trim() || undefined,
+        energyLevel: energyLevel ?? undefined,
+        tomorrowCarry: tomorrowCarry.trim() || undefined,
+      })
+
+      // Check if still mounted before updating state
+      if (id && !draftId && isMountedRef.current) {
+        setDraftId(id)
+      }
+    } catch (error) {
+      logger.error('Auto-save failed:', error)
     }
   }, [isEditMode, draftId, goalCompleted, quickWin, blocker, energyLevel, tomorrowCarry])
 
@@ -180,6 +199,13 @@ export function EveningCheckInScreen({ navigation }: Props) {
     navigation.goBack()
   }
 
+  // Track component unmount
+  useEffect(() => {
+    return () => {
+      isMountedRef.current = false
+    }
+  }, [])
+
   // Trigger auto-save on field changes (debounced)
   useEffect(() => {
     // Skip on initial mount with prefilled data
@@ -200,7 +226,7 @@ export function EveningCheckInScreen({ navigation }: Props) {
     // Debounce save by 2 seconds
     saveTimeoutRef.current = setTimeout(() => {
       autoSave()
-    }, 2000)
+    }, AUTO_SAVE_DEBOUNCE_MS)
 
     return () => {
       if (saveTimeoutRef.current) {
