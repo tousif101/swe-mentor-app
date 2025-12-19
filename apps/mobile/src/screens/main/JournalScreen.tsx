@@ -7,6 +7,9 @@ import {
   ActivityIndicator,
   RefreshControl,
   Pressable,
+  ActionSheetIOS,
+  Platform,
+  Alert,
 } from 'react-native'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
@@ -88,6 +91,62 @@ export function JournalScreen() {
     setSelectedTag(null)
   }, [])
 
+  const handleEditPress = useCallback((dayGroup: DayGroup) => {
+    const hasMorning = !!dayGroup.morning
+    const hasEvening = !!dayGroup.evening
+
+    const navigateToEdit = (type: 'morning' | 'evening') => {
+      if (type === 'morning' && dayGroup.morning) {
+        navigation.navigate('MorningCheckIn', {
+          checkInId: dayGroup.morning.id,
+          prefill: {
+            focus_area: dayGroup.morning.focus_area,
+            daily_goal: dayGroup.morning.daily_goal,
+          },
+        })
+      } else if (type === 'evening' && dayGroup.evening) {
+        navigation.navigate('EveningCheckIn', {
+          checkInId: dayGroup.evening.id,
+          prefill: {
+            goal_completed: dayGroup.evening.goal_completed,
+            quick_win: dayGroup.evening.quick_win,
+            blocker: dayGroup.evening.blocker,
+            energy_level: dayGroup.evening.energy_level,
+            tomorrow_carry: dayGroup.evening.tomorrow_carry,
+          },
+        })
+      }
+    }
+
+    if (hasMorning && hasEvening) {
+      // Show action sheet to choose
+      if (Platform.OS === 'ios') {
+        ActionSheetIOS.showActionSheetWithOptions(
+          {
+            title: 'Edit which check-in?',
+            options: ['Edit Morning Check-in', 'Edit Evening Reflection', 'Cancel'],
+            cancelButtonIndex: 2,
+          },
+          (buttonIndex) => {
+            if (buttonIndex === 0) navigateToEdit('morning')
+            else if (buttonIndex === 1) navigateToEdit('evening')
+          }
+        )
+      } else {
+        // Android: use Alert as simple alternative
+        Alert.alert('Edit which check-in?', undefined, [
+          { text: 'Morning Check-in', onPress: () => navigateToEdit('morning') },
+          { text: 'Evening Reflection', onPress: () => navigateToEdit('evening') },
+          { text: 'Cancel', style: 'cancel' },
+        ])
+      }
+    } else if (hasMorning) {
+      navigateToEdit('morning')
+    } else if (hasEvening) {
+      navigateToEdit('evening')
+    }
+  }, [navigation])
+
   const handleStartCheckIn = useCallback(() => {
     const timeOfDay = getTimeOfDay()
     if (timeOfDay === 'morning') {
@@ -98,8 +157,8 @@ export function JournalScreen() {
   }, [navigation])
 
   const renderItem = useCallback(({ item }: { item: DayGroup }) => (
-    <DayCard dayGroup={item} onHashtagPress={handleHashtagPress} />
-  ), [handleHashtagPress])
+    <DayCard dayGroup={item} onHashtagPress={handleHashtagPress} onEditPress={handleEditPress} />
+  ), [handleHashtagPress, handleEditPress])
 
   const renderEmpty = () => {
     if (loading) return null
