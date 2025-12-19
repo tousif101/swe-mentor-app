@@ -12,8 +12,11 @@ import {
   Alert,
 } from 'react-native'
 import { useFocusEffect, useNavigation } from '@react-navigation/native'
+import type { CompositeNavigationProp } from '@react-navigation/native'
+import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs'
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import type { HomeStackParamList } from '../../navigation/HomeStackNavigator'
+import type { MainTabParamList } from '../../navigation/MainTabNavigator'
 import { DayCard, JournalSearch, JournalEmptyState } from '../../components'
 import {
   fetchAllCheckIns,
@@ -27,7 +30,11 @@ import { useAuth } from '../../hooks/useAuth'
 import { getTimeOfDay } from '../../utils/checkInHelpers'
 import { logger } from '../../utils/logger'
 
-type JournalScreenNavigationProp = NativeStackNavigationProp<HomeStackParamList>
+// Composite type for navigating from Tab to nested HomeStack
+type JournalScreenNavigationProp = CompositeNavigationProp<
+  BottomTabNavigationProp<MainTabParamList, 'JournalTab'>,
+  NativeStackNavigationProp<HomeStackParamList>
+>
 
 export function JournalScreen() {
   const { user } = useAuth()
@@ -97,22 +104,29 @@ export function JournalScreen() {
 
     const navigateToEdit = (type: 'morning' | 'evening') => {
       if (type === 'morning' && dayGroup.morning) {
-        navigation.navigate('MorningCheckIn', {
-          checkInId: dayGroup.morning.id,
-          prefill: {
-            focus_area: dayGroup.morning.focus_area,
-            daily_goal: dayGroup.morning.daily_goal,
+        // Navigate to HomeTab stack, then to MorningCheckIn screen
+        navigation.navigate('HomeTab', {
+          screen: 'MorningCheckIn',
+          params: {
+            checkInId: dayGroup.morning.id,
+            prefill: {
+              focus_area: dayGroup.morning.focus_area,
+              daily_goal: dayGroup.morning.daily_goal,
+            },
           },
         })
       } else if (type === 'evening' && dayGroup.evening) {
-        navigation.navigate('EveningCheckIn', {
-          checkInId: dayGroup.evening.id,
-          prefill: {
-            goal_completed: dayGroup.evening.goal_completed,
-            quick_win: dayGroup.evening.quick_win,
-            blocker: dayGroup.evening.blocker,
-            energy_level: dayGroup.evening.energy_level,
-            tomorrow_carry: dayGroup.evening.tomorrow_carry,
+        navigation.navigate('HomeTab', {
+          screen: 'EveningCheckIn',
+          params: {
+            checkInId: dayGroup.evening.id,
+            prefill: {
+              goal_completed: dayGroup.evening.goal_completed,
+              quick_win: dayGroup.evening.quick_win,
+              blocker: dayGroup.evening.blocker,
+              energy_level: dayGroup.evening.energy_level,
+              tomorrow_carry: dayGroup.evening.tomorrow_carry,
+            },
           },
         })
       }
@@ -150,9 +164,9 @@ export function JournalScreen() {
   const handleStartCheckIn = useCallback(() => {
     const timeOfDay = getTimeOfDay()
     if (timeOfDay === 'morning') {
-      navigation.navigate('MorningCheckIn', undefined)
+      navigation.navigate('HomeTab', { screen: 'MorningCheckIn', params: undefined })
     } else {
-      navigation.navigate('EveningCheckIn', undefined)
+      navigation.navigate('HomeTab', { screen: 'EveningCheckIn', params: undefined })
     }
   }, [navigation])
 
