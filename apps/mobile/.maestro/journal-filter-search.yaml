@@ -1,0 +1,128 @@
+# Maestro E2E Test: Journal Filter and Search
+# Tests filtering by tags and searching journal entries
+# Run with: maestro test .maestro/journal-filter-search.yaml
+#
+# Prerequisites: Must have multiple check-ins with different focus areas
+
+appId: host.exp.Exponent
+
+---
+
+# Navigate to Journal tab
+- tapOn: "Journal"
+- assertVisible:
+    text: "Journal"
+    timeout: 3000
+
+# Wait for entries to load
+- extendedWaitUntil:
+    visible:
+      id: "day-card-*"
+    timeout: 5000
+
+# Verify search bar is visible
+- assertVisible:
+    id: "journal-search-input"
+
+# Verify filter chips are visible
+- assertVisible: "All"
+- assertVisible:
+    id: "filter-chip-*"
+
+---
+
+# Test 1: Filter by focus area tag
+- tapOn: "#system-design"  # Tap on a focus area chip
+
+# Verify chip is selected
+- assertVisible:
+    id: "filter-chip-system-design-selected"
+
+# Verify filtered results
+- assertVisible:
+    text: "entries match|entry matches"
+
+# Verify only system-design entries are shown
+- assertVisible: "#system-design"
+
+# Clear filter
+- tapOn: "All"
+
+# All entries should be visible again
+- assertNotVisible:
+    text: "entries match"
+
+---
+
+# Test 2: Search functionality
+- tapOn:
+    id: "journal-search-input"
+- inputText: "Maestro"
+
+# Should show filtered results
+- assertVisible:
+    text: "Maestro"
+
+# Results count should update
+- assertVisible:
+    text: "entries match|entry matches"
+
+# Clear search
+- clearText:
+    id: "journal-search-input"
+
+# All entries should return
+- assertNotVisible:
+    text: "entries match"
+
+---
+
+# Test 3: Combine search + filter
+- tapOn: "#ownership"  # Select a filter chip
+- tapOn:
+    id: "journal-search-input"
+- inputText: "test"
+
+# Should show entries matching BOTH filter and search
+- assertVisible:
+    text: "test"
+- assertVisible: "#ownership"
+
+# Clear filters
+- clearText:
+    id: "journal-search-input"
+- tapOn: "All"
+
+---
+
+# Test 4: Empty state - no results
+- tapOn:
+    id: "journal-search-input"
+- inputText: "xyzabc123nonexistent"
+
+# Should show "no results" empty state
+- assertVisible:
+    text: "No entries found|No results"
+
+# Should show "Clear filters" button
+- assertVisible:
+    text: "Clear filters|Show all"
+
+# Clear and return to all entries
+- tapOn: "Clear filters|Show all"
+- assertVisible:
+    id: "day-card-*"
+
+---
+
+# Test 5: Tap on hashtag in entry to filter
+- tapOn:
+    id: "hashtag-system-design"  # Tap hashtag within an entry
+
+# Should automatically filter by that tag
+- assertVisible:
+    id: "filter-chip-system-design-selected"
+
+# Should show filtered results
+- assertVisible:
+    text: "entries match"

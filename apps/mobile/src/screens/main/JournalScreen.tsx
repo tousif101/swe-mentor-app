@@ -109,6 +109,7 @@ export function JournalScreen() {
           screen: 'MorningCheckIn',
           params: {
             checkInId: dayGroup.morning.id,
+            returnTo: 'JournalTab',
             prefill: {
               focus_area: dayGroup.morning.focus_area,
               daily_goal: dayGroup.morning.daily_goal,
@@ -120,6 +121,7 @@ export function JournalScreen() {
           screen: 'EveningCheckIn',
           params: {
             checkInId: dayGroup.evening.id,
+            returnTo: 'JournalTab',
             prefill: {
               goal_completed: dayGroup.evening.goal_completed,
               quick_win: dayGroup.evening.quick_win,

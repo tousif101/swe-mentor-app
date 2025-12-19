@@ -1,0 +1,62 @@
+# Maestro E2E Test: Journal Edit Flow
+# Tests editing existing check-ins from the journal tab
+# Run with: maestro test .maestro/journal-edit-flow.yaml
+#
+# Prerequisites: Must have completed at least one check-in
+
+appId: host.exp.Exponent
+
+---
+
+# Navigate to Journal tab
+- tapOn: "Journal"
+- assertVisible:
+    text: "Journal"
+    timeout: 3000
+
+# Wait for journal entries to load
+- extendedWaitUntil:
+    visible:
+      id: "day-card-*"  # Any day card
+    timeout: 5000
+
+# Tap the edit button on the first entry
+- tapOn:
+    id: "edit-button-*"  # Edit button with dynamic ID
+
+# Should show ActionSheet or directly navigate to check-in screen
+# Wait for edit screen to load
+- extendedWaitUntil:
+    visible:
+      text: "Edit Morning Check-in|Edit Evening Reflection"
+    timeout: 3000
+
+# Verify we're in edit mode
+- assertVisible:
+    text: "Edit"
+
+# Modify the daily goal/quick win
+- tapOn:
+    id: "daily-goal-input|quick-win-input"
+- inputText: " - Edited via Maestro"
+
+# Save changes
+- tapOn: "Save Changes"
+
+# Verify success message
+- assertVisible:
+    text: "Changes Saved!"
+    timeout: 3000
+
+# Dismiss the alert
+- tapOn: "OK"
+
+# Should return to Journal tab (not Home)
+- assertVisible:
+    text: "Journal"
+    timeout: 2000
+
+# Verify we can see the updated text
+- assertVisible:
+    text: "Edited via Maestro"
+    timeout: 2000

@@ -191,14 +191,14 @@ export function HomeScreen() {
 
   if (isLoading) {
     return (
-      <View style={styles.loadingContainer}>
+      <View testID="home-screen-loading" style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#8B5CF6" />
       </View>
     )
   }
 
   return (
-    <View style={styles.screenContainer}>
+    <View testID="home-screen" style={styles.screenContainer}>
       {/* Ambient Glow */}
       <View style={styles.ambientGlow} />
 
@@ -208,7 +208,7 @@ export function HomeScreen() {
       <ScrollView style={styles.container} contentContainerStyle={styles.content}>
         {/* Header */}
         <View style={styles.header}>
-          <View>
+          <View testID="home-greeting">
             <Text style={styles.greetingPrefix}>{greeting.prefix}</Text>
             <Text style={styles.greetingName}>{greeting.name}</Text>
           </View>

@@ -33,7 +33,7 @@ type Props = {
 export function EveningCheckInScreen({ navigation }: Props) {
   const { profile } = useProfileContext()
   const route = useRoute<EveningCheckInRouteProp>()
-  const { checkInId, prefill } = route.params ?? {}
+  const { checkInId, prefill, returnTo } = route.params ?? {}
   const isEditMode = !!checkInId
 
   // Track draft ID for auto-save
@@ -137,6 +137,7 @@ export function EveningCheckInScreen({ navigation }: Props) {
       await saveCheckIn({
         userId: userData.user.id,
         checkInType: 'evening',
+        checkInId: draftId ?? undefined,
         goalCompleted: goalCompleted!,
         quickWin: quickWin.trim(),
         blocker: goalCompleted === 'yes' ? undefined : blocker.trim(),
@@ -147,7 +148,17 @@ export function EveningCheckInScreen({ navigation }: Props) {
       // Skip celebration modal in edit mode - just show Alert
       if (isEditMode) {
         Alert.alert('Changes Saved!', 'Your evening reflection has been updated.', [
-          { text: 'OK', onPress: () => navigation.goBack() },
+          {
+            text: 'OK',
+            onPress: () => {
+              if (returnTo) {
+                // Navigate to specific tab if returnTo is specified
+                navigation.getParent()?.navigate(returnTo)
+              } else {
+                navigation.goBack()
+              }
+            },
+          },
         ])
       } else {
         setShowCelebration(true)

@@ -16,6 +16,7 @@ export function getLocalDateString(date: Date = new Date()): string {
 type SaveCheckInParams = {
   userId: string
   checkInType: 'morning' | 'evening'
+  checkInId?: string // If provided, update this specific check-in (edit mode)
   focusArea?: string
   dailyGoal?: string
   goalCompleted?: 'yes' | 'partially' | 'no'
@@ -42,6 +43,7 @@ export async function saveCheckIn(params: SaveCheckInParams) {
   const {
     userId,
     checkInType,
+    checkInId: editCheckInId, // ID for editing existing check-in
     focusArea,
     dailyGoal,
     goalCompleted,
@@ -51,21 +53,22 @@ export async function saveCheckIn(params: SaveCheckInParams) {
     tomorrowCarry,
   } = params
 
+  // DIAGNOSTIC: Log what we received
+  logger.info('[saveCheckIn] Called with params:', {
+    checkInType,
+    editCheckInId,
+    isEditMode: !!editCheckInId,
+    focusArea,
+    dailyGoal,
+  })
+
   const today = getLocalDateString()
 
-  // 1. Check if check-in already exists for today
-  const { data: existingCheckIn } = await supabase
-    .from('check_ins')
-    .select('id')
-    .eq('user_id', userId)
-    .eq('check_in_type', checkInType)
-    .eq('check_in_date', today)
-    .single()
+  let resultCheckInId: string
 
-  let checkInId: string
-
-  if (existingCheckIn) {
-    // Update existing check-in
+  // If editing a specific check-in (edit mode), update by ID directly
+  if (editCheckInId) {
+    logger.info('[saveCheckIn] EDIT MODE - updating check-in:', editCheckInId)
     const { data, error } = await supabase
       .from('check_ins')
       .update({
@@ -76,19 +79,56 @@ export async function saveCheckIn(params: SaveCheckInParams) {
         blocker: blocker,
         energy_level: energyLevel,
         tomorrow_carry: tomorrowCarry,
-        completed_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
+        // Note: Don't update completed_at in edit mode - it's already set
       })
-      .eq('id', existingCheckIn.id)
+      .eq('id', editCheckInId)
       .select('id')
       .single()
 
     if (error) {
+      logger.error('[saveCheckIn] EDIT MODE - update failed:', error)
       throw error
     }
 
-    checkInId = data.id
+    logger.info('[saveCheckIn] EDIT MODE - update successful:', data.id)
+    resultCheckInId = data.id
   } else {
+    logger.info('[saveCheckIn] NEW CHECK-IN MODE - checking for existing check-in')
+    // Check if check-in already exists for today (new check-in flow)
+    const { data: existingCheckIn } = await supabase
+      .from('check_ins')
+      .select('id')
+      .eq('user_id', userId)
+      .eq('check_in_type', checkInType)
+      .eq('check_in_date', today)
+      .single()
+
+    if (existingCheckIn) {
+      // Update existing check-in for today
+      const { data, error } = await supabase
+        .from('check_ins')
+        .update({
+          focus_area: focusArea,
+          daily_goal: dailyGoal,
+          goal_completed: goalCompleted,
+          quick_win: quickWin,
+          blocker: blocker,
+          energy_level: energyLevel,
+          tomorrow_carry: tomorrowCarry,
+          completed_at: new Date().toISOString(),
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', existingCheckIn.id)
+        .select('id')
+        .single()
+
+      if (error) {
+        throw error
+      }
+
+      resultCheckInId = data.id
+    } else {
     // Create new check-in
     const { data, error } = await supabase
       .from('check_ins')
@@ -113,13 +153,14 @@ export async function saveCheckIn(params: SaveCheckInParams) {
       throw error
     }
 
-    checkInId = data.id
+    resultCheckInId = data.id
   }
+}
 
   // 2. Update user streaks
   await updateUserStreak(userId, today, checkInType)
 
-  return checkInId
+  return resultCheckInId
 }
 
 /**

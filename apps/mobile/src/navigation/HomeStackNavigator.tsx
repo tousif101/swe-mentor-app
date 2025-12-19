@@ -7,6 +7,7 @@ export type HomeStackParamList = {
   Home: undefined
   MorningCheckIn: {
     checkInId?: string
+    returnTo?: 'JournalTab' | 'HomeTab'
     prefill?: {
       focus_area?: string | null
       daily_goal?: string | null
@@ -14,6 +15,7 @@ export type HomeStackParamList = {
   } | undefined
   EveningCheckIn: {
     checkInId?: string
+    returnTo?: 'JournalTab' | 'HomeTab'
     prefill?: {
       goal_completed?: string | null
       quick_win?: string | null

@@ -1,0 +1,61 @@
+# Maestro E2E Test: Morning Check-in Input Flow
+# Tests creating a new morning check-in with all fields
+# Run with: maestro test .maestro/morning-check-in.yaml
+#
+# Prerequisites: User must be logged in and onboarded
+
+appId: host.exp.Exponent
+
+---
+
+# Start from Home tab
+- tapOn: "Home"
+- assertVisible:
+    text: "Welcome"
+    timeout: 3000
+
+# Tap on morning check-in card (or Start Morning Check-in button)
+- tapOn:
+    text: "Start Morning Check-in|Begin Morning Check-in"
+
+# Wait for morning check-in screen
+- extendedWaitUntil:
+    visible: "Morning Check-in"
+    timeout: 3000
+
+# Select focus area
+- assertVisible: "What's your focus today?"
+- tapOn: "System Design"
+
+# Verify chip is selected (purple border)
+- assertVisible:
+    id: "chip-system-design-selected"
+
+# Input daily goal
+- tapOn:
+    id: "daily-goal-input"
+- inputText: "Complete E2E test setup with Maestro"
+
+# Verify text was entered
+- assertVisible: "Complete E2E test setup with Maestro"
+
+# Save the check-in
+- tapOn: "Save Changes"
+
+# Verify success message
+- assertVisible:
+    text: "Check-in Complete!"
+    timeout: 3000
+
+# Dismiss alert
+- tapOn: "OK"
+
+# Should return to home screen
+- assertVisible:
+    text: "Welcome"
+    timeout: 2000
+
+# Verify check-in is now completed (check mark or completed state)
+- assertVisible:
+    id: "morning-check-in-completed|check-mark-*"
+    timeout: 2000

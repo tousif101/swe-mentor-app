@@ -36,7 +36,7 @@ function AuthNavigator() {
 
 function LoadingScreen() {
   return (
-    <View className="flex-1 bg-gray-950 items-center justify-center">
+    <View testID="auth-loading" className="flex-1 bg-gray-950 items-center justify-center">
       <ActivityIndicator size="large" color="#8b5cf6" />
     </View>
   )

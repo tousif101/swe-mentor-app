@@ -40,8 +40,17 @@ type MorningCheckInScreenProps = {
 export function MorningCheckInScreen({ navigation }: MorningCheckInScreenProps) {
   const { profile } = useProfileContext()
   const route = useRoute<MorningCheckInRouteProp>()
-  const { checkInId, prefill } = route.params ?? {}
+  const { checkInId, prefill, returnTo } = route.params ?? {}
   const isEditMode = !!checkInId
+
+  // DIAGNOSTIC: Log route params
+  useEffect(() => {
+    logger.info('[MorningCheckIn] Screen loaded with params:', {
+      checkInId,
+      isEditMode,
+      prefill,
+    })
+  }, [checkInId, isEditMode, prefill])
 
   const [focusArea, setFocusArea] = useState<string | null>(prefill?.focus_area ?? null)
   const [dailyGoal, setDailyGoal] = useState(prefill?.daily_goal ?? '')
@@ -156,9 +165,20 @@ export function MorningCheckInScreen({ navigation }: MorningCheckInScreenProps) 
         throw new Error('User not authenticated')
       }
 
+      // DIAGNOSTIC: Log what we're about to save
+      logger.info('[MorningCheckIn] About to call saveCheckIn with:', {
+        checkInType: 'morning',
+        checkInId: draftId ?? undefined,
+        draftId,
+        isEditMode,
+        focusArea,
+        dailyGoal: dailyGoal.trim(),
+      })
+
       await saveCheckIn({
         userId: userData.user.id,
         checkInType: 'morning',
+        checkInId: draftId ?? undefined,
         focusArea: focusArea!,
         dailyGoal: dailyGoal.trim(),
       })
@@ -172,7 +192,14 @@ export function MorningCheckInScreen({ navigation }: MorningCheckInScreenProps) 
         [
           {
             text: 'OK',
-            onPress: () => navigation.goBack(),
+            onPress: () => {
+              if (returnTo) {
+                // Navigate to specific tab if returnTo is specified
+                navigation.getParent()?.navigate(returnTo)
+              } else {
+                navigation.goBack()
+              }
+            },
           },
         ]
       )
