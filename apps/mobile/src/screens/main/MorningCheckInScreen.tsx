@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import {
   View,
   Text,
@@ -15,9 +15,10 @@ import { Ionicons } from '@expo/vector-icons'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { useRoute, RouteProp } from '@react-navigation/native'
 import { useProfileContext } from '../../contexts'
+import { useCheckInAutoSave } from '../../hooks'
 import { ChipSelector, type Chip } from '../../components/ChipSelector'
 import { supabase } from '../../lib/supabase'
-import { saveCheckIn, createOrUpdateDraft } from '../../utils/checkInHelpers'
+import { saveCheckIn } from '../../utils/checkInHelpers'
 import { HomeStackParamList } from '../../navigation/HomeStackNavigator'
 import { logger } from '../../utils/logger'
 
@@ -57,10 +58,13 @@ export function MorningCheckInScreen({ navigation }: MorningCheckInScreenProps) 
   const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<{ focusArea?: string; dailyGoal?: string }>({})
 
-  // Track draft ID for auto-save
-  const [draftId, setDraftId] = useState<string | null>(checkInId ?? null)
-  const isFirstInteraction = useRef(true)
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  // Auto-save hook
+  const { draftId, isSaving } = useCheckInAutoSave({
+    checkInType: 'morning',
+    isEditMode,
+    fields: { focusArea, dailyGoal },
+    hasMeaningfulData: () => !!(focusArea || dailyGoal.trim()),
+  })
 
   // Get greeting based on time of day
   const currentTime = new Date().getHours()
@@ -97,58 +101,6 @@ export function MorningCheckInScreen({ navigation }: MorningCheckInScreenProps) 
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
-
-  // Auto-save function
-  const autoSave = useCallback(async (focus: string | null, goal: string) => {
-    // Skip if no meaningful data yet
-    if (!focus && !goal.trim()) return
-
-    // Skip auto-save in edit mode (already has completed_at)
-    if (isEditMode) return
-
-    const { data: userData } = await supabase.auth.getUser()
-    if (!userData.user) return
-
-    const id = await createOrUpdateDraft({
-      userId: userData.user.id,
-      checkInType: 'morning',
-      focusArea: focus ?? undefined,
-      dailyGoal: goal.trim() || undefined,
-    })
-
-    if (id && !draftId) {
-      setDraftId(id)
-    }
-  }, [isEditMode, draftId])
-
-  // Trigger auto-save on field changes (debounced)
-  useEffect(() => {
-    // Skip on initial mount with prefilled data
-    if (isFirstInteraction.current && (prefill?.focus_area || prefill?.daily_goal)) {
-      isFirstInteraction.current = false
-      return
-    }
-    isFirstInteraction.current = false
-
-    // Only auto-save if we have meaningful data
-    if (!focusArea && !dailyGoal.trim()) return
-
-    // Clear existing timeout
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current)
-    }
-
-    // Debounce save by 2 seconds
-    saveTimeoutRef.current = setTimeout(() => {
-      autoSave(focusArea, dailyGoal)
-    }, 2000)
-
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current)
-      }
-    }
-  }, [focusArea, dailyGoal, autoSave, prefill])
 
   const handleSubmit = async () => {
     if (!validateForm()) {
@@ -240,6 +192,14 @@ export function MorningCheckInScreen({ navigation }: MorningCheckInScreenProps) 
             Set your intentions for the day ahead
           </Text>
         </View>
+
+        {/* Auto-save indicator */}
+        {isSaving && (
+          <View className="flex-row items-center justify-center py-2 mb-4">
+            <ActivityIndicator size="small" color="#8B5CF6" />
+            <Text className="text-gray-400 text-xs ml-2">Saving draft...</Text>
+          </View>
+        )}
 
         {/* Focus Area Selector */}
         <View className="mb-6">

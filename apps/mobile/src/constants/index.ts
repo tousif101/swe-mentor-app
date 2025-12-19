@@ -34,3 +34,6 @@ export const PASSWORD_REQUIREMENTS = {
   requireNumber: true,
   requireSpecialChar: true,
 } as const
+
+// Auto-save debounce duration (in ms)
+export const AUTO_SAVE_DEBOUNCE_MS = 2000

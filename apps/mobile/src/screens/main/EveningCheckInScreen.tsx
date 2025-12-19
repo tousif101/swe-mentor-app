@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   View,
   Text,
@@ -17,17 +17,21 @@ import { Ionicons } from '@expo/vector-icons'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { useRoute, RouteProp } from '@react-navigation/native'
 import { useProfileContext } from '../../contexts'
+import { useCheckInAutoSave } from '../../hooks'
 import { supabase } from '../../lib/supabase'
 import { saveCheckIn } from '../../utils/checkInHelpers'
 import { HomeStackParamList } from '../../navigation/HomeStackNavigator'
 import { logger } from '../../utils/logger'
 import { ENERGY_LEVELS } from '../../constants'
-import { createOrUpdateDraft } from '../../utils'
 
 type EveningCheckInRouteProp = RouteProp<HomeStackParamList, 'EveningCheckIn'>
 
 type Props = {
   navigation: NativeStackNavigationProp<HomeStackParamList, 'EveningCheckIn'>
+}
+
+const isValidGoalCompleted = (value: unknown): value is 'yes' | 'partially' | 'no' => {
+  return value === 'yes' || value === 'partially' || value === 'no'
 }
 
 export function EveningCheckInScreen({ navigation }: Props) {
@@ -36,13 +40,9 @@ export function EveningCheckInScreen({ navigation }: Props) {
   const { checkInId, prefill, returnTo } = route.params ?? {}
   const isEditMode = !!checkInId
 
-  // Track draft ID for auto-save
-  const [draftId, setDraftId] = useState<string | null>(checkInId ?? null)
-  const isFirstInteraction = useRef(true)
-
   const [goalCompleted, setGoalCompleted] = useState<
     'yes' | 'partially' | 'no' | null
-  >((prefill?.goal_completed as 'yes' | 'partially' | 'no') ?? null)
+  >(isValidGoalCompleted(prefill?.goal_completed) ? prefill.goal_completed : null)
   const [quickWin, setQuickWin] = useState(prefill?.quick_win ?? '')
   const [blocker, setBlocker] = useState(prefill?.blocker ?? '')
   const [energyLevel, setEnergyLevel] = useState<number | null>(prefill?.energy_level ?? null)
@@ -59,36 +59,15 @@ export function EveningCheckInScreen({ navigation }: Props) {
   const celebrationScale = useRef(new Animated.Value(0.9)).current
   const celebrationOpacity = useRef(new Animated.Value(0)).current
 
-  // Debounce timer ref
-  const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  // Auto-save hook
+  const { draftId, isSaving } = useCheckInAutoSave({
+    checkInType: 'evening',
+    isEditMode,
+    fields: { goalCompleted, quickWin, blocker, energyLevel, tomorrowCarry },
+    hasMeaningfulData: () => !!(goalCompleted || quickWin.trim()),
+  })
 
   const greeting = 'Good evening'
-
-  // Auto-save function
-  const autoSave = useCallback(async () => {
-    // Skip if no meaningful data yet (first meaningful interaction: goalCompleted OR quickWin has content)
-    if (!goalCompleted && !quickWin.trim()) return
-
-    // Skip auto-save in edit mode
-    if (isEditMode) return
-
-    const { data: userData } = await supabase.auth.getUser()
-    if (!userData.user) return
-
-    const id = await createOrUpdateDraft({
-      userId: userData.user.id,
-      checkInType: 'evening',
-      goalCompleted: goalCompleted ?? undefined,
-      quickWin: quickWin.trim() || undefined,
-      blocker: blocker.trim() || undefined,
-      energyLevel: energyLevel ?? undefined,
-      tomorrowCarry: tomorrowCarry.trim() || undefined,
-    })
-
-    if (id && !draftId) {
-      setDraftId(id)
-    }
-  }, [isEditMode, draftId, goalCompleted, quickWin, blocker, energyLevel, tomorrowCarry])
 
   const validateForm = () => {
     const newErrors: {
@@ -180,35 +159,6 @@ export function EveningCheckInScreen({ navigation }: Props) {
     navigation.goBack()
   }
 
-  // Trigger auto-save on field changes (debounced)
-  useEffect(() => {
-    // Skip on initial mount with prefilled data
-    if (isFirstInteraction.current && prefill) {
-      isFirstInteraction.current = false
-      return
-    }
-    isFirstInteraction.current = false
-
-    // Only auto-save if we have meaningful data
-    if (!goalCompleted && !quickWin.trim()) return
-
-    // Clear existing timeout
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current)
-    }
-
-    // Debounce save by 2 seconds
-    saveTimeoutRef.current = setTimeout(() => {
-      autoSave()
-    }, 2000)
-
-    return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current)
-      }
-    }
-  }, [goalCompleted, quickWin, blocker, energyLevel, tomorrowCarry, autoSave, prefill])
-
   useEffect(() => {
     let animation: Animated.CompositeAnimation | null = null
 
@@ -263,6 +213,14 @@ export function EveningCheckInScreen({ navigation }: Props) {
             Reflect on your day and set up tomorrow for success
           </Text>
         </View>
+
+        {/* Auto-save indicator */}
+        {isSaving && (
+          <View className="flex-row items-center justify-center py-2 mb-4">
+            <ActivityIndicator size="small" color="#8B5CF6" />
+            <Text className="text-gray-400 text-xs ml-2">Saving draft...</Text>
+          </View>
+        )}
 
         {/* Goal completion */}
         <View className="mb-6">

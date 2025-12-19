@@ -58,6 +58,9 @@ export function DayCard({ dayGroup, onHashtagPress, onEditPress, defaultExpanded
               onPress={handleEditPress}
               style={styles.editButton}
               hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              accessibilityLabel="Edit check-in"
+              accessibilityRole="button"
+              accessibilityHint="Opens the check-in editor"
             >
               <Ionicons name="pencil" size={16} color="#9CA3AF" />
             </Pressable>
