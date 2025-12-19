@@ -11,6 +11,7 @@ type IoniconsName = keyof typeof Ionicons.glyphMap
 type DayCardProps = {
   dayGroup: DayGroup
   onHashtagPress: (tag: string) => void
+  onEditPress?: (dayGroup: DayGroup) => void
   defaultExpanded?: boolean
 }
 
@@ -21,7 +22,7 @@ const statusConfig: Record<DayStatus, { icon: string; color: string }> = {
   pending: { icon: 'remove', color: '#6b7280' },
 }
 
-export function DayCard({ dayGroup, onHashtagPress, defaultExpanded = false }: DayCardProps) {
+export function DayCard({ dayGroup, onHashtagPress, onEditPress, defaultExpanded = false }: DayCardProps) {
   const [expanded, setExpanded] = useState(defaultExpanded)
   const status = getDayStatus(dayGroup)
   const config = statusConfig[status]
@@ -41,12 +42,28 @@ export function DayCard({ dayGroup, onHashtagPress, defaultExpanded = false }: D
     }
   }, [focusArea, onHashtagPress])
 
+  const handleEditPress = useCallback((e: GestureResponderEvent) => {
+    e.stopPropagation()
+    onEditPress?.(dayGroup)
+  }, [onEditPress, dayGroup])
+
   return (
     <Pressable onPress={handlePress} style={styles.container}>
       {/* Header Row */}
       <View style={styles.header}>
         <Text style={styles.dateText}>{formatJournalDate(dayGroup.date)}</Text>
-        <Ionicons name={config.icon as IoniconsName} size={20} color={config.color} />
+        <View style={styles.headerActions}>
+          {onEditPress && (
+            <Pressable
+              onPress={handleEditPress}
+              style={styles.editButton}
+              hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+            >
+              <Ionicons name="pencil" size={16} color="#9CA3AF" />
+            </Pressable>
+          )}
+          <Ionicons name={config.icon as IoniconsName} size={20} color={config.color} />
+        </View>
       </View>
 
       {/* Hashtag */}
@@ -153,6 +170,14 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 4,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+  },
+  editButton: {
+    padding: 4,
   },
   dateText: {
     color: '#ffffff',
