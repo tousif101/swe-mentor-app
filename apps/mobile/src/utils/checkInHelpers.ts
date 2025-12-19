@@ -509,3 +509,100 @@ export async function getIncompleteCheckIn(
 
   return data
 }
+
+type SaveDraftParams = {
+  userId: string
+  checkInType: 'morning' | 'evening'
+  focusArea?: string
+  dailyGoal?: string
+  goalCompleted?: 'yes' | 'partially' | 'no'
+  quickWin?: string
+  blocker?: string
+  energyLevel?: number
+  tomorrowCarry?: string
+}
+
+/**
+ * Create or update a draft check-in (incomplete)
+ * Uses upsert pattern to handle race conditions
+ * Returns the check-in ID or null on failure
+ */
+export async function createOrUpdateDraft(
+  params: SaveDraftParams
+): Promise<string | null> {
+  const {
+    userId,
+    checkInType,
+    focusArea,
+    dailyGoal,
+    goalCompleted,
+    quickWin,
+    blocker,
+    energyLevel,
+    tomorrowCarry,
+  } = params
+
+  const today = getLocalDateString()
+
+  try {
+    // First check if draft already exists
+    const existing = await getIncompleteCheckIn(userId, checkInType)
+
+    if (existing) {
+      // Update existing draft
+      const { data, error } = await supabase
+        .from('check_ins')
+        .update({
+          focus_area: focusArea,
+          daily_goal: dailyGoal,
+          goal_completed: goalCompleted,
+          quick_win: quickWin,
+          blocker: blocker,
+          energy_level: energyLevel,
+          tomorrow_carry: tomorrowCarry,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', existing.id)
+        .is('completed_at', null) // Safety guard
+        .select('id')
+        .single()
+
+      if (error) {
+        logger.error('Error updating draft:', error)
+        return existing.id // Return existing ID even if update failed
+      }
+
+      return data.id
+    } else {
+      // Create new draft
+      const { data, error } = await supabase
+        .from('check_ins')
+        .insert({
+          user_id: userId,
+          check_in_type: checkInType,
+          check_in_date: today,
+          input_method: 'app',
+          focus_area: focusArea,
+          daily_goal: dailyGoal,
+          goal_completed: goalCompleted,
+          quick_win: quickWin,
+          blocker: blocker,
+          energy_level: energyLevel,
+          tomorrow_carry: tomorrowCarry,
+          // Note: completed_at is NOT set - this is a draft
+        })
+        .select('id')
+        .single()
+
+      if (error) {
+        logger.error('Error creating draft:', error)
+        return null
+      }
+
+      return data.id
+    }
+  } catch (error) {
+    logger.error('Draft save failed:', error)
+    return null
+  }
+}
