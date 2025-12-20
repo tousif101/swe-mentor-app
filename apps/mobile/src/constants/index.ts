@@ -3,6 +3,32 @@
  * Centralizes magic numbers and configuration values for maintainability
  */
 
+// Theme colors for StyleSheet usage (mirrors Tailwind config)
+// Use Tailwind classes (e.g., bg-gray-950) when possible
+// Use these constants only in StyleSheet.create() objects
+export const COLORS = {
+  // Backgrounds
+  background: '#030712', // gray-950 - main app background
+  surface: '#111827', // gray-900 - card backgrounds
+  surfaceLight: '#1f2937', // gray-800 - elevated surfaces
+
+  // Primary (Purple)
+  primary: '#8b5cf6', // primary-500
+  primaryDark: '#7c3aed', // primary-600
+  primaryLight: '#a78bfa', // primary-400
+
+  // Text
+  textPrimary: '#ffffff',
+  textSecondary: '#9ca3af', // gray-400
+  textMuted: '#6b7280', // gray-500
+
+  // Status
+  error: '#ef4444', // red-500
+  success: '#10b981', // emerald-500
+  warning: '#f59e0b', // amber-500
+  amber400: '#fbbf24', // amber-400 - morning icon
+} as const
+
 // Streak milestones that trigger confetti celebrations
 export const STREAK_MILESTONES = [7, 30, 100] as const
 export type StreakMilestone = (typeof STREAK_MILESTONES)[number]
@@ -37,3 +63,42 @@ export const PASSWORD_REQUIREMENTS = {
 
 // Auto-save debounce duration (in ms)
 export const AUTO_SAVE_DEBOUNCE_MS = 2000
+
+// Toast durations (in ms)
+export const TOAST_DURATION = {
+  short: 2000,
+  normal: 3000,
+} as const
+
+// Name validation requirements
+export const NAME_REQUIREMENTS = {
+  minLength: 2,
+  maxLength: 50,
+} as const
+
+// Time option type for reminder pickers
+export type TimeOption = {
+  readonly label: string
+  readonly value: string
+}
+
+// Morning reminder time options
+export const MORNING_TIME_OPTIONS: readonly TimeOption[] = [
+  { label: '7:00 AM', value: '07:00' },
+  { label: '8:00 AM', value: '08:00' },
+  { label: '9:00 AM', value: '09:00' },
+  { label: '10:00 AM', value: '10:00' },
+] as const
+
+// Evening reminder time options
+export const EVENING_TIME_OPTIONS: readonly TimeOption[] = [
+  { label: '5:00 PM', value: '17:00' },
+  { label: '6:00 PM', value: '18:00' },
+  { label: '7:00 PM', value: '19:00' },
+] as const
+
+// Default reminder times
+export const DEFAULT_REMINDER_TIMES = {
+  morning: '09:00',
+  evening: '18:00',
+} as const

@@ -30,6 +30,7 @@ const Stack = createNativeStackNavigator<OnboardingStackParamList>()
 export function OnboardingNavigator() {
   return (
     <Stack.Navigator
+      id="OnboardingStack"
       screenOptions={{
         headerShown: false,
         contentStyle: { backgroundColor: '#030712' },

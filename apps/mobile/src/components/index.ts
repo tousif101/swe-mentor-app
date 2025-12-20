@@ -1,4 +1,5 @@
 export { ProgressBar } from './ProgressBar'
+export { ReminderTimeSelector } from './ReminderTimeSelector'
 export { ChipSelector } from './ChipSelector'
 export type { Chip } from './ChipSelector'
 export { CustomTabBar } from './CustomTabBar'

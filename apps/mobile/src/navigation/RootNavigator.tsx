@@ -20,6 +20,7 @@ const AuthStack = createNativeStackNavigator<AuthStackParamList>()
 function AuthNavigator() {
   return (
     <AuthStack.Navigator
+      id="AuthStack"
       screenOptions={{
         headerShown: false,
         contentStyle: { backgroundColor: '#030712' },

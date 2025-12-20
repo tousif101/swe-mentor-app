@@ -29,6 +29,58 @@ import {
 import { useAuth } from '../../hooks/useAuth'
 import { getTimeOfDay } from '../../utils/checkInHelpers'
 import { logger } from '../../utils/logger'
+import { COLORS } from '../../constants'
+
+// Memoized header component to prevent unnecessary re-renders
+type JournalHeaderProps = {
+  hasEntries: boolean
+  searchQuery: string
+  onSearchChange: (query: string) => void
+  selectedTag: string | null
+  availableTags: string[]
+  onTagSelect: (tag: string | null) => void
+  resultsCount: number
+  hasActiveFilters: boolean
+}
+
+const JournalHeader = React.memo(function JournalHeader({
+  hasEntries,
+  searchQuery,
+  onSearchChange,
+  selectedTag,
+  availableTags,
+  onTagSelect,
+  resultsCount,
+  hasActiveFilters,
+}: JournalHeaderProps) {
+  return (
+    <>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.title}>Journal</Text>
+        <Text style={styles.subtitle}>Your past check-ins and reflections</Text>
+      </View>
+
+      {/* Search & Filters - only show if has entries */}
+      {hasEntries && (
+        <JournalSearch
+          searchQuery={searchQuery}
+          onSearchChange={onSearchChange}
+          selectedTag={selectedTag}
+          availableTags={availableTags}
+          onTagSelect={onTagSelect}
+        />
+      )}
+
+      {/* Results count */}
+      {hasActiveFilters && resultsCount > 0 && (
+        <Text style={styles.resultsCount}>
+          {resultsCount} {resultsCount === 1 ? 'entry' : 'entries'} match
+        </Text>
+      )}
+    </>
+  )
+})
 
 // Composite type for navigating from Tab to nested HomeStack
 type JournalScreenNavigationProp = CompositeNavigationProp<
@@ -191,31 +243,16 @@ export function JournalScreen() {
   }
 
   const renderHeader = useCallback(() => (
-    <>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.title}>Journal</Text>
-        <Text style={styles.subtitle}>Your past check-ins and reflections</Text>
-      </View>
-
-      {/* Search & Filters - only show if has entries */}
-      {checkIns.length > 0 && (
-        <JournalSearch
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          selectedTag={selectedTag}
-          availableTags={availableTags}
-          onTagSelect={setSelectedTag}
-        />
-      )}
-
-      {/* Results count */}
-      {(searchQuery || selectedTag) && dayGroups.length > 0 && (
-        <Text style={styles.resultsCount}>
-          {dayGroups.length} {dayGroups.length === 1 ? 'entry' : 'entries'} match
-        </Text>
-      )}
-    </>
+    <JournalHeader
+      hasEntries={checkIns.length > 0}
+      searchQuery={searchQuery}
+      onSearchChange={setSearchQuery}
+      selectedTag={selectedTag}
+      availableTags={availableTags}
+      onTagSelect={setSelectedTag}
+      resultsCount={dayGroups.length}
+      hasActiveFilters={!!(searchQuery || selectedTag)}
+    />
   ), [checkIns.length, searchQuery, selectedTag, availableTags, dayGroups.length])
 
   if (loading) {
@@ -250,8 +287,8 @@ export function JournalScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={handleRefresh}
-            tintColor="#8b5cf6"
-            colors={['#8b5cf6']}
+            tintColor={COLORS.primary}
+            colors={[COLORS.primary]}
           />
         }
       />
@@ -262,11 +299,11 @@ export function JournalScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0f0d23',
+    backgroundColor: COLORS.background,
   },
   loadingContainer: {
     flex: 1,
-    backgroundColor: '#0f0d23',
+    backgroundColor: COLORS.background,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -279,41 +316,41 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   title: {
-    color: '#ffffff',
+    color: COLORS.textPrimary,
     fontSize: 28,
     fontWeight: 'bold',
   },
   subtitle: {
-    color: '#9ca3af',
+    color: COLORS.textSecondary,
     fontSize: 16,
     marginTop: 4,
   },
   resultsCount: {
-    color: '#6b7280',
+    color: COLORS.textMuted,
     fontSize: 14,
     marginBottom: 16,
   },
   errorContainer: {
     flex: 1,
-    backgroundColor: '#0f0d23',
+    backgroundColor: COLORS.background,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 24,
   },
   errorText: {
-    color: '#ef4444',
+    color: COLORS.error,
     fontSize: 16,
     marginBottom: 16,
     textAlign: 'center',
   },
   retryButton: {
-    backgroundColor: '#8b5cf6',
+    backgroundColor: COLORS.primary,
     paddingHorizontal: 24,
     paddingVertical: 12,
     borderRadius: 12,
   },
   retryButtonText: {
-    color: '#ffffff',
+    color: COLORS.textPrimary,
     fontSize: 16,
     fontWeight: '600',
   },

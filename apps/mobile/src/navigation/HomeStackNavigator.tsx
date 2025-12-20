@@ -31,6 +31,7 @@ const Stack = createNativeStackNavigator<HomeStackParamList>()
 export function HomeStackNavigator() {
   return (
     <Stack.Navigator
+      id="HomeStack"
       screenOptions={{
         headerShown: true,
         headerStyle: {
