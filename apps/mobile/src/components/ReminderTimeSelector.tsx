@@ -1,6 +1,6 @@
 import { View, Text, Pressable, Switch } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
-import Animated, { FadeIn, FadeOut, Layout } from 'react-native-reanimated'
+// TODO: Re-enable after native rebuild - Animated, { FadeIn, FadeOut, Layout } from 'react-native-reanimated'
 import { COLORS, type TimeOption } from '../constants'
 
 type ReminderType = 'morning' | 'evening'
@@ -18,7 +18,7 @@ type Props = {
 const REMINDER_CONFIG = {
   morning: {
     icon: 'sunny' as const,
-    iconColor: '#fbbf24', // amber-400
+    iconColor: COLORS.amber400,
     title: 'Morning Check-in',
     subtitle: 'Set your daily intentions',
   },
@@ -63,17 +63,15 @@ export function ReminderTimeSelector({
           trackColor={{ false: '#374151', true: COLORS.primaryDark }}
           thumbColor={COLORS.textPrimary}
           ios_backgroundColor="#374151"
+          accessibilityLabel={`${config.title} reminder toggle`}
+          accessibilityRole="switch"
+          accessibilityState={{ checked: enabled }}
         />
       </View>
 
-      {/* Time picker chips - animated */}
+      {/* Time picker chips */}
       {enabled && (
-        <Animated.View
-          entering={FadeIn.duration(200)}
-          exiting={FadeOut.duration(150)}
-          layout={Layout.springify()}
-          className="flex-row flex-wrap gap-2"
-        >
+        <View className="flex-row flex-wrap gap-2">
           {timeOptions.map((time) => (
             <TimeChip
               key={time.value}
@@ -82,7 +80,7 @@ export function ReminderTimeSelector({
               onPress={() => onTimeChange(time.value)}
             />
           ))}
-        </Animated.View>
+        </View>
       )}
     </View>
   )
@@ -98,6 +96,9 @@ function TimeChip({ label, selected, onPress }: TimeChipProps) {
   return (
     <Pressable
       onPress={onPress}
+      accessibilityLabel={`${label} reminder time`}
+      accessibilityRole="button"
+      accessibilityState={{ selected }}
       className={`px-4 py-2.5 rounded-xl border ${
         selected
           ? 'bg-primary-600/20 border-primary-600'

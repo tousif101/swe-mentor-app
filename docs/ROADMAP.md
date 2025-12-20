@@ -74,23 +74,24 @@ This document tracks completed features, current work, and planned features for 
 - [x] Delete check-in functionality with confirmation
 - [x] Auto-save hook extraction (useCheckInAutoSave)
 
+### Phase 9: Profile Settings (Complete)
+- [x] Edit Profile screen (name editing with validation)
+- [x] Career Goal screen (role + target role with focus area preview)
+- [x] Reminder Settings screen (morning/evening times + push toggle)
+- [x] Profile stack navigation wired up
+- [x] Haptic feedback utilities
+
 ---
 
-## Current Focus: Profile & Notifications
+## Current Focus: Push Notifications
 
-Completing the profile section and enabling reminders.
+Enabling actual push notifications for reminders.
 
 ---
 
 ## Upcoming Features (Priority Order)
 
-### 1. Profile Settings (Next Up)
-- [ ] Edit Profile screen (name, role, target role)
-- [ ] Change reminder times screen
-- [ ] Wire up settings buttons to navigate to screens
-- [ ] Sign out confirmation dialog (already works, could add confirmation)
-
-### 2. Push Notifications
+### 1. Push Notifications
 - [ ] Expo push notification setup
 - [ ] Request notification permissions
 - [ ] Morning reminder at user's chosen time
@@ -98,11 +99,11 @@ Completing the profile section and enabling reminders.
 - [ ] Streak reminders (don't break your streak!)
 - [ ] Store push token in Supabase
 
-### 3. UI Polish
+### 2. UI Polish
 - [x] Fix Journal background color (now uses `COLORS.background` constant)
 - [ ] Consistent styling across all screens
 
-### 4. Insights Screen - Real Data
+### 3. Insights Screen - Real Data
 - [ ] Replace placeholder with actual stats
 - [ ] Total check-ins count
 - [ ] Current/longest streak display
@@ -110,29 +111,37 @@ Completing the profile section and enabling reminders.
 - [ ] Energy level trends
 - [ ] Weekly/monthly completion rate
 
-### 5. AI Mentor Chat
+### 4. AI Mentor Chat
 - [ ] Chat interface
 - [ ] Socratic questioning prompts
 - [ ] Context from recent check-ins
 - [ ] Career advice based on focus areas
 
-### 6. Voice Input
+### 5. Voice Input
 - [ ] Speech-to-text for check-in fields
 - [ ] Microphone button on input fields
 - [ ] Transcription preview before save
 
-### 7. Advanced Insights
+### 6. Advanced Insights
 - [ ] Weekly summary generation
 - [ ] Monthly progress report
 - [ ] Focus area improvement tracking
 - [ ] AI-generated recommendations
+
+### 7. Twilio SMS Reminders
+- [ ] Twilio account setup + API integration
+- [ ] Phone number collection in profile/onboarding
+- [ ] SMS opt-in/opt-out toggle in settings
+- [ ] Morning reminder SMS at user's chosen time
+- [ ] Evening reminder SMS at user's chosen time
+- [ ] SMS-based check-in replies (reply to log entry)
+- [ ] Streak warning SMS ("Don't break your 7-day streak!")
 
 ---
 
 ## Deferred / Future
 
 - Calendar view for journal navigation
-- SMS journaling (Twilio integration)
 - Quarterly/yearly goal setting
 - Team features (manager view)
 - Web app check-ins
@@ -202,7 +211,13 @@ Completing the profile section and enabling reminders.
 - Created `user_notification_settings` table
 - PR #7 merged
 
+- Completed Profile Settings (Phase 9)
+  - EditProfileScreen with name validation
+  - CareerGoalScreen with role pickers + focus area preview
+  - ReminderSettingsScreen with time selection + push toggle
+  - Fixed upsert conflict for notification settings
+  - Removed react-native-reanimated temporarily (Worklets mismatch)
+
 ### Next Session
-- Complete Profile Settings screens (Edit Profile, Reminders)
-- Wire up profile settings navigation
-- Start push notification setup
+- Start push notification implementation
+- Consider Insights Screen with real data

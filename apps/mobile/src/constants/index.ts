@@ -26,6 +26,7 @@ export const COLORS = {
   error: '#ef4444', // red-500
   success: '#10b981', // emerald-500
   warning: '#f59e0b', // amber-500
+  amber400: '#fbbf24', // amber-400 - morning icon
 } as const
 
 // Streak milestones that trigger confetti celebrations

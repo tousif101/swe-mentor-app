@@ -56,52 +56,62 @@ export function ReminderSettingsScreen({ navigation }: Props) {
 
   const [initialSettings, setInitialSettings] = useState<SettingsState>(settings)
 
-  const loadSettings = useCallback(async () => {
-    if (!user?.id) return
+  // Load current settings from database with cleanup to prevent memory leak
+  useEffect(() => {
+    let isMounted = true
 
-    try {
-      setIsLoading(true)
+    const load = async () => {
+      if (!user?.id) return
 
-      const { data, error } = await supabase
-        .from('user_notification_settings')
-        .select('*')
-        .eq('user_id', user.id)
-        .single()
+      try {
+        setIsLoading(true)
 
-      if (error && error.code !== 'PGRST116') {
-        // PGRST116 = no rows returned, which is okay (user hasn't saved settings yet)
-        logger.error('Error loading notification settings:', error)
-        return
-      }
+        const { data, error } = await supabase
+          .from('user_notification_settings')
+          .select('*')
+          .eq('user_id', user.id)
+          .single()
 
-      if (data) {
-        // Remove :00 suffix from time if present (database stores time with seconds)
-        const morningTime = data.morning_time?.substring(0, 5) || DEFAULT_REMINDER_TIMES.morning
-        const eveningTime = data.evening_time?.substring(0, 5) || DEFAULT_REMINDER_TIMES.evening
+        if (!isMounted) return
 
-        const loadedSettings: SettingsState = {
-          morningEnabled: data.morning_enabled ?? true,
-          morningTime,
-          eveningEnabled: data.evening_enabled ?? true,
-          eveningTime,
-          pushEnabled: data.push_enabled ?? true,
-          timezone: data.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+        if (error && error.code !== 'PGRST116') {
+          logger.error('Error loading notification settings:', error)
+          return
         }
 
-        setSettings(loadedSettings)
-        setInitialSettings(loadedSettings)
+        if (data) {
+          const morningTime = data.morning_time?.substring(0, 5) || DEFAULT_REMINDER_TIMES.morning
+          const eveningTime = data.evening_time?.substring(0, 5) || DEFAULT_REMINDER_TIMES.evening
+
+          const loadedSettings: SettingsState = {
+            morningEnabled: data.morning_enabled ?? true,
+            morningTime,
+            eveningEnabled: data.evening_enabled ?? true,
+            eveningTime,
+            pushEnabled: data.push_enabled ?? true,
+            timezone: data.timezone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+          }
+
+          setSettings(loadedSettings)
+          setInitialSettings(loadedSettings)
+        }
+      } catch (err) {
+        if (isMounted) {
+          logger.error('Error loading settings:', err)
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false)
+        }
       }
-    } catch (err) {
-      logger.error('Error loading settings:', err)
-    } finally {
-      setIsLoading(false)
+    }
+
+    load()
+
+    return () => {
+      isMounted = false
     }
   }, [user?.id])
-
-  // Load current settings from database
-  useEffect(() => {
-    loadSettings()
-  }, [loadSettings])
 
   // Check if settings have changed
   useEffect(() => {
@@ -175,15 +185,18 @@ export function ReminderSettingsScreen({ navigation }: Props) {
       // Add :00 suffix to times for database storage (time without timezone format)
       const { error } = await supabase
         .from('user_notification_settings')
-        .upsert({
-          user_id: user.id,
-          morning_enabled: settings.morningEnabled,
-          morning_time: `${settings.morningTime}:00`,
-          evening_enabled: settings.eveningEnabled,
-          evening_time: `${settings.eveningTime}:00`,
-          push_enabled: settings.pushEnabled,
-          timezone: settings.timezone,
-        })
+        .upsert(
+          {
+            user_id: user.id,
+            morning_enabled: settings.morningEnabled,
+            morning_time: `${settings.morningTime}:00`,
+            evening_enabled: settings.eveningEnabled,
+            evening_time: `${settings.eveningTime}:00`,
+            push_enabled: settings.pushEnabled,
+            timezone: settings.timezone,
+          },
+          { onConflict: 'user_id' }
+        )
 
       if (error) {
         logger.error('Error saving notification settings:', error)
@@ -217,7 +230,7 @@ export function ReminderSettingsScreen({ navigation }: Props) {
 
   return (
     <View className="flex-1 bg-gray-950">
-      <ScrollView className="flex-1 px-6 pt-4" showsVerticalScrollIndicator={false}>
+      <ScrollView className="flex-1 px-6 pt-14" showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View className="mb-6">
           <View className="flex-row items-center mb-2">

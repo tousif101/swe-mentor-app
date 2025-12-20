@@ -31,6 +31,57 @@ import { getTimeOfDay } from '../../utils/checkInHelpers'
 import { logger } from '../../utils/logger'
 import { COLORS } from '../../constants'
 
+// Memoized header component to prevent unnecessary re-renders
+type JournalHeaderProps = {
+  hasEntries: boolean
+  searchQuery: string
+  onSearchChange: (query: string) => void
+  selectedTag: string | null
+  availableTags: string[]
+  onTagSelect: (tag: string | null) => void
+  resultsCount: number
+  hasActiveFilters: boolean
+}
+
+const JournalHeader = React.memo(function JournalHeader({
+  hasEntries,
+  searchQuery,
+  onSearchChange,
+  selectedTag,
+  availableTags,
+  onTagSelect,
+  resultsCount,
+  hasActiveFilters,
+}: JournalHeaderProps) {
+  return (
+    <>
+      {/* Header */}
+      <View style={styles.header}>
+        <Text style={styles.title}>Journal</Text>
+        <Text style={styles.subtitle}>Your past check-ins and reflections</Text>
+      </View>
+
+      {/* Search & Filters - only show if has entries */}
+      {hasEntries && (
+        <JournalSearch
+          searchQuery={searchQuery}
+          onSearchChange={onSearchChange}
+          selectedTag={selectedTag}
+          availableTags={availableTags}
+          onTagSelect={onTagSelect}
+        />
+      )}
+
+      {/* Results count */}
+      {hasActiveFilters && resultsCount > 0 && (
+        <Text style={styles.resultsCount}>
+          {resultsCount} {resultsCount === 1 ? 'entry' : 'entries'} match
+        </Text>
+      )}
+    </>
+  )
+})
+
 // Composite type for navigating from Tab to nested HomeStack
 type JournalScreenNavigationProp = CompositeNavigationProp<
   BottomTabNavigationProp<MainTabParamList, 'JournalTab'>,
@@ -192,31 +243,16 @@ export function JournalScreen() {
   }
 
   const renderHeader = useCallback(() => (
-    <>
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.title}>Journal</Text>
-        <Text style={styles.subtitle}>Your past check-ins and reflections</Text>
-      </View>
-
-      {/* Search & Filters - only show if has entries */}
-      {checkIns.length > 0 && (
-        <JournalSearch
-          searchQuery={searchQuery}
-          onSearchChange={setSearchQuery}
-          selectedTag={selectedTag}
-          availableTags={availableTags}
-          onTagSelect={setSelectedTag}
-        />
-      )}
-
-      {/* Results count */}
-      {(searchQuery || selectedTag) && dayGroups.length > 0 && (
-        <Text style={styles.resultsCount}>
-          {dayGroups.length} {dayGroups.length === 1 ? 'entry' : 'entries'} match
-        </Text>
-      )}
-    </>
+    <JournalHeader
+      hasEntries={checkIns.length > 0}
+      searchQuery={searchQuery}
+      onSearchChange={setSearchQuery}
+      selectedTag={selectedTag}
+      availableTags={availableTags}
+      onTagSelect={setSelectedTag}
+      resultsCount={dayGroups.length}
+      hasActiveFilters={!!(searchQuery || selectedTag)}
+    />
   ), [checkIns.length, searchQuery, selectedTag, availableTags, dayGroups.length])
 
   if (loading) {

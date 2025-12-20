@@ -13,6 +13,7 @@ const Stack = createNativeStackNavigator<ProfileStackParamList>()
 export function ProfileStackNavigator() {
   return (
     <Stack.Navigator
+      id="ProfileStack"
       screenOptions={{
         headerShown: false,
         contentStyle: { backgroundColor: COLORS.background },
@@ -26,5 +27,3 @@ export function ProfileStackNavigator() {
     </Stack.Navigator>
   )
 }
-
-export type { ProfileStackParamList }

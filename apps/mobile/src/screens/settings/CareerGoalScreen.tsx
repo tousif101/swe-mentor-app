@@ -12,7 +12,7 @@ import {
 } from 'react-native'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { Ionicons } from '@expo/vector-icons'
-import Animated, { FadeIn, Layout } from 'react-native-reanimated'
+// TODO: Re-enable after native rebuild - Animated, { FadeIn, Layout } from 'react-native-reanimated'
 import { useProfileContext } from '../../contexts'
 import { supabase } from '../../lib/supabase'
 import { ROLE_CONFIG, getFocusAreas, type DbRole, getValidTargetRoles, ROLES_ORDERED } from '../../lib/roleMapping'
@@ -63,46 +63,48 @@ export function CareerGoalScreen({ navigation }: Props) {
     return currentRole ? getValidTargetRoles(currentRole) : ROLES_ORDERED
   }, [currentRole])
 
-  // Handle role selection with ActionSheetIOS on iOS, Alert on Android
-  const handleCurrentRolePress = useCallback(() => {
-    if (Platform.OS === 'ios') {
-      ActionSheetIOS.showActionSheetWithOptions(
-        {
-          title: 'Select your current role',
-          options: [...roleOptions.map((r) => r.label), 'Cancel'],
-          cancelButtonIndex: roleOptions.length,
-        },
-        (buttonIndex) => {
-          if (buttonIndex < roleOptions.length) {
-            const selected = roleOptions[buttonIndex].value
-            setCurrentRole(selected)
-            // Auto-update target role if it becomes invalid
-            if (targetRole && ROLE_CONFIG[targetRole].index < ROLE_CONFIG[selected].index) {
-              setTargetRole(selected)
+  // Reusable role picker that handles platform differences
+  const showRolePicker = useCallback(
+    (
+      title: string,
+      options: Array<{ value: DbRole; label: string }>,
+      onSelect: (role: DbRole) => void
+    ) => {
+      if (Platform.OS === 'ios') {
+        ActionSheetIOS.showActionSheetWithOptions(
+          {
+            title,
+            options: [...options.map((r) => r.label), 'Cancel'],
+            cancelButtonIndex: options.length,
+          },
+          (buttonIndex) => {
+            if (buttonIndex < options.length) {
+              onSelect(options[buttonIndex].value)
             }
           }
-        }
-      )
-    } else {
-      Alert.alert(
-        'Select your current role',
-        undefined,
-        [
-          ...roleOptions.map((r) => ({
+        )
+      } else {
+        Alert.alert(title, undefined, [
+          ...options.map((r) => ({
             text: r.label,
-            onPress: () => {
-              setCurrentRole(r.value)
-              // Auto-update target role if it becomes invalid
-              if (targetRole && ROLE_CONFIG[targetRole].index < ROLE_CONFIG[r.value].index) {
-                setTargetRole(r.value)
-              }
-            },
+            onPress: () => onSelect(r.value),
           })),
           { text: 'Cancel', style: 'cancel' },
-        ]
-      )
-    }
-  }, [roleOptions, targetRole])
+        ])
+      }
+    },
+    []
+  )
+
+  const handleCurrentRolePress = useCallback(() => {
+    showRolePicker('Select your current role', roleOptions, (selected) => {
+      setCurrentRole(selected)
+      // Auto-update target role if it becomes invalid
+      if (targetRole && ROLE_CONFIG[targetRole].index < ROLE_CONFIG[selected].index) {
+        setTargetRole(selected)
+      }
+    })
+  }, [showRolePicker, roleOptions, targetRole])
 
   const handleTargetRolePress = useCallback(() => {
     if (!currentRole) return
@@ -112,33 +114,8 @@ export function CareerGoalScreen({ navigation }: Props) {
       label: ROLE_CONFIG[role].label,
     }))
 
-    if (Platform.OS === 'ios') {
-      ActionSheetIOS.showActionSheetWithOptions(
-        {
-          title: 'Select your target role',
-          options: [...validOptions.map((r) => r.label), 'Cancel'],
-          cancelButtonIndex: validOptions.length,
-        },
-        (buttonIndex) => {
-          if (buttonIndex < validOptions.length) {
-            setTargetRole(validOptions[buttonIndex].value)
-          }
-        }
-      )
-    } else {
-      Alert.alert(
-        'Select your target role',
-        undefined,
-        [
-          ...validOptions.map((r) => ({
-            text: r.label,
-            onPress: () => setTargetRole(r.value),
-          })),
-          { text: 'Cancel', style: 'cancel' },
-        ]
-      )
-    }
-  }, [currentRole, validTargetRoles])
+    showRolePicker('Select your target role', validOptions, setTargetRole)
+  }, [currentRole, validTargetRoles, showRolePicker])
 
   const handleSave = useCallback(async () => {
     if (!hasChanges || !currentRole || !targetRole) return
@@ -255,11 +232,7 @@ export function CareerGoalScreen({ navigation }: Props) {
 
         {/* Focus Areas Preview */}
         {focusAreasPreview.length > 0 && (
-          <Animated.View
-            entering={FadeIn.duration(300)}
-            layout={Layout.springify()}
-            style={styles.previewCard}
-          >
+          <View style={styles.previewCard}>
             <View style={styles.previewHeader}>
               <Ionicons name="flag-outline" size={20} color={COLORS.primary} />
               <Text style={styles.previewTitle}>Your Focus Areas</Text>
@@ -269,17 +242,13 @@ export function CareerGoalScreen({ navigation }: Props) {
               {targetRole && ROLE_CONFIG[targetRole].label}
             </Text>
             <View style={styles.chipContainer}>
-              {focusAreasPreview.map((area, index) => (
-                <Animated.View
-                  key={area}
-                  entering={FadeIn.duration(300).delay(index * 50)}
-                  style={styles.chip}
-                >
+              {focusAreasPreview.map((area) => (
+                <View key={area} style={styles.chip}>
                   <Text style={styles.chipText}>{area}</Text>
-                </Animated.View>
+                </View>
               ))}
             </View>
-          </Animated.View>
+          </View>
         )}
 
         {/* Save Button */}

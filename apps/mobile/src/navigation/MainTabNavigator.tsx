@@ -1,7 +1,8 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { getFocusedRouteNameFromRoute, NavigatorScreenParams } from '@react-navigation/native'
 import { HomeStackNavigator, HomeStackParamList } from './HomeStackNavigator'
-import { ProfileStackNavigator, ProfileStackParamList } from './ProfileStackNavigator'
+import { ProfileStackNavigator } from './ProfileStackNavigator'
+import type { ProfileStackParamList } from '../types'
 import { JournalScreen } from '../screens/main/JournalScreen'
 import { InsightsScreen } from '../screens/main/InsightsScreen'
 import { CustomTabBar } from '../components/CustomTabBar'
@@ -27,6 +28,7 @@ const HIDDEN_TAB_BAR_SCREENS = [
 export function MainTabNavigator() {
   return (
     <Tab.Navigator
+      id="MainTabs"
       tabBar={(props) => {
         // Check if current route should hide tab bar
         const route = props.state.routes[props.state.index]
