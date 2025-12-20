@@ -328,10 +328,13 @@ export type Database = {
           evening_enabled: boolean | null
           evening_time: string | null
           id: string
+          last_evening_notification_at: string | null
+          last_morning_notification_at: string | null
           morning_enabled: boolean | null
           morning_time: string | null
           phone_number: string | null
           push_enabled: boolean | null
+          push_token: string | null
           sms_enabled: boolean | null
           timezone: string | null
           updated_at: string | null
@@ -345,10 +348,13 @@ export type Database = {
           evening_enabled?: boolean | null
           evening_time?: string | null
           id?: string
+          last_evening_notification_at?: string | null
+          last_morning_notification_at?: string | null
           morning_enabled?: boolean | null
           morning_time?: string | null
           phone_number?: string | null
           push_enabled?: boolean | null
+          push_token?: string | null
           sms_enabled?: boolean | null
           timezone?: string | null
           updated_at?: string | null
@@ -362,10 +368,13 @@ export type Database = {
           evening_enabled?: boolean | null
           evening_time?: string | null
           id?: string
+          last_evening_notification_at?: string | null
+          last_morning_notification_at?: string | null
           morning_enabled?: boolean | null
           morning_time?: string | null
           phone_number?: string | null
           push_enabled?: boolean | null
+          push_token?: string | null
           sms_enabled?: boolean | null
           timezone?: string | null
           updated_at?: string | null
@@ -388,7 +397,28 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_due_evening_reminders: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          push_token: string
+          user_id: string
+        }[]
+      }
+      get_due_morning_reminders: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          push_token: string
+          user_id: string
+        }[]
+      }
+      mark_evening_notifications_sent: {
+        Args: { user_ids: string[] }
+        Returns: undefined
+      }
+      mark_morning_notifications_sent: {
+        Args: { user_ids: string[] }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never
