@@ -39,6 +39,13 @@ type UsePushNotificationsReturn = {
  * Hook to manage push notification registration and handling.
  * Automatically registers for push notifications when user is authenticated.
  * Stores push token in Supabase for server-side notification sending.
+ *
+ * TODO(security): Token duplication not prevented at DB level - consider adding
+ *   unique constraint or partial unique index on push_token column
+ * TODO(ux): Missing permission re-request UI guidance - when permission is denied,
+ *   provide users with instructions to enable in device settings
+ * TODO(cleanup): Missing token invalidation on logout - clear push_token from DB
+ *   when user logs out to prevent notifications to wrong user
  */
 export function usePushNotifications(
   options: UsePushNotificationsOptions = {}
@@ -53,6 +60,8 @@ export function usePushNotifications(
   // Refs for subscription cleanup
   const notificationListenerRef = useRef<EventSubscription | null>(null)
   const responseListenerRef = useRef<EventSubscription | null>(null)
+  // Ref to avoid recreating AppState listener when token changes
+  const expoPushTokenRef = useRef<string | null>(null)
 
   /**
    * Register for push notifications and get Expo push token
@@ -103,6 +112,7 @@ export function usePushNotifications(
       logger.info('[usePushNotifications] Got push token:', tokenData.data)
 
       // Set up Android notification channel
+      // TODO(robustness): Wrap in try-catch - channel creation failure shouldn't block registration
       if (Platform.OS === 'android') {
         await Notifications.setNotificationChannelAsync(
           PUSH_NOTIFICATION_CONFIG.channelId,
@@ -159,11 +169,19 @@ export function usePushNotifications(
    */
   const handleNotificationResponse = useCallback(
     (response: Notifications.NotificationResponse) => {
-      const data = response.notification.request.content.data as NotificationData
+      const rawData = response.notification.request.content.data
+
+      // Runtime validation - ensure data is a valid object
+      if (!rawData || typeof rawData !== 'object') {
+        logger.warn('[usePushNotifications] Invalid notification data:', rawData)
+        return
+      }
+
+      const data = rawData as NotificationData
 
       logger.info('[usePushNotifications] Notification tapped:', data)
 
-      if (onNotificationTap && data) {
+      if (onNotificationTap) {
         onNotificationTap(data)
       }
     },
@@ -182,7 +200,10 @@ export function usePushNotifications(
         return true
       }
       return false
-    } catch {
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Permission request failed')
+      logger.error('[usePushNotifications] Permission request failed:', error)
+      setError(error)
       return false
     }
   }, [registerForPushNotifications, savePushToken])
@@ -228,7 +249,9 @@ export function usePushNotifications(
     return () => {
       isMounted = false
     }
-  }, [user?.id, registerForPushNotifications, savePushToken, isRegistering])
+  // NOTE: isRegistering intentionally excluded from deps to prevent infinite loops
+  // The guard check inside register() is sufficient to prevent duplicate registrations
+  }, [user?.id, registerForPushNotifications, savePushToken])
 
   // Set up notification listeners
   useEffect(() => {
@@ -257,19 +280,28 @@ export function usePushNotifications(
     }
   }, [handleNotificationResponse])
 
+  // Keep ref in sync with state to avoid recreating listener
+  expoPushTokenRef.current = expoPushToken
+
   // Handle app state changes - refresh token when app becomes active
   useEffect(() => {
     const handleAppStateChange = async (nextAppState: AppStateStatus) => {
-      if (nextAppState === 'active' && user?.id && expoPushToken) {
+      // Capture userId at start for null safety during async operations
+      const currentUserId = user?.id
+      const currentToken = expoPushTokenRef.current
+
+      if (nextAppState === 'active' && currentUserId && currentToken) {
         // Token might have changed, re-register
         try {
           const token = await registerForPushNotifications()
-          if (token && token !== expoPushToken) {
+          // Check user still logged in before saving
+          if (token && token !== currentToken && user?.id === currentUserId) {
             setExpoPushToken(token)
             await savePushToken(token)
           }
         } catch (err) {
           logger.error('[usePushNotifications] Token refresh failed:', err)
+          setError(err instanceof Error ? err : new Error('Token refresh failed'))
         }
       }
     }
@@ -279,7 +311,8 @@ export function usePushNotifications(
     return () => {
       subscription.remove()
     }
-  }, [user?.id, expoPushToken, registerForPushNotifications, savePushToken])
+  // NOTE: expoPushToken excluded - using ref to avoid listener recreation
+  }, [user?.id, registerForPushNotifications, savePushToken])
 
   return {
     expoPushToken,

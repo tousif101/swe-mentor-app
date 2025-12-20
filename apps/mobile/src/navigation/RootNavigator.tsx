@@ -1,4 +1,5 @@
 import { useRef, useCallback } from 'react'
+import { logger } from '../utils'
 import { NavigationContainer, NavigationContainerRef } from '@react-navigation/native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { View, ActivityIndicator } from 'react-native'
@@ -56,16 +57,28 @@ function RootNavigatorContent() {
       return
     }
 
+    // Validate data object
+    if (!data || !data.screen) {
+      logger.warn('[RootNavigator] Notification tapped without screen data')
+      return
+    }
+
     // Only navigate if user is authenticated and onboarded
     if (session && profile?.onboarding_completed) {
-      if (data.screen === 'MorningCheckIn') {
-        navigationRef.current.navigate('HomeTab', {
-          screen: 'MorningCheckIn',
-        })
-      } else if (data.screen === 'EveningCheckIn') {
-        navigationRef.current.navigate('HomeTab', {
-          screen: 'EveningCheckIn',
-        })
+      try {
+        if (data.screen === 'MorningCheckIn') {
+          navigationRef.current.navigate('HomeTab', {
+            screen: 'MorningCheckIn',
+          })
+        } else if (data.screen === 'EveningCheckIn') {
+          navigationRef.current.navigate('HomeTab', {
+            screen: 'EveningCheckIn',
+          })
+        } else {
+          logger.warn('[RootNavigator] Unknown screen:', data.screen)
+        }
+      } catch (err) {
+        logger.error('[RootNavigator] Navigation failed:', err)
       }
     }
   }, [session, profile?.onboarding_completed])
