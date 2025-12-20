@@ -1,22 +1,28 @@
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { getFocusedRouteNameFromRoute, NavigatorScreenParams } from '@react-navigation/native'
 import { HomeStackNavigator, HomeStackParamList } from './HomeStackNavigator'
+import { ProfileStackNavigator, ProfileStackParamList } from './ProfileStackNavigator'
 import { JournalScreen } from '../screens/main/JournalScreen'
 import { InsightsScreen } from '../screens/main/InsightsScreen'
-import { ProfileScreen } from '../screens/main/ProfileScreen'
 import { CustomTabBar } from '../components/CustomTabBar'
 
 export type MainTabParamList = {
   HomeTab: NavigatorScreenParams<HomeStackParamList> | undefined
   JournalTab: undefined
   InsightsTab: undefined
-  ProfileTab: undefined
+  ProfileTab: NavigatorScreenParams<ProfileStackParamList> | undefined
 }
 
 const Tab = createBottomTabNavigator<MainTabParamList>()
 
 // Screens where tab bar should be hidden
-const HIDDEN_TAB_BAR_SCREENS = ['MorningCheckIn', 'EveningCheckIn']
+const HIDDEN_TAB_BAR_SCREENS = [
+  'MorningCheckIn',
+  'EveningCheckIn',
+  'EditProfile',
+  'CareerGoal',
+  'ReminderSettings',
+]
 
 export function MainTabNavigator() {
   return (
@@ -39,7 +45,7 @@ export function MainTabNavigator() {
       <Tab.Screen name="HomeTab" component={HomeStackNavigator} />
       <Tab.Screen name="JournalTab" component={JournalScreen} />
       <Tab.Screen name="InsightsTab" component={InsightsScreen} />
-      <Tab.Screen name="ProfileTab" component={ProfileScreen} />
+      <Tab.Screen name="ProfileTab" component={ProfileStackNavigator} />
     </Tab.Navigator>
   )
 }

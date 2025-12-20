@@ -1,11 +1,17 @@
 import { View, Text, ScrollView, Pressable } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
+import { useNavigation } from '@react-navigation/native'
+import { NativeStackNavigationProp } from '@react-navigation/native-stack'
 import { useAuth } from '../../hooks'
 import { useProfileContext } from '../../contexts'
 import { supabase } from '../../lib/supabase'
 import { ROLE_CONFIG, type DbRole } from '../../lib/roleMapping'
+import type { ProfileStackParamList } from '../../types'
+
+type ProfileNavigation = NativeStackNavigationProp<ProfileStackParamList, 'ProfileMain'>
 
 export function ProfileScreen() {
+  const navigation = useNavigation<ProfileNavigation>()
   const { user } = useAuth()
   const { profile } = useProfileContext()
 
@@ -69,26 +75,35 @@ export function ProfileScreen() {
 
           {/* Settings Items */}
           <View className="bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden">
-            <Pressable className="flex-row items-center justify-between px-4 py-4 border-b border-gray-800">
-              <View className="flex-row items-center">
-                <Ionicons name="notifications-outline" size={24} color="#8b5cf6" />
-                <Text className="text-white ml-3">Notifications</Text>
-              </View>
-              <Ionicons name="chevron-forward" size={20} color="#6b7280" />
-            </Pressable>
-
-            <Pressable className="flex-row items-center justify-between px-4 py-4 border-b border-gray-800">
-              <View className="flex-row items-center">
-                <Ionicons name="time-outline" size={24} color="#8b5cf6" />
-                <Text className="text-white ml-3">Reminders</Text>
-              </View>
-              <Ionicons name="chevron-forward" size={20} color="#6b7280" />
-            </Pressable>
-
-            <Pressable className="flex-row items-center justify-between px-4 py-4 border-b border-gray-800">
+            <Pressable
+              onPress={() => navigation.navigate('EditProfile')}
+              className="flex-row items-center justify-between px-4 py-4 border-b border-gray-800"
+            >
               <View className="flex-row items-center">
                 <Ionicons name="person-outline" size={24} color="#8b5cf6" />
                 <Text className="text-white ml-3">Edit Profile</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color="#6b7280" />
+            </Pressable>
+
+            <Pressable
+              onPress={() => navigation.navigate('CareerGoal')}
+              className="flex-row items-center justify-between px-4 py-4 border-b border-gray-800"
+            >
+              <View className="flex-row items-center">
+                <Ionicons name="rocket-outline" size={24} color="#8b5cf6" />
+                <Text className="text-white ml-3">Career Goal</Text>
+              </View>
+              <Ionicons name="chevron-forward" size={20} color="#6b7280" />
+            </Pressable>
+
+            <Pressable
+              onPress={() => navigation.navigate('ReminderSettings')}
+              className="flex-row items-center justify-between px-4 py-4 border-b border-gray-800"
+            >
+              <View className="flex-row items-center">
+                <Ionicons name="notifications-outline" size={24} color="#8b5cf6" />
+                <Text className="text-white ml-3">Reminders</Text>
               </View>
               <Ionicons name="chevron-forward" size={20} color="#6b7280" />
             </Pressable>

@@ -1,6 +1,6 @@
 # SWE Mentor App - Development Roadmap
 
-**Last Updated:** 2025-12-17
+**Last Updated:** 2025-12-19
 
 ## Overview
 
@@ -55,59 +55,60 @@ This document tracks completed features, current work, and planned features for 
 - [x] WeekProgress - glass border, animated fill
 - [x] InsightsPreview - purple-tinted glass border
 - [x] HomeScreen - ambient glow background
-- [x] PR #9 created
+- [x] PR #9 merged
+
+### Phase 7: Journal Entries List (Complete)
+- [x] Day-card component (collapsed/expanded with Chevron)
+- [x] Search bar with debounced input
+- [x] Hashtag filter chips (auto-generated from focus areas)
+- [x] Empty states (no entries, no search results)
+- [x] Group check-ins by day (morning + evening)
+- [x] Pull-to-refresh
+- [x] Loading skeletons
+
+### Phase 8: ContinueCard & Edit Journal (Complete)
+- [x] ContinueCard wired to detect partial check-ins
+- [x] Edit check-in screen with auto-save
+- [x] Navigate from ContinueCard to edit screen
+- [x] Navigate from DayCard to view/edit entries
+- [x] Delete check-in functionality with confirmation
+- [x] Auto-save hook extraction (useCheckInAutoSave)
 
 ---
 
-## Current Focus: Journal Entries List
+## Current Focus: Profile & Notifications
 
-Design complete - ready for implementation.
-
-### Features
-- [x] Design document created (`docs/plans/2025-12-17-journal-entries-list-design.md`)
-- [ ] Day-card component (collapsed/expanded)
-- [ ] Search bar with debounced input
-- [ ] Hashtag filter chips (auto-generated from focus areas)
-- [ ] Empty states (no entries, no results)
-- [ ] Group check-ins by day (morning + evening)
-- [ ] Pull-to-refresh
-- [ ] Loading skeletons
-
-### Design Decisions
-- Timeline feed of day-cards, newest first
-- Each day shows morning + evening grouped together
-- Focus area becomes hashtag (e.g., #system-design)
-- Search + filter always visible at top
-- Tap card to expand, see full details
-- Gentle "Evening not logged" for partial days (no guilt)
+Completing the profile section and enabling reminders.
 
 ---
 
 ## Upcoming Features (Priority Order)
 
-### 1. Home Screen Polish
-- [ ] "Continue where you left off" card for incomplete check-ins
-- [ ] Wire up ContinueCard to actual partial check-in detection
+### 1. Profile Settings (Next Up)
+- [ ] Edit Profile screen (name, role, target role)
+- [ ] Change reminder times screen
+- [ ] Wire up settings buttons to navigate to screens
+- [ ] Sign out confirmation dialog (already works, could add confirmation)
 
-### 2. Insights Screen - Real Data
+### 2. Push Notifications
+- [ ] Expo push notification setup
+- [ ] Request notification permissions
+- [ ] Morning reminder at user's chosen time
+- [ ] Evening reminder at user's chosen time
+- [ ] Streak reminders (don't break your streak!)
+- [ ] Store push token in Supabase
+
+### 3. UI Polish
+- [x] Fix Journal background color (now uses `COLORS.background` constant)
+- [ ] Consistent styling across all screens
+
+### 4. Insights Screen - Real Data
 - [ ] Replace placeholder with actual stats
 - [ ] Total check-ins count
 - [ ] Current/longest streak display
 - [ ] Focus area breakdown
 - [ ] Energy level trends
 - [ ] Weekly/monthly completion rate
-
-### 3. Profile Settings
-- [ ] Edit profile (name, role, target role)
-- [ ] Change reminder times
-- [ ] Notification preferences
-- [ ] Account settings (email, password)
-
-### 4. Push Notifications
-- [ ] Expo push notification setup
-- [ ] Morning reminder at user's chosen time
-- [ ] Evening reminder at user's chosen time
-- [ ] Streak reminders (don't break your streak!)
 
 ### 5. AI Mentor Chat
 - [ ] Chat interface
@@ -163,6 +164,22 @@ Design complete - ready for implementation.
 
 ## Session Log
 
+### 2025-12-19
+- Completed Journal Entries List implementation
+  - DayCard with collapsed/expanded states
+  - JournalSearch with debounced input
+  - Hashtag filter chips from focus areas
+  - JournalEmptyState for no entries/no results
+  - Pull-to-refresh and loading skeletons
+- Completed ContinueCard & Edit Journal implementation
+  - ContinueCard wired to detect partial check-ins
+  - Edit check-in screen with auto-save
+  - Navigation from ContinueCard to edit
+  - Navigation from DayCard to view/edit
+  - Delete functionality with confirmation
+- Extracted auto-save logic into useCheckInAutoSave hook
+- Merged multiple PRs and addressed tech debt
+
 ### 2025-12-17
 - Completed glassmorphism polish implementation (PR #9)
   - HeroCard animations (float, shine, softer gradient)
@@ -186,6 +203,6 @@ Design complete - ready for implementation.
 - PR #7 merged
 
 ### Next Session
-- Implement Journal Entries List (use design doc)
-- Wire up ContinueCard to detect partial check-ins
-- Start Insights screen real data
+- Complete Profile Settings screens (Edit Profile, Reminders)
+- Wire up profile settings navigation
+- Start push notification setup
