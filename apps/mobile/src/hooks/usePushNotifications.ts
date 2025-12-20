@@ -58,6 +58,9 @@ export function usePushNotifications(
    * Register for push notifications and get Expo push token
    */
   const registerForPushNotifications = useCallback(async (): Promise<string | null> => {
+    logger.info('[usePushNotifications] Starting registration...')
+    logger.info('[usePushNotifications] Device.isDevice:', Device.isDevice)
+
     // Only works on physical devices
     if (!Device.isDevice) {
       logger.warn('[usePushNotifications] Push notifications require a physical device')
@@ -67,12 +70,14 @@ export function usePushNotifications(
     try {
       // Check existing permission
       const { status: existingStatus } = await Notifications.getPermissionsAsync()
+      logger.info('[usePushNotifications] Existing permission status:', existingStatus)
       let finalStatus = existingStatus
 
       // Request permission if not granted
       if (existingStatus !== 'granted') {
         const { status } = await Notifications.requestPermissionsAsync()
         finalStatus = status
+        logger.info('[usePushNotifications] Requested permission, status:', finalStatus)
       }
 
       if (finalStatus !== 'granted') {
@@ -81,16 +86,21 @@ export function usePushNotifications(
       }
 
       // Get project ID from app config
+      logger.info('[usePushNotifications] expoConfig:', JSON.stringify(Constants.expoConfig?.extra))
       const projectId = Constants.expoConfig?.extra?.eas?.projectId
 
       if (!projectId) {
+        logger.error('[usePushNotifications] Missing projectId in config')
         throw new Error('Missing Expo project ID in app.json')
       }
+
+      logger.info('[usePushNotifications] Getting push token with projectId:', projectId)
 
       // Get Expo push token
       const tokenData = await Notifications.getExpoPushTokenAsync({
         projectId,
       })
+      logger.info('[usePushNotifications] Got push token:', tokenData.data)
 
       // Set up Android notification channel
       if (Platform.OS === 'android') {
@@ -118,12 +128,14 @@ export function usePushNotifications(
    * Save push token to Supabase
    */
   const savePushToken = useCallback(async (token: string): Promise<void> => {
+    logger.info('[usePushNotifications] Saving token for user:', user?.id)
     if (!user?.id) {
       logger.warn('[usePushNotifications] Cannot save token: no user')
       return
     }
 
-    const { error: saveError } = await supabase
+    logger.info('[usePushNotifications] Upserting push token to database...')
+    const { error: saveError, data } = await supabase
       .from('user_notification_settings')
       .upsert(
         {
@@ -132,13 +144,14 @@ export function usePushNotifications(
         },
         { onConflict: 'user_id' }
       )
+      .select()
 
     if (saveError) {
-      logger.error('[usePushNotifications] Failed to save push token:', saveError)
+      logger.error('[usePushNotifications] Failed to save push token:', saveError.message, saveError.details, saveError.hint)
       throw saveError
     }
 
-    logger.info('[usePushNotifications] Push token saved successfully')
+    logger.info('[usePushNotifications] Push token saved successfully, result:', JSON.stringify(data))
   }, [user?.id])
 
   /**
