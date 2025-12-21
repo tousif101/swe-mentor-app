@@ -235,6 +235,7 @@ export function HomeScreen() {
 
           <View style={styles.headerIcons}>
             <TouchableOpacity
+              testID="header-notification-button"
               style={styles.iconButton}
               onPress={() => {
                 navigation.getParent()?.navigate('ProfileTab', {
@@ -245,6 +246,7 @@ export function HomeScreen() {
               <Ionicons name="notifications-outline" size={20} color="#9CA3AF" />
             </TouchableOpacity>
             <TouchableOpacity
+              testID="header-settings-button"
               style={styles.iconButton}
               onPress={() => {
                 navigation.getParent()?.navigate('ProfileTab')
