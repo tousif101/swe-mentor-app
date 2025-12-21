@@ -28,7 +28,7 @@ export function ProfileScreen() {
   }
 
   return (
-    <ScrollView className="flex-1 bg-gray-950">
+    <ScrollView className="flex-1 bg-gray-950" testID="profile-screen">
       {/* Header */}
       <View className="px-6 pt-16 pb-8">
         <Text className="text-white text-3xl font-bold">Profile</Text>
@@ -87,6 +87,7 @@ export function ProfileScreen() {
           {/* Settings Items */}
           <View className="bg-gray-900 rounded-2xl border border-gray-800 overflow-hidden">
             <Pressable
+              testID="edit-profile-row"
               onPress={() => navigation.navigate('EditProfile')}
               className="flex-row items-center justify-between px-4 py-4 border-b border-gray-800"
             >
@@ -98,6 +99,7 @@ export function ProfileScreen() {
             </Pressable>
 
             <Pressable
+              testID="career-goal-row"
               onPress={() => navigation.navigate('CareerGoal')}
               className="flex-row items-center justify-between px-4 py-4 border-b border-gray-800"
             >
@@ -109,6 +111,7 @@ export function ProfileScreen() {
             </Pressable>
 
             <Pressable
+              testID="reminder-settings-row"
               onPress={() => navigation.navigate('ReminderSettings')}
               className="flex-row items-center justify-between px-4 py-4 border-b border-gray-800"
             >
@@ -134,6 +137,7 @@ export function ProfileScreen() {
 
         {/* Logout Button */}
         <Pressable
+          testID="sign-out-button"
           onPress={handleLogout}
           className="bg-gray-900 rounded-xl px-6 py-4 border border-red-500/30 mb-8"
         >
