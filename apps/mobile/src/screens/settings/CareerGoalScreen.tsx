@@ -164,12 +164,13 @@ export function CareerGoalScreen({ navigation }: Props) {
   }, [hasChanges, currentRole, targetRole, refetch, navigation, profile])
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={styles.container} testID="career-goal-screen">
       <View style={styles.content}>
         {/* Header */}
         <View style={styles.header}>
           <View style={styles.headerRow}>
             <Pressable
+              testID="back-button"
               onPress={() => navigation.goBack()}
               style={styles.backButton}
             >
@@ -186,6 +187,7 @@ export function CareerGoalScreen({ navigation }: Props) {
         <View style={styles.section}>
           <Text style={styles.label}>Current Role</Text>
           <Pressable
+            testID="current-role-picker"
             onPress={handleCurrentRolePress}
             style={styles.picker}
           >
@@ -208,6 +210,7 @@ export function CareerGoalScreen({ navigation }: Props) {
         <View style={styles.section}>
           <Text style={styles.label}>Target Role</Text>
           <Pressable
+            testID="target-role-picker"
             onPress={handleTargetRolePress}
             style={[styles.picker, !currentRole && styles.pickerDisabled]}
             disabled={!currentRole}
@@ -253,6 +256,7 @@ export function CareerGoalScreen({ navigation }: Props) {
 
         {/* Save Button */}
         <Pressable
+          testID="save-button"
           onPress={handleSave}
           disabled={!hasChanges || isSaving || !currentRole || !targetRole}
           style={[
