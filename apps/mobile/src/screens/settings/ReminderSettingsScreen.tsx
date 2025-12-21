@@ -229,12 +229,13 @@ export function ReminderSettingsScreen({ navigation }: Props) {
   }
 
   return (
-    <View className="flex-1 bg-gray-950">
+    <View className="flex-1 bg-gray-950" testID="reminder-settings-screen">
       <ScrollView className="flex-1 px-6 pt-14" showsVerticalScrollIndicator={false}>
         {/* Header */}
         <View className="mb-6">
           <View className="flex-row items-center mb-2">
             <Pressable
+              testID="back-button"
               onPress={() => navigation.goBack()}
               className="mr-3 w-10 h-10 items-center justify-center"
             >
@@ -268,6 +269,7 @@ export function ReminderSettingsScreen({ navigation }: Props) {
               </Text>
             </View>
             <Switch
+              testID="push-toggle"
               value={settings.pushEnabled}
               onValueChange={handlePushToggle}
               trackColor={{ false: '#374151', true: COLORS.primaryDark }}
@@ -328,6 +330,7 @@ export function ReminderSettingsScreen({ navigation }: Props) {
       {/* Fixed Bottom Save Button */}
       <View className="px-6 pb-8 pt-4 bg-gray-950 border-t border-gray-800">
         <Pressable
+          testID="save-button"
           onPress={handleSave}
           disabled={!hasChanges || isSaving}
           className={`rounded-2xl py-4 items-center ${
