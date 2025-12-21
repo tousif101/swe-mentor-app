@@ -73,6 +73,7 @@ export function EditProfileScreen({ navigation }: Props) {
 
   return (
     <KeyboardAvoidingView
+      testID="edit-profile-screen"
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       className="flex-1 bg-gray-950"
     >
@@ -80,6 +81,7 @@ export function EditProfileScreen({ navigation }: Props) {
       <View className="px-6 pt-16 pb-4 border-b border-gray-800">
         <View className="flex-row items-center">
           <Pressable
+            testID="back-button"
             onPress={handleBack}
             className="mr-4 w-10 h-10 items-center justify-center"
           >
@@ -97,6 +99,7 @@ export function EditProfileScreen({ navigation }: Props) {
         <View className="mb-6">
           <Text className="text-gray-300 text-sm mb-2 font-medium">Name</Text>
           <TextInput
+            testID="name-input"
             value={name}
             onChangeText={(text) => {
               setName(text)
@@ -126,6 +129,7 @@ export function EditProfileScreen({ navigation }: Props) {
 
         {/* Save Button */}
         <Pressable
+          testID="save-button"
           onPress={handleSave}
           disabled={!canSave}
           style={[
