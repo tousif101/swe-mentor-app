@@ -129,9 +129,17 @@ export function CustomTabBar({ state, descriptors, navigation }: BottomTabBarPro
               })
             }
 
+            const testIdMap: Record<string, string> = {
+              HomeTab: 'home-tab',
+              JournalTab: 'journal-tab',
+              InsightsTab: 'insights-tab',
+              ProfileTab: 'profile-tab',
+            }
+
             return (
               <TouchableOpacity
                 key={route.key}
+                testID={testIdMap[route.name] || route.name.toLowerCase()}
                 accessibilityRole="button"
                 accessibilityState={isFocused ? { selected: true } : {}}
                 accessibilityLabel={options.tabBarAccessibilityLabel}
