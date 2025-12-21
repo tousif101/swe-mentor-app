@@ -1,6 +1,6 @@
 # SWE Mentor App - Development Roadmap
 
-**Last Updated:** 2025-12-19
+**Last Updated:** 2025-12-20
 
 ## Overview
 
@@ -81,29 +81,34 @@ This document tracks completed features, current work, and planned features for 
 - [x] Profile stack navigation wired up
 - [x] Haptic feedback utilities
 
+### Phase 10: Push Notifications (Complete)
+- [x] Expo push notification setup (`expo-notifications`)
+- [x] Request notification permissions with graceful fallback
+- [x] Push token registration and storage in Supabase
+- [x] `usePushNotifications` hook for token management
+- [x] Supabase Edge Function (`send-reminders`) for batch notifications
+- [x] Timezone-aware reminder queries (`get_due_morning_reminders`, `get_due_evening_reminders`)
+- [x] Morning reminder at user's chosen time
+- [x] Evening reminder at user's chosen time
+- [x] Duplicate prevention via `last_*_notification_at` tracking
+- [x] Home screen notification/settings buttons wired up
+- [x] Production deployment guide for pg_cron + Edge Functions
+
 ---
 
-## Current Focus: Push Notifications
+## Current Focus: Insights Screen
 
-Enabling actual push notifications for reminders.
+Building out the Insights tab with real data from check-ins.
 
 ---
 
 ## Upcoming Features (Priority Order)
 
-### 1. Push Notifications
-- [ ] Expo push notification setup
-- [ ] Request notification permissions
-- [ ] Morning reminder at user's chosen time
-- [ ] Evening reminder at user's chosen time
-- [ ] Streak reminders (don't break your streak!)
-- [ ] Store push token in Supabase
-
-### 2. UI Polish
+### 1. UI Polish
 - [x] Fix Journal background color (now uses `COLORS.background` constant)
 - [ ] Consistent styling across all screens
 
-### 3. Insights Screen - Real Data
+### 2. Insights Screen - Real Data
 - [ ] Replace placeholder with actual stats
 - [ ] Total check-ins count
 - [ ] Current/longest streak display
@@ -218,6 +223,18 @@ Enabling actual push notifications for reminders.
   - Fixed upsert conflict for notification settings
   - Removed react-native-reanimated temporarily (Worklets mismatch)
 
+### 2025-12-20
+- Completed Push Notifications implementation (Phase 10)
+  - Expo push notification setup with permissions handling
+  - Push token registration and Supabase storage
+  - Supabase Edge Function for batch notification sending
+  - Timezone-aware reminder query functions
+  - Fixed time comparison bug (::time cast for PostgreSQL)
+  - Tested end-to-end notification flow successfully
+  - Added production deployment guide (pg_cron, Edge Functions)
+- Fixed Home screen header buttons (notification/settings navigation)
+- Fixed check_ins unique constraint for draft upserts
+
 ### Next Session
-- Start push notification implementation
 - Consider Insights Screen with real data
+- UI polish pass

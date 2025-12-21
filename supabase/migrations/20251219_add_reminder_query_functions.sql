@@ -17,9 +17,10 @@ BEGIN
     AND uns.morning_enabled = true
     AND uns.push_token IS NOT NULL
     -- Current time in user's timezone is within 5 min of their morning_time
+    -- Note: explicit ::time cast required to compare time with time zone to time without time zone
     AND (
-      (CURRENT_TIME AT TIME ZONE uns.timezone) >= uns.morning_time
-      AND (CURRENT_TIME AT TIME ZONE uns.timezone) < uns.morning_time + INTERVAL '5 minutes'
+      (CURRENT_TIME AT TIME ZONE uns.timezone)::time >= uns.morning_time
+      AND (CURRENT_TIME AT TIME ZONE uns.timezone)::time < uns.morning_time + INTERVAL '5 minutes'
     )
     -- Haven't sent notification in the last 23 hours (prevents duplicate on DST changes)
     AND (
@@ -53,9 +54,10 @@ BEGIN
     AND uns.evening_enabled = true
     AND uns.push_token IS NOT NULL
     -- Current time in user's timezone is within 5 min of their evening_time
+    -- Note: explicit ::time cast required to compare time with time zone to time without time zone
     AND (
-      (CURRENT_TIME AT TIME ZONE uns.timezone) >= uns.evening_time
-      AND (CURRENT_TIME AT TIME ZONE uns.timezone) < uns.evening_time + INTERVAL '5 minutes'
+      (CURRENT_TIME AT TIME ZONE uns.timezone)::time >= uns.evening_time
+      AND (CURRENT_TIME AT TIME ZONE uns.timezone)::time < uns.evening_time + INTERVAL '5 minutes'
     )
     -- Haven't sent notification in the last 23 hours
     AND (
