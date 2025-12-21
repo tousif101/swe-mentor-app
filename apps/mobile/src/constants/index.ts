@@ -102,3 +102,11 @@ export const DEFAULT_REMINDER_TIMES = {
   morning: '09:00',
   evening: '18:00',
 } as const
+
+// Push notification configuration
+export const PUSH_NOTIFICATION_CONFIG = {
+  // Android notification channel
+  channelId: 'swe-mentor-reminders',
+  channelName: 'Check-in Reminders',
+  channelDescription: 'Daily morning and evening check-in reminders',
+} as const

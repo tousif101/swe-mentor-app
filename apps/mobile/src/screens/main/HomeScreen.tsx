@@ -234,10 +234,22 @@ export function HomeScreen() {
           </View>
 
           <View style={styles.headerIcons}>
-            <TouchableOpacity style={styles.iconButton}>
+            <TouchableOpacity
+              style={styles.iconButton}
+              onPress={() => {
+                navigation.getParent()?.navigate('ProfileTab', {
+                  screen: 'ReminderSettings',
+                })
+              }}
+            >
               <Ionicons name="notifications-outline" size={20} color="#9CA3AF" />
             </TouchableOpacity>
-            <TouchableOpacity style={styles.iconButton}>
+            <TouchableOpacity
+              style={styles.iconButton}
+              onPress={() => {
+                navigation.getParent()?.navigate('ProfileTab')
+              }}
+            >
               <Ionicons name="settings-outline" size={20} color="#9CA3AF" />
             </TouchableOpacity>
           </View>

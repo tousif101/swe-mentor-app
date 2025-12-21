@@ -1,0 +1,35 @@
+-- Enable required extensions
+-- Note: pg_cron is only available in Supabase production, not local development
+-- CREATE EXTENSION IF NOT EXISTS pg_cron;
+-- CREATE EXTENSION IF NOT EXISTS pg_net;
+
+-- For production deployment, run this manually in Supabase SQL Editor:
+--
+-- Schedule the reminder job every 5 minutes
+-- SELECT cron.schedule(
+--   'send-reminders-job',
+--   '*/5 * * * *',
+--   $$
+--   SELECT net.http_post(
+--     url := current_setting('app.settings.supabase_url') || '/functions/v1/send-reminders',
+--     headers := jsonb_build_object(
+--       'Authorization', 'Bearer ' || current_setting('app.settings.service_role_key'),
+--       'Content-Type', 'application/json'
+--     ),
+--     body := '{}'::jsonb
+--   );
+--   $$
+-- );
+--
+-- View scheduled jobs:
+-- SELECT * FROM cron.job;
+--
+-- View job run history:
+-- SELECT * FROM cron.job_run_details ORDER BY start_time DESC LIMIT 10;
+--
+-- To unschedule (if needed):
+-- SELECT cron.unschedule('send-reminders-job');
+
+-- This file exists as documentation for the production pg_cron setup.
+-- The actual cron job should be configured via Supabase Dashboard > Extensions > pg_cron
+-- or via the SQL commands above after enabling the pg_cron extension.
