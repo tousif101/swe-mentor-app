@@ -14,8 +14,8 @@ export function generateTestEmail(): string {
  * Default test credentials
  */
 export const TEST_CREDENTIALS = {
-  email: process.env.TEST_EMAIL || 'test@example.com',
-  password: process.env.TEST_PASSWORD || 'TestPassword123',
+  email: process.env.TEST_EMAIL || 'testing@gmail.com',
+  password: process.env.TEST_PASSWORD || 'Testingthisapp123',
   name: 'Test User',
 }
 

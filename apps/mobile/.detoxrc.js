@@ -12,15 +12,15 @@ module.exports = {
   apps: {
     'ios.release': {
       type: 'ios.app',
-      binaryPath: 'ios/build/Build/Products/Release-iphonesimulator/mobile.app',
+      binaryPath: 'ios/build/Build/Products/Release-iphonesimulator/SWEMentor.app',
       build:
-        'xcodebuild -workspace ios/mobile.xcworkspace -scheme mobile -configuration Release -sdk iphonesimulator -derivedDataPath ios/build',
+        'xcodebuild -workspace ios/SWEMentor.xcworkspace -scheme SWEMentor -configuration Release -sdk iphonesimulator -derivedDataPath ios/build',
     },
     'ios.debug': {
       type: 'ios.app',
-      binaryPath: 'ios/build/Build/Products/Debug-iphonesimulator/mobile.app',
+      binaryPath: 'ios/build/Build/Products/Debug-iphonesimulator/SWEMentor.app',
       build:
-        'xcodebuild -workspace ios/mobile.xcworkspace -scheme mobile -configuration Debug -sdk iphonesimulator -derivedDataPath ios/build',
+        'xcodebuild -workspace ios/SWEMentor.xcworkspace -scheme SWEMentor -configuration Debug -sdk iphonesimulator -derivedDataPath ios/build',
     },
   },
   devices: {

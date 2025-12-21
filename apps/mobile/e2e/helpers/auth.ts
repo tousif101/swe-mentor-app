@@ -3,30 +3,51 @@
  */
 
 export async function loginAsTestUser(email: string, password: string) {
-  // Navigate to login from welcome screen
-  await element(by.text('I already have an account')).tap()
+  // Disable sync during login due to animations
+  await device.disableSynchronization()
 
-  // Wait for login screen
-  await expect(element(by.text('Welcome back'))).toBeVisible()
+  try {
+    // Check if already logged in (on home screen)
+    try {
+      await waitFor(element(by.id('home-screen')))
+        .toBeVisible()
+        .withTimeout(3000)
+      // Already logged in, skip login flow
+      return
+    } catch {
+      // Not on home screen, continue with login
+    }
 
-  // Enter email
-  await element(by.id('email-input')).typeText(email)
+    // Navigate to login from welcome screen
+    await element(by.text('I already have an account')).tap()
 
-  // Enter password
-  await element(by.id('password-input')).typeText(password)
+    // Wait for login screen
+    await waitFor(element(by.text('Welcome back')))
+      .toBeVisible()
+      .withTimeout(5000)
 
-  // Tap sign in (this will dismiss keyboard)
-  await element(by.id('sign-in-button')).tap()
+    // Enter email
+    await element(by.id('email-input')).typeText(email)
 
-  // Wait for HomeScreen to appear (bypasses intermediate loading states)
-  await waitFor(element(by.id('home-screen')))
-    .toBeVisible()
-    .withTimeout(20000)
+    // Enter password
+    await element(by.id('password-input')).typeText(password)
 
-  // Confirm greeting is visible
-  await waitFor(element(by.id('home-greeting')))
-    .toBeVisible()
-    .withTimeout(5000)
+    // Tap sign in (this will dismiss keyboard)
+    await element(by.id('sign-in-button')).tap()
+
+    // Wait for HomeScreen to appear (bypasses intermediate loading states)
+    await waitFor(element(by.id('home-screen')))
+      .toBeVisible()
+      .withTimeout(30000)
+
+    // Confirm greeting is visible
+    await waitFor(element(by.id('home-greeting')))
+      .toBeVisible()
+      .withTimeout(5000)
+  } finally {
+    // Re-enable sync
+    await device.enableSynchronization()
+  }
 }
 
 export async function signupNewUser(email: string, password: string, name: string) {
