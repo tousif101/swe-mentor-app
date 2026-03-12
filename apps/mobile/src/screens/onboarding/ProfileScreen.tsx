@@ -9,6 +9,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Modal,
+  FlatList,
 } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
@@ -22,6 +23,7 @@ import {
   getValidTargetRoles,
   type DbRole,
 } from '../../lib/roleMapping'
+import { useCompanyMatch } from '../../hooks'
 import type { OnboardingStackParamList } from '../../navigation/OnboardingNavigator'
 
 type Props = {
@@ -125,6 +127,20 @@ export function ProfileScreen({ navigation }: Props) {
   const [showRolePicker, setShowRolePicker] = useState(false)
   const [showTargetPicker, setShowTargetPicker] = useState(false)
 
+  const {
+    companyName,
+    companySize,
+    careerMatrixId,
+    matchedCompany,
+    suggestions,
+    isSearching,
+    setCompanyName,
+    selectCompany,
+    setCompanySize,
+  } = useCompanyMatch()
+
+  const COMPANY_SIZES = ['<50', '50-200', '200-1000', '1000-5000', '5000+'] as const
+
   // When current role changes, update target role default
   const handleRoleChange = (newRole: DbRole) => {
     setRole(newRole)
@@ -158,6 +174,9 @@ export function ProfileScreen({ navigation }: Props) {
       name: parsed.data.name,
       role: parsed.data.role,
       targetRole: parsed.data.targetRole,
+      ...(companyName ? { companyName } : {}),
+      ...(companySize ? { companySize } : {}),
+      ...(careerMatrixId ? { careerMatrixId } : {}),
     })
   }
 
@@ -265,6 +284,75 @@ export function ProfileScreen({ navigation }: Props) {
           {errors.targetRole && (
             <Text className="text-red-400 text-sm mt-1">{errors.targetRole}</Text>
           )}
+        </View>
+
+        {/* Company Name Input */}
+        <View className="mb-6">
+          <Text className="text-gray-300 text-sm mb-2 font-medium">
+            Your company <Text className="text-gray-500">(optional)</Text>
+          </Text>
+          <TextInput
+            value={companyName}
+            onChangeText={setCompanyName}
+            placeholder="Your company (optional)"
+            placeholderTextColor="#6b7280"
+            autoCapitalize="words"
+            className="w-full px-4 py-3.5 rounded-xl bg-gray-800 border border-gray-700 text-white"
+          />
+          {/* Autocomplete Suggestions */}
+          {suggestions.length > 0 && (
+            <View className="mt-1 bg-gray-800 rounded-xl overflow-hidden">
+              <FlatList
+                data={suggestions}
+                keyExtractor={(item) => item.id}
+                keyboardShouldPersistTaps="handled"
+                renderItem={({ item }) => (
+                  <Pressable
+                    onPress={() => selectCompany(item.company_name, item.id)}
+                    className="px-4 py-3 border-b border-gray-700"
+                  >
+                    <Text className="text-white">{item.company_name}</Text>
+                  </Pressable>
+                )}
+              />
+            </View>
+          )}
+          {/* Matched Company Banner */}
+          {matchedCompany && (
+            <View className="mt-2 px-4 py-3 bg-green-500/10 border border-green-500/20 rounded-xl flex-row items-center">
+              <Ionicons name="checkmark-circle" size={20} color="#22c55e" style={{ marginRight: 8 }} />
+              <Text className="text-green-400 text-sm">
+                We have {matchedCompany}&apos;s career framework!
+              </Text>
+            </View>
+          )}
+        </View>
+
+        {/* Company Size Selector */}
+        <View className="mb-8">
+          <Text className="text-gray-300 text-sm mb-2 font-medium">
+            Company size <Text className="text-gray-500">(optional)</Text>
+          </Text>
+          <View className="flex-row flex-wrap gap-2">
+            {COMPANY_SIZES.map((size) => (
+              <Pressable
+                key={size}
+                onPress={() => setCompanySize(size)}
+                className={`px-4 py-2 rounded-lg ${
+                  companySize === size
+                    ? 'bg-primary-600/20 border border-primary-500'
+                    : 'bg-gray-800 border border-gray-700'
+                }`}
+              >
+                <Text
+                  className={companySize === size ? 'text-primary-400' : 'text-gray-300'}
+                  style={companySize === size ? { color: '#a78bfa' } : undefined}
+                >
+                  {size}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
         </View>
 
         {/* Form Error */}
