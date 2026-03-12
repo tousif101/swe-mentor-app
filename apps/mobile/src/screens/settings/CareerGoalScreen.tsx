@@ -2,7 +2,9 @@ import { useState, useMemo, useCallback } from 'react'
 import {
   View,
   Text,
+  TextInput,
   ScrollView,
+  FlatList,
   Pressable,
   ActivityIndicator,
   Platform,
@@ -16,6 +18,7 @@ import { Ionicons } from '@expo/vector-icons'
 import { useProfileContext } from '../../contexts'
 import { supabase } from '../../lib/supabase'
 import { ROLE_CONFIG, getFocusAreas, type DbRole, getValidTargetRoles, ROLES_ORDERED } from '../../lib/roleMapping'
+import { useCompanyMatch } from '../../hooks'
 import { showFeedback } from '../../utils'
 import { COLORS } from '../../constants'
 import type { ProfileStackParamList } from '../../types'
@@ -23,6 +26,8 @@ import type { ProfileStackParamList } from '../../types'
 type Props = {
   navigation: NativeStackNavigationProp<ProfileStackParamList, 'CareerGoal'>
 }
+
+const COMPANY_SIZES = ['<50', '50-200', '200-1000', '1000-5000', '5000+'] as const
 
 export function CareerGoalScreen({ navigation }: Props) {
   const { profile, refetch } = useProfileContext()
@@ -35,6 +40,22 @@ export function CareerGoalScreen({ navigation }: Props) {
   )
   const [isSaving, setIsSaving] = useState(false)
 
+  const {
+    companyName,
+    companySize,
+    careerMatrixId,
+    matchedCompany,
+    suggestions,
+    setCompanyName,
+    selectCompany,
+    setCompanySize,
+    getCompanyFields,
+  } = useCompanyMatch({
+    companyName: profile?.company_name ?? undefined,
+    companySize: profile?.company_size ?? undefined,
+    careerMatrixId: profile?.career_matrix_id ?? undefined,
+  })
+
   // Calculate focus areas preview
   const focusAreasPreview = useMemo(() => {
     if (!currentRole || !targetRole) return []
@@ -45,9 +66,12 @@ export function CareerGoalScreen({ navigation }: Props) {
   const hasChanges = useMemo(() => {
     return (
       currentRole !== profile?.role ||
-      targetRole !== profile?.target_role
+      targetRole !== profile?.target_role ||
+      companyName !== (profile?.company_name ?? '') ||
+      companySize !== (profile?.company_size ?? null) ||
+      careerMatrixId !== (profile?.career_matrix_id ?? null)
     )
-  }, [currentRole, targetRole, profile?.role, profile?.target_role])
+  }, [currentRole, targetRole, companyName, companySize, careerMatrixId, profile?.role, profile?.target_role, profile?.company_name, profile?.company_size, profile?.career_matrix_id])
 
   // Role options for pickers
   const roleOptions = useMemo(
@@ -138,12 +162,16 @@ export function CareerGoalScreen({ navigation }: Props) {
             try {
               const newFocusAreas = getFocusAreas(currentRole, targetRole)
 
+              const companyFields = getCompanyFields()
               const { error } = await supabase
                 .from('profiles')
                 .update({
                   role: currentRole,
                   target_role: targetRole,
                   focus_areas: newFocusAreas,
+                  ...(companyFields.company_name !== null ? { company_name: companyFields.company_name } : { company_name: null }),
+                  company_size: companyFields.company_size,
+                  career_matrix_id: companyFields.career_matrix_id,
                 })
                 .eq('id', profile.id)
 
@@ -231,6 +259,74 @@ export function CareerGoalScreen({ navigation }: Props) {
             )}
             <Ionicons name="chevron-down" size={20} color={COLORS.textMuted} />
           </Pressable>
+        </View>
+
+        {/* Company Name */}
+        <View style={styles.section}>
+          <Text style={styles.label}>
+            Company <Text style={styles.optionalLabel}>(optional)</Text>
+          </Text>
+          <TextInput
+            value={companyName}
+            onChangeText={setCompanyName}
+            placeholder="Your company (optional)"
+            placeholderTextColor={COLORS.textMuted}
+            autoCapitalize="words"
+            style={styles.textInput}
+          />
+          {suggestions.length > 0 && (
+            <View style={styles.suggestionsContainer}>
+              <FlatList
+                data={suggestions}
+                keyExtractor={(item) => item.id}
+                keyboardShouldPersistTaps="handled"
+                renderItem={({ item }) => (
+                  <Pressable
+                    onPress={() => selectCompany(item.company_name, item.id)}
+                    style={styles.suggestionItem}
+                  >
+                    <Text style={styles.suggestionText}>{item.company_name}</Text>
+                  </Pressable>
+                )}
+              />
+            </View>
+          )}
+          {matchedCompany && (
+            <View style={styles.matchBanner}>
+              <Ionicons name="checkmark-circle" size={20} color="#22c55e" style={{ marginRight: 8 }} />
+              <Text style={styles.matchText}>
+                We have {matchedCompany}&apos;s career framework!
+              </Text>
+            </View>
+          )}
+        </View>
+
+        {/* Company Size */}
+        <View style={styles.section}>
+          <Text style={styles.label}>
+            Company size <Text style={styles.optionalLabel}>(optional)</Text>
+          </Text>
+          <View style={styles.sizeChipContainer}>
+            {COMPANY_SIZES.map((size) => (
+              <Pressable
+                key={size}
+                onPress={() => setCompanySize(size)}
+                style={[
+                  styles.sizeChip,
+                  companySize === size && styles.sizeChipSelected,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.sizeChipText,
+                    companySize === size && styles.sizeChipTextSelected,
+                  ]}
+                >
+                  {size}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
         </View>
 
         {/* Focus Areas Preview */}
@@ -389,6 +485,71 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.primaryLight,
     fontWeight: '500',
+  },
+  textInput: {
+    backgroundColor: COLORS.surface,
+    borderRadius: 12,
+    padding: 16,
+    fontSize: 16,
+    color: COLORS.textPrimary,
+  },
+  suggestionsContainer: {
+    marginTop: 4,
+    backgroundColor: COLORS.surfaceLight,
+    borderRadius: 12,
+    overflow: 'hidden',
+  },
+  suggestionItem: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: '#374151',
+  },
+  suggestionText: {
+    fontSize: 16,
+    color: COLORS.textPrimary,
+  },
+  matchBanner: {
+    marginTop: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(34, 197, 94, 0.2)',
+    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  matchText: {
+    fontSize: 14,
+    color: '#4ade80',
+  },
+  optionalLabel: {
+    color: COLORS.textMuted,
+  },
+  sizeChipContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  sizeChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: COLORS.surface,
+    borderWidth: 1,
+    borderColor: COLORS.surfaceLight,
+  },
+  sizeChipSelected: {
+    backgroundColor: `${COLORS.primaryDark}33`,
+    borderColor: COLORS.primary,
+  },
+  sizeChipText: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+  },
+  sizeChipTextSelected: {
+    color: COLORS.primaryLight,
   },
   saveButton: {
     backgroundColor: COLORS.primary,

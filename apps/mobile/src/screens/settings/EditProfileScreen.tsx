@@ -120,6 +120,31 @@ export function EditProfileScreen({ navigation }: Props) {
           )}
         </View>
 
+        {/* Company Info (read-only) */}
+        {(profile?.company_name || profile?.company_size) && (
+          <View className="mb-6">
+            <Text className="text-gray-300 text-sm mb-2 font-medium">Company</Text>
+            <View className="px-4 py-3.5 rounded-xl bg-gray-900 border border-gray-800">
+              {profile?.company_name && (
+                <Text className="text-white">{profile.company_name}</Text>
+              )}
+              {profile?.company_size && (
+                <Text className="text-gray-400 text-sm mt-1">
+                  {profile.company_size} employees
+                </Text>
+              )}
+            </View>
+            <Pressable
+              onPress={() => navigation.navigate('CareerGoal')}
+              className="mt-2"
+            >
+              <Text className="text-sm" style={{ color: '#a78bfa' }}>
+                Edit in Career Goals
+              </Text>
+            </Pressable>
+          </View>
+        )}
+
         {/* Error Message */}
         {error && (
           <View className="mb-4 py-3 px-4 rounded-xl bg-red-500/10 border border-red-500/20">
