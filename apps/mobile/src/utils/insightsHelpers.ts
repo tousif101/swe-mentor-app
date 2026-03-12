@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabase'
 import { logger } from './logger'
 import { getLocalDateString } from './checkInHelpers'
+import { INSIGHTS_CHECK_IN_FETCH_LIMIT, INSIGHTS_ENERGY_TREND_DAYS, INSIGHTS_WEEKLY_RATE_DAYS } from '../constants'
 
 // ============================================
 // Types
@@ -97,11 +98,15 @@ export function computeWeeklyCompletionRate(checkIns: DateCheckIn[], totalDays: 
 // ============================================
 
 export async function fetchInsightsData(userId: string): Promise<InsightsData> {
+  if (!userId) {
+    throw new Error('Invalid userId provided')
+  }
+
   // Fetch streak data and recent check-ins in parallel
   const [streakResult, checkInsResult] = await Promise.all([
     supabase
       .from('user_streaks')
-      .select('*')
+      .select('current_streak, longest_streak, total_check_ins, total_morning_check_ins, total_evening_check_ins')
       .eq('user_id', userId)
       .single(),
     supabase
@@ -110,10 +115,10 @@ export async function fetchInsightsData(userId: string): Promise<InsightsData> {
       .eq('user_id', userId)
       .not('completed_at', 'is', null)
       .order('check_in_date', { ascending: false })
-      .limit(180),
+      .limit(INSIGHTS_CHECK_IN_FETCH_LIMIT),
   ])
 
-  // Default streak data
+  // Default streak data (PGRST116 = no row found, normal for new users)
   const streak = streakResult.data || {
     current_streak: 0,
     longest_streak: 0,
@@ -126,16 +131,17 @@ export async function fetchInsightsData(userId: string): Promise<InsightsData> {
     logger.error('Error fetching streak data:', streakResult.error)
   }
 
-  const checkIns = checkInsResult.data || []
-
   if (checkInsResult.error) {
     logger.error('Error fetching check-ins:', checkInsResult.error)
+    throw checkInsResult.error
   }
 
-  // Last 14 days of evening check-ins for energy trend
+  const checkIns = checkInsResult.data || []
+
+  // Most recent evening check-ins for energy trend (query is DESC, slice takes newest)
   const recentEvening = checkIns
     .filter((c) => c.check_in_type === 'evening')
-    .slice(0, 14)
+    .slice(0, INSIGHTS_ENERGY_TREND_DAYS)
 
   // All evening check-ins for goal completion
   const allEvening = checkIns.filter((c) => c.check_in_type === 'evening')
@@ -145,7 +151,7 @@ export async function fetchInsightsData(userId: string): Promise<InsightsData> {
 
   // Last 7 days for weekly rate
   const sevenDaysAgo = new Date()
-  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6)
+  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - (INSIGHTS_WEEKLY_RATE_DAYS - 1))
   const sevenDaysAgoStr = getLocalDateString(sevenDaysAgo)
   const lastWeekCheckIns = checkIns.filter((c) => c.check_in_date >= sevenDaysAgoStr)
 
@@ -164,7 +170,7 @@ export async function fetchInsightsData(userId: string): Promise<InsightsData> {
     energyTrend,
     goalCompletion: computeGoalCompletionStats(allEvening),
     focusAreas: computeFocusAreaBreakdown(allMorning),
-    weeklyCompletionRate: computeWeeklyCompletionRate(lastWeekCheckIns, 7),
+    weeklyCompletionRate: computeWeeklyCompletionRate(lastWeekCheckIns, INSIGHTS_WEEKLY_RATE_DAYS),
     averageEnergy,
   }
 }

@@ -103,6 +103,11 @@ export const DEFAULT_REMINDER_TIMES = {
   evening: '18:00',
 } as const
 
+// Insights configuration
+export const INSIGHTS_CHECK_IN_FETCH_LIMIT = 180
+export const INSIGHTS_ENERGY_TREND_DAYS = 14
+export const INSIGHTS_WEEKLY_RATE_DAYS = 7
+
 // Push notification configuration
 export const PUSH_NOTIFICATION_CONFIG = {
   // Android notification channel
