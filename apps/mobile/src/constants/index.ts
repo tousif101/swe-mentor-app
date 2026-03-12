@@ -27,6 +27,9 @@ export const COLORS = {
   success: '#10b981', // emerald-500
   warning: '#f59e0b', // amber-500
   amber400: '#fbbf24', // amber-400 - morning icon
+
+  // UI Elements
+  trackBackground: 'rgba(255, 255, 255, 0.05)', // progress bar/chart tracks
 } as const
 
 // Streak milestones that trigger confetti celebrations
@@ -102,6 +105,12 @@ export const DEFAULT_REMINDER_TIMES = {
   morning: '09:00',
   evening: '18:00',
 } as const
+
+// Insights configuration
+export const INSIGHTS_CHECK_IN_FETCH_LIMIT = 180
+export const INSIGHTS_ENERGY_DISPLAY_DAYS = 7
+export const INSIGHTS_WEEKLY_RATE_DAYS = 7
+export const ENERGY_COLORS = ['#ef4444', '#f59e0b', '#eab308', '#84cc16', '#10b981'] as const // 1-5: red, amber, yellow, lime, emerald
 
 // Push notification configuration
 export const PUSH_NOTIFICATION_CONFIG = {

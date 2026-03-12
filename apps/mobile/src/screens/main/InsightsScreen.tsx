@@ -1,75 +1,106 @@
-import { View, Text, ScrollView } from 'react-native'
+import { View, Text, ScrollView, RefreshControl, ActivityIndicator, Pressable } from 'react-native'
+import { useSafeAreaInsets } from 'react-native-safe-area-context'
 import { Ionicons } from '@expo/vector-icons'
+import { useInsights } from '../../hooks'
+import { StatCard, EnergyTrendBar, GoalCompletionBar, FocusAreaList } from '../../components/insights'
+import { COLORS } from '../../constants'
 
 export function InsightsScreen() {
+  const insets = useSafeAreaInsets()
+  const { data, isLoading, error, refresh } = useInsights()
+
+  if (isLoading && !data) {
+    return (
+      <View className="flex-1 bg-gray-950 items-center justify-center">
+        <ActivityIndicator size="large" color={COLORS.primary} />
+      </View>
+    )
+  }
+
+  if (error && !data) {
+    return (
+      <View className="flex-1 bg-gray-950 items-center justify-center px-6">
+        <Ionicons name="cloud-offline" size={48} color={COLORS.textMuted} />
+        <Text className="text-white text-lg font-semibold mt-4">Couldn't load insights</Text>
+        <Text className="text-gray-400 text-sm text-center mt-2">
+          Check your connection and try again.
+        </Text>
+        <Pressable
+          onPress={refresh}
+          className="mt-6 bg-primary-600 rounded-2xl px-6 py-3"
+        >
+          <Text className="text-white font-semibold">Try Again</Text>
+        </Pressable>
+      </View>
+    )
+  }
+
+  if (!data) return null
+
   return (
-    <ScrollView className="flex-1 bg-gray-950">
+    <ScrollView
+      className="flex-1 bg-gray-950"
+      refreshControl={
+        <RefreshControl
+          refreshing={isLoading}
+          onRefresh={refresh}
+          tintColor={COLORS.primary}
+        />
+      }
+    >
       {/* Header */}
-      <View className="px-6 pt-16 pb-8">
-        <Text className="text-white text-3xl font-bold">Insights</Text>
-        <Text className="text-gray-400 text-base mt-2">
-          AI-powered career analytics and recommendations
+      <View className="px-6 pb-6" style={{ paddingTop: insets.top + 16 }}>
+        <Text className="text-white text-2xl font-bold">Insights</Text>
+        <Text className="text-gray-400 text-sm mt-1">
+          Your check-in analytics
         </Text>
       </View>
 
-      {/* Content */}
-      <View className="px-6">
-        {/* Placeholder Card */}
-        <View className="bg-gray-900 rounded-2xl p-6 border border-gray-800 mb-6">
-          <View className="items-center justify-center py-12">
-            <View className="w-16 h-16 bg-primary-600/20 rounded-full items-center justify-center mb-4">
-              <Ionicons name="bulb" size={32} color="#8b5cf6" />
-            </View>
-            <Text className="text-white text-xl font-semibold mb-2">
-              Insights Tab
-            </Text>
-            <Text className="text-gray-400 text-center">
-              Get personalized insights from your check-ins
-            </Text>
-          </View>
-        </View>
+      {/* Stats Row */}
+      <View className="px-6 gap-3 mb-6">
+        <StatCard
+          label="Total Check-ins"
+          value={data.totalCheckIns}
+          subtitle={`${data.totalMorningCheckIns} morning · ${data.totalEveningCheckIns} evening`}
+          icon="checkmark-circle"
+          iconColor={COLORS.success}
+        />
+        <StatCard
+          label="Current Streak"
+          value={`${data.currentStreak} days`}
+          subtitle={`Longest: ${data.longestStreak} days`}
+          icon="flame"
+          iconColor={COLORS.warning}
+        />
+        <StatCard
+          label="Weekly Rate"
+          value={`${data.weeklyCompletionRate}%`}
+          subtitle="Last 7 days"
+          icon="calendar"
+          iconColor={COLORS.primaryLight}
+        />
+        <StatCard
+          label="Avg Energy"
+          value={data.averageEnergy > 0 ? `${data.averageEnergy}/5` : '—'}
+          subtitle="Last 7 evening check-ins"
+          icon="battery-charging"
+          iconColor={COLORS.success}
+        />
+      </View>
 
-        {/* Stats Preview Placeholder */}
-        <View className="mb-6">
-          <Text className="text-white text-lg font-semibold mb-4">
-            Your Progress
-          </Text>
+      {/* Energy Trend */}
+      <View className="px-6 mb-6">
+        <EnergyTrendBar data={data.energyTrend} />
+      </View>
 
-          <View className="gap-3">
-            {/* Stat Card 1 */}
-            <View className="bg-gray-900 rounded-xl p-4 border border-gray-800 flex-row items-center justify-between">
-              <View>
-                <Text className="text-gray-400 text-sm">Total Check-ins</Text>
-                <Text className="text-white text-2xl font-bold mt-1">0</Text>
-              </View>
-              <View className="w-12 h-12 bg-primary-600/20 rounded-full items-center justify-center">
-                <Ionicons name="checkmark-circle" size={24} color="#8b5cf6" />
-              </View>
-            </View>
+      {/* Goal Completion */}
+      <View className="px-6 mb-6">
+        <GoalCompletionBar stats={data.goalCompletion} />
+      </View>
 
-            {/* Stat Card 2 */}
-            <View className="bg-gray-900 rounded-xl p-4 border border-gray-800 flex-row items-center justify-between">
-              <View>
-                <Text className="text-gray-400 text-sm">Longest Streak</Text>
-                <Text className="text-white text-2xl font-bold mt-1">0 days</Text>
-              </View>
-              <View className="w-12 h-12 bg-primary-600/20 rounded-full items-center justify-center">
-                <Ionicons name="flame" size={24} color="#8b5cf6" />
-              </View>
-            </View>
-
-            {/* Stat Card 3 */}
-            <View className="bg-gray-900 rounded-xl p-4 border border-gray-800 flex-row items-center justify-between">
-              <View>
-                <Text className="text-gray-400 text-sm">Focus Areas</Text>
-                <Text className="text-white text-2xl font-bold mt-1">0</Text>
-              </View>
-              <View className="w-12 h-12 bg-primary-600/20 rounded-full items-center justify-center">
-                <Ionicons name="star" size={24} color="#8b5cf6" />
-              </View>
-            </View>
-          </View>
-        </View>
+      {/* Focus Areas */}
+      <View className="px-6 mb-12">
+        <FocusAreaList areas={data.focusAreas} />
       </View>
     </ScrollView>
   )
