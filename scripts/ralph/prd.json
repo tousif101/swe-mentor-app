@@ -41,7 +41,7 @@
         "Typecheck passes"
       ],
       "priority": 2,
-      "passes": false,
+      "passes": true,
       "notes": "Reference docs/career-ladder-research.json for the full extracted data (848 lines). The career_matrices table has: id, company_name, source ('public'|'user_uploaded'|'template'), source_url, is_verified, created_at, updated_at. The level_definitions table has: id, matrix_id, level_code, level_name, level_order, scope (JSONB), technical_expectations (TEXT[]), leadership_expectations (TEXT[]), collaboration_expectations (TEXT[]), visibility_expectations (TEXT[]), created_at. UNIQUE constraint on (matrix_id, level_code). Set source='public' and is_verified=true for real companies (Dropbox, Etsy). Set source='template' and is_verified=false for generics. Map the research data thoughtfully — e.g. Dropbox 'craft' pillar maps to technical_expectations, 'talent' to leadership_expectations, 'culture' to collaboration_expectations, 'direction' to visibility_expectations. Keep the mapping function DRY — create a shared mapToLevelDefinition() helper."
     },
     {
@@ -63,7 +63,7 @@
         "Typecheck passes"
       ],
       "priority": 3,
-      "passes": false,
+      "passes": true,
       "notes": "This hook is the DRY foundation — used in BOTH ProfileScreen (onboarding) and CareerGoalScreen (settings). Keep it focused: just company matching logic, no profile saving. The Supabase query should be: supabase.from('career_matrices').select('id, company_name').ilike('company_name', `%${text}%`).limit(5). Debounce with setTimeout + clearTimeout pattern. Only search when text is 2+ characters."
     },
     {
@@ -84,7 +84,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 4,
-      "passes": false,
+      "passes": true,
       "notes": "Use the useCompanyMatch hook from US-003 — do NOT duplicate the matching logic. The autocomplete dropdown should dismiss when tapping outside (use a Pressable overlay). Company size chips should highlight the selected one with bg-primary-600/20 border-primary-500. Keep the existing ProfileScreen layout intact — company fields go AFTER the target role selector, BEFORE the Continue button. All company fields are optional — the Continue button should work with or without them. The ReadyScreen already saves profile data on line 48-57 — just add the company fields to that .update() call."
     },
     {
@@ -103,7 +103,7 @@
         "Verify in browser using dev-browser skill"
       ],
       "priority": 5,
-      "passes": false,
+      "passes": true,
       "notes": "Check the existing CareerGoalScreen.tsx and EditProfileScreen.tsx for their current structure before making changes. The useCompanyMatch hook accepts initial values — pass the current profile's company_name, company_size, career_matrix_id. This story demonstrates the DRY benefit: same hook, same UX, two screens. Use the existing ProfileContext or useProfile hook to get current profile data for pre-filling."
     }
   ]
