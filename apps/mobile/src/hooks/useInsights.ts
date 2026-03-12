@@ -7,7 +7,7 @@ import { useAuth } from './useAuth'
 export function useInsights() {
   const { user } = useAuth()
   const [data, setData] = useState<InsightsData | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
+  const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<Error | null>(null)
 
   const refresh = useCallback(async () => {
@@ -21,18 +21,14 @@ export function useInsights() {
       setData(insights)
     } catch (err) {
       logger.error('Failed to fetch insights:', err)
-      setError(err instanceof Error ? err : new Error('Failed to load insights'))
+      setError(new Error('Failed to load insights'))
     } finally {
       setIsLoading(false)
     }
   }, [user?.id])
 
   // Re-fetch when tab becomes focused (e.g., after completing a check-in on Home tab)
-  useFocusEffect(
-    useCallback(() => {
-      refresh()
-    }, [refresh])
-  )
+  useFocusEffect(refresh)
 
   return { data, isLoading, error, refresh }
 }

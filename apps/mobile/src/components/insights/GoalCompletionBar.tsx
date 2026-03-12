@@ -18,7 +18,7 @@ export function GoalCompletionBar({ stats }: Props) {
 
   const yesPercent = Math.round((stats.yes / stats.total) * 100)
   const partialPercent = Math.round((stats.partially / stats.total) * 100)
-  const noPercent = Math.round((stats.no / stats.total) * 100)
+  const noPercent = 100 - yesPercent - partialPercent
 
   return (
     <View className="bg-gray-900 rounded-2xl p-4 border border-gray-800">

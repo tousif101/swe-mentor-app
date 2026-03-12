@@ -23,7 +23,7 @@ export function InsightsScreen() {
         <Ionicons name="cloud-offline" size={48} color={COLORS.textMuted} />
         <Text className="text-white text-lg font-semibold mt-4">Couldn't load insights</Text>
         <Text className="text-gray-400 text-sm text-center mt-2">
-          {error.message}
+          Check your connection and try again.
         </Text>
         <Pressable
           onPress={refresh}
@@ -82,7 +82,7 @@ export function InsightsScreen() {
         <StatCard
           label="Avg Energy"
           value={data.averageEnergy > 0 ? `${data.averageEnergy}/5` : '—'}
-          subtitle="From evening check-ins"
+          subtitle="Last 7 evening check-ins"
           icon="battery-charging"
           iconColor={COLORS.success}
         />

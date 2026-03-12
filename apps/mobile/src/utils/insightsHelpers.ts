@@ -1,7 +1,7 @@
 import { supabase } from '../lib/supabase'
 import { logger } from './logger'
 import { getLocalDateString } from './checkInHelpers'
-import { INSIGHTS_CHECK_IN_FETCH_LIMIT, INSIGHTS_ENERGY_TREND_DAYS, INSIGHTS_WEEKLY_RATE_DAYS } from '../constants'
+import { INSIGHTS_CHECK_IN_FETCH_LIMIT, INSIGHTS_ENERGY_DISPLAY_DAYS, INSIGHTS_WEEKLY_RATE_DAYS } from '../constants'
 
 // ============================================
 // Types
@@ -111,7 +111,7 @@ export async function fetchInsightsData(userId: string): Promise<InsightsData> {
       .single(),
     supabase
       .from('check_ins')
-      .select('check_in_date, check_in_type, focus_area, energy_level, goal_completed, completed_at')
+      .select('check_in_date, check_in_type, focus_area, energy_level, goal_completed')
       .eq('user_id', userId)
       .not('completed_at', 'is', null)
       .order('check_in_date', { ascending: false })
@@ -129,6 +129,7 @@ export async function fetchInsightsData(userId: string): Promise<InsightsData> {
 
   if (streakResult.error && streakResult.error.code !== 'PGRST116') {
     logger.error('Error fetching streak data:', streakResult.error)
+    throw new Error('Failed to load insights')
   }
 
   if (checkInsResult.error) {
@@ -138,10 +139,10 @@ export async function fetchInsightsData(userId: string): Promise<InsightsData> {
 
   const checkIns = checkInsResult.data || []
 
-  // Most recent evening check-ins for energy trend (query is DESC, slice takes newest)
+  // Most recent evening check-ins for energy trend (query is DESC, slice takes newest, then sorted ASC by computeEnergyTrend)
   const recentEvening = checkIns
     .filter((c) => c.check_in_type === 'evening')
-    .slice(0, INSIGHTS_ENERGY_TREND_DAYS)
+    .slice(0, INSIGHTS_ENERGY_DISPLAY_DAYS)
 
   // All evening check-ins for goal completion
   const allEvening = checkIns.filter((c) => c.check_in_type === 'evening')
@@ -149,11 +150,10 @@ export async function fetchInsightsData(userId: string): Promise<InsightsData> {
   // All morning check-ins for focus areas
   const allMorning = checkIns.filter((c) => c.check_in_type === 'morning')
 
-  // Last 7 days for weekly rate
-  const sevenDaysAgo = new Date()
-  sevenDaysAgo.setDate(sevenDaysAgo.getDate() - (INSIGHTS_WEEKLY_RATE_DAYS - 1))
-  const sevenDaysAgoStr = getLocalDateString(sevenDaysAgo)
-  const lastWeekCheckIns = checkIns.filter((c) => c.check_in_date >= sevenDaysAgoStr)
+  // Last 7 days for weekly rate (immutable date computation per CLAUDE.md)
+  const rateWindowStart = new Date(Date.now() - (INSIGHTS_WEEKLY_RATE_DAYS - 1) * 24 * 60 * 60 * 1000)
+  const rateWindowStartStr = getLocalDateString(rateWindowStart)
+  const lastWeekCheckIns = checkIns.filter((c) => c.check_in_date >= rateWindowStartStr)
 
   const energyTrend = computeEnergyTrend(recentEvening)
   const energyLevels = energyTrend.map((e) => e.level)
