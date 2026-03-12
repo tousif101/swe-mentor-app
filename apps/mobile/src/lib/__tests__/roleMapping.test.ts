@@ -9,16 +9,17 @@ import {
 } from '../roleMapping'
 
 describe('ROLE_CONFIG', () => {
-  it('has all 5 roles defined', () => {
-    expect(Object.keys(ROLE_CONFIG)).toHaveLength(5)
+  it('has all 6 roles defined', () => {
+    expect(Object.keys(ROLE_CONFIG)).toHaveLength(6)
   })
 
   it('has correct indices in ascending order', () => {
-    expect(ROLE_CONFIG.software_engineer_1.index).toBe(0)
-    expect(ROLE_CONFIG.software_engineer_2.index).toBe(1)
-    expect(ROLE_CONFIG.senior_engineer.index).toBe(2)
-    expect(ROLE_CONFIG.staff_engineer.index).toBe(3)
-    expect(ROLE_CONFIG.principal_engineer.index).toBe(4)
+    expect(ROLE_CONFIG.intern.index).toBe(0)
+    expect(ROLE_CONFIG.software_engineer_1.index).toBe(1)
+    expect(ROLE_CONFIG.software_engineer_2.index).toBe(2)
+    expect(ROLE_CONFIG.senior_engineer.index).toBe(3)
+    expect(ROLE_CONFIG.staff_engineer.index).toBe(4)
+    expect(ROLE_CONFIG.principal_engineer.index).toBe(5)
   })
 
   it('has labels and descriptions for all roles', () => {
@@ -32,6 +33,7 @@ describe('ROLE_CONFIG', () => {
 describe('ROLES_ORDERED', () => {
   it('has roles in correct order', () => {
     expect(ROLES_ORDERED).toEqual([
+      'intern',
       'software_engineer_1',
       'software_engineer_2',
       'senior_engineer',
@@ -71,6 +73,39 @@ describe('getFocusAreas', () => {
     expect(areas).toContain('Industry Leadership')
   })
 
+  it('returns focus areas for Intern -> SE1', () => {
+    const areas = getFocusAreas('intern', 'software_engineer_1')
+    expect(areas).toContain('Code Fluency')
+    expect(areas).toContain('Software Design')
+    expect(areas).toContain('Ownership')
+  })
+
+  it('returns focus areas for Intern -> SE2', () => {
+    const areas = getFocusAreas('intern', 'software_engineer_2')
+    expect(areas).toContain('Code Fluency')
+    expect(areas).toContain('Software Design')
+    expect(areas).toContain('Ownership')
+    expect(areas).toContain('Impact')
+  })
+
+  it('returns focus areas for Intern -> Senior', () => {
+    const areas = getFocusAreas('intern', 'senior_engineer')
+    expect(areas).toContain('Code Fluency')
+    expect(areas).toContain('Impact')
+  })
+
+  it('returns focus areas for Intern -> Staff', () => {
+    const areas = getFocusAreas('intern', 'staff_engineer')
+    expect(areas).toContain('Architecture')
+    expect(areas).toContain('Impact')
+  })
+
+  it('returns focus areas for Intern -> Principal', () => {
+    const areas = getFocusAreas('intern', 'principal_engineer')
+    expect(areas).toContain('Technical Vision')
+    expect(areas).toContain('Impact')
+  })
+
   it('returns default areas for undefined transition', () => {
     // Same role (no transition defined)
     const areas = getFocusAreas('software_engineer_1', 'software_engineer_1')
@@ -79,6 +114,10 @@ describe('getFocusAreas', () => {
 })
 
 describe('getNextRole', () => {
+  it('returns SE1 for Intern', () => {
+    expect(getNextRole('intern')).toBe('software_engineer_1')
+  })
+
   it('returns SE2 for SE1', () => {
     expect(getNextRole('software_engineer_1')).toBe('software_engineer_2')
   })
@@ -120,9 +159,20 @@ describe('isValidTargetRole', () => {
 })
 
 describe('getValidTargetRoles', () => {
-  it('returns all roles for SE1', () => {
-    const targets = getValidTargetRoles('software_engineer_1')
+  it('returns all roles for Intern', () => {
+    const targets = getValidTargetRoles('intern')
     expect(targets).toEqual(ROLES_ORDERED)
+  })
+
+  it('returns SE1 and above for SE1', () => {
+    const targets = getValidTargetRoles('software_engineer_1')
+    expect(targets).toEqual([
+      'software_engineer_1',
+      'software_engineer_2',
+      'senior_engineer',
+      'staff_engineer',
+      'principal_engineer',
+    ])
   })
 
   it('returns SE2 and above for SE2', () => {
