@@ -20,14 +20,12 @@ import { supabase } from '../../lib/supabase'
 import { ROLE_CONFIG, getFocusAreas, type DbRole, getValidTargetRoles, ROLES_ORDERED } from '../../lib/roleMapping'
 import { useCompanyMatch } from '../../hooks'
 import { showFeedback } from '../../utils'
-import { COLORS } from '../../constants'
+import { COLORS, COMPANY_SIZES } from '../../constants'
 import type { ProfileStackParamList } from '../../types'
 
 type Props = {
   navigation: NativeStackNavigationProp<ProfileStackParamList, 'CareerGoal'>
 }
-
-const COMPANY_SIZES = ['<50', '50-200', '200-1000', '1000-5000', '5000+'] as const
 
 export function CareerGoalScreen({ navigation }: Props) {
   const { profile, refetch } = useProfileContext()
@@ -189,7 +187,7 @@ export function CareerGoalScreen({ navigation }: Props) {
         },
       ]
     )
-  }, [hasChanges, currentRole, targetRole, refetch, navigation, profile])
+  }, [hasChanges, currentRole, targetRole, refetch, navigation, profile, getCompanyFields])
 
   return (
     <ScrollView style={styles.container} testID="career-goal-screen">
@@ -295,7 +293,7 @@ export function CareerGoalScreen({ navigation }: Props) {
             <View style={styles.matchBanner}>
               <Ionicons name="checkmark-circle" size={20} color="#22c55e" style={{ marginRight: 8 }} />
               <Text style={styles.matchText}>
-                We have {matchedCompany}&apos;s career framework!
+                We have {matchedCompany}{"'"}s career framework!
               </Text>
             </View>
           )}

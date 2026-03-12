@@ -24,6 +24,7 @@ import {
   type DbRole,
 } from '../../lib/roleMapping'
 import { useCompanyMatch } from '../../hooks'
+import { COMPANY_SIZES } from '../../constants'
 import type { OnboardingStackParamList } from '../../navigation/OnboardingNavigator'
 
 type Props = {
@@ -133,13 +134,10 @@ export function ProfileScreen({ navigation }: Props) {
     careerMatrixId,
     matchedCompany,
     suggestions,
-    isSearching,
     setCompanyName,
     selectCompany,
     setCompanySize,
   } = useCompanyMatch()
-
-  const COMPANY_SIZES = ['<50', '50-200', '200-1000', '1000-5000', '5000+'] as const
 
   // When current role changes, update target role default
   const handleRoleChange = (newRole: DbRole) => {
@@ -157,6 +155,9 @@ export function ProfileScreen({ navigation }: Props) {
       name: name.trim(),
       role,
       targetRole,
+      ...(companyName ? { company_name: companyName } : {}),
+      ...(companySize ? { company_size: companySize } : {}),
+      ...(careerMatrixId ? { career_matrix_id: careerMatrixId } : {}),
     })
 
     if (!parsed.success) {
@@ -322,7 +323,7 @@ export function ProfileScreen({ navigation }: Props) {
             <View className="mt-2 px-4 py-3 bg-green-500/10 border border-green-500/20 rounded-xl flex-row items-center">
               <Ionicons name="checkmark-circle" size={20} color="#22c55e" style={{ marginRight: 8 }} />
               <Text className="text-green-400 text-sm">
-                We have {matchedCompany}&apos;s career framework!
+                We have {matchedCompany}{"'"}s career framework!
               </Text>
             </View>
           )}
