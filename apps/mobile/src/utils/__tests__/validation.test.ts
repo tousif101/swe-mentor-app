@@ -259,4 +259,67 @@ describe('profileSchema', () => {
     })
     expect(result.success).toBe(true)
   })
+
+  it('accepts intern as current role', () => {
+    const result = profileSchema.safeParse({
+      name: 'Jane Intern',
+      role: 'intern',
+      targetRole: 'intern',
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts intern targeting SE1', () => {
+    const result = profileSchema.safeParse({
+      name: 'Jane Intern',
+      role: 'intern',
+      targetRole: 'software_engineer_1',
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects SE1 targeting intern (below current)', () => {
+    const result = profileSchema.safeParse({
+      name: 'John SE1',
+      role: 'software_engineer_1',
+      targetRole: 'intern',
+    })
+    expect(result.success).toBe(false)
+    if (!result.success) {
+      expect(result.error.flatten().fieldErrors.targetRole).toContain(
+        'Target role must be at or above your current role'
+      )
+    }
+  })
+
+  it('accepts optional company fields', () => {
+    const result = profileSchema.safeParse({
+      ...validProfile,
+      company_name: 'Acme Corp',
+      company_size: '50-200',
+      career_matrix_id: '550e8400-e29b-41d4-a716-446655440000',
+    })
+    expect(result.success).toBe(true)
+  })
+
+  it('accepts profile without company fields', () => {
+    const result = profileSchema.safeParse(validProfile)
+    expect(result.success).toBe(true)
+  })
+
+  it('rejects invalid company_size enum value', () => {
+    const result = profileSchema.safeParse({
+      ...validProfile,
+      company_size: 'huge',
+    })
+    expect(result.success).toBe(false)
+  })
+
+  it('rejects invalid career_matrix_id format', () => {
+    const result = profileSchema.safeParse({
+      ...validProfile,
+      career_matrix_id: 'not-a-uuid',
+    })
+    expect(result.success).toBe(false)
+  })
 })

@@ -1,0 +1,23 @@
+# Ralph Progress Log
+Started: Thu Mar 12 05:16:01 EDT 2026
+---
+
+## Codebase Patterns
+- Validation schemas live in `apps/mobile/src/utils/validation.ts`, tests in `__tests__/validation.test.ts`
+- Use `ROLE_CONFIG` and `ROLES_ORDERED` from `lib/roleMapping.ts` as single source of truth for roles — never duplicate role lists
+- Vitest is the test runner for mobile app: `npx vitest run` from `apps/mobile/`
+- Pre-existing typecheck errors in App.tsx and e2e/ are unrelated — only check for errors in modified files
+- Zod enum requires a non-empty tuple type — use `as unknown as readonly [string, ...string[]]` when converting arrays
+
+---
+
+## 2026-03-12 05:17 - US-001
+- Fixed validation schema: added 'intern' role, derived roleIndexMap from ROLE_CONFIG (DRY fix), added optional company fields (company_name, company_size, career_matrix_id)
+- Files changed:
+  - `apps/mobile/src/utils/validation.ts` — rewrote to import from roleMapping.ts, derive roles dynamically, add company fields
+  - `apps/mobile/src/utils/__tests__/validation.test.ts` — added 7 new test cases for intern role and company fields
+- **Learnings for future iterations:**
+  - `ROLES_ORDERED` is typed as `DbRole[]` not a tuple, so needs double cast for `z.enum()`
+  - Pre-existing TS errors in App.tsx and e2e/ — don't block on those
+  - All 30 validation tests pass
+---

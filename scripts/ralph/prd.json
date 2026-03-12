@@ -1,0 +1,110 @@
+{
+  "project": "SWE Mentor App - Career Ladders & Onboarding",
+  "branchName": "ralph/career-ladders-onboarding",
+  "description": "Seed career ladder data from research, fix validation schema, create reusable company matching hook, update onboarding to collect company info with smart career ladder matching, and update settings screens. DRY code: shared useCompanyMatch hook used in both onboarding and settings.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Fix validation schema: add intern role and company fields",
+      "description": "As a developer, I need the Zod validation schema updated to accept the intern role and optional company fields so form validation works correctly.",
+      "acceptanceCriteria": [
+        "Modify apps/mobile/src/utils/validation.ts",
+        "Add 'intern' to the userRoles array (currently missing — roleMapping.ts has it but validation.ts does not)",
+        "DRY FIX: Replace the hardcoded roleIndexMap with a derived version from ROLE_CONFIG to prevent future drift. Use: const roleIndexMap: Record<string, number> = Object.fromEntries(Object.entries(ROLE_CONFIG).map(([k, v]) => [k, v.index])). This eliminates the duplicate index definitions. The resulting map should be: { intern: 0, software_engineer_1: 1, software_engineer_2: 2, senior_engineer: 3, staff_engineer: 4, principal_engineer: 5 }",
+        "Add optional company fields to profileSchema: company_name (z.string().optional()), company_size (z.enum(['<50', '50-200', '200-1000', '1000-5000', '5000+']).optional()), career_matrix_id (z.string().uuid().optional())",
+        "Export updated ProfileInput type",
+        "Update validation tests (apps/mobile/src/utils/__tests__/validation.test.ts if it exists, or apps/mobile/src/lib/__tests__/ equivalent) to add test cases for role: 'intern' and targetRole: 'intern' (intern->intern should pass, intern->SE1 should pass)",
+        "Existing tests still pass",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": true,
+      "notes": "BUG FIX: validation.ts line 34 has userRoles without 'intern' even though roleMapping.ts was updated in Loop 1. CRITICAL: Replace the entire roleIndexMap with a derivation from ROLE_CONFIG (imported from roleMapping.ts) so the indices can never drift again. Import { ROLE_CONFIG } from '../lib/roleMapping' and derive the map. Keep the existing .refine() for target role validation — the derived indices will be correct automatically."
+    },
+    {
+      "id": "US-002",
+      "title": "Create career ladder seed script",
+      "description": "As a developer, I need career ladder data seeded into the database so the mentor can provide company-specific coaching.",
+      "acceptanceCriteria": [
+        "Create scripts/seed-career-ladders.ts",
+        "Script reads data from docs/career-ladder-research.json",
+        "Uses Supabase client with service role key (SUPABASE_SERVICE_ROLE_KEY env var) — do NOT use anon key",
+        "Parses Dropbox career ladder: IC1-IC7 with all 5 pillars (Results, Direction, Talent, Culture, Craft) mapped to technical_expectations, leadership_expectations, collaboration_expectations, visibility_expectations arrays",
+        "Parses Etsy career ladder: Engineer I through Distinguished Engineer with competency profiles mapped to expectation arrays",
+        "Creates 3 generic templates with source='template': 'Generic FAANG' (L3-L7+ matching typical big tech levels), 'Generic Startup' (Junior, Mid, Senior, Staff with startup-focused expectations), 'Generic Midsize' (Junior through Principal with balanced expectations)",
+        "Creates 'Generic Intern' template with INTERN and NEW_GRAD levels focused on: learning velocity, asking good questions, seeking feedback, code review skills, return offer positioning",
+        "Idempotent: checks if company_name already exists in career_matrices before inserting (skip if exists)",
+        "Each level_definition has correct level_order (ascending integer), meaningful level_code and level_name",
+        "scope column populated as JSONB with summary and collaborative_reach fields",
+        "Script runnable with: npx tsx scripts/seed-career-ladders.ts",
+        "Script logs progress to console: 'Seeding [Company]... [N] levels inserted' or 'Skipping [Company] — already exists'",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "Reference docs/career-ladder-research.json for the full extracted data (848 lines). The career_matrices table has: id, company_name, source ('public'|'user_uploaded'|'template'), source_url, is_verified, created_at, updated_at. The level_definitions table has: id, matrix_id, level_code, level_name, level_order, scope (JSONB), technical_expectations (TEXT[]), leadership_expectations (TEXT[]), collaboration_expectations (TEXT[]), visibility_expectations (TEXT[]), created_at. UNIQUE constraint on (matrix_id, level_code). Set source='public' and is_verified=true for real companies (Dropbox, Etsy). Set source='template' and is_verified=false for generics. Map the research data thoughtfully — e.g. Dropbox 'craft' pillar maps to technical_expectations, 'talent' to leadership_expectations, 'culture' to collaboration_expectations, 'direction' to visibility_expectations. Keep the mapping function DRY — create a shared mapToLevelDefinition() helper."
+    },
+    {
+      "id": "US-003",
+      "title": "Create reusable useCompanyMatch hook",
+      "description": "As a developer, I need a shared hook for company name autocomplete and career matrix matching so the logic is DRY across onboarding and settings.",
+      "acceptanceCriteria": [
+        "Create apps/mobile/src/hooks/useCompanyMatch.ts",
+        "Hook accepts initial values: { companyName?: string, companySize?: string, careerMatrixId?: string }",
+        "State: companyName (string), companySize (string | null), careerMatrixId (string | null), matchedCompany (string | null), suggestions (string[]), isSearching (boolean)",
+        "setCompanyName(text) function: updates state, debounces 300ms, then queries career_matrices via Supabase ILIKE '%text%' for suggestions",
+        "selectCompany(companyName, matrixId) function: sets companyName, careerMatrixId, matchedCompany",
+        "setCompanySize(size) function: updates company size state",
+        "clearMatch() function: resets careerMatrixId and matchedCompany",
+        "getCompanyFields() function: returns { company_name, company_size, career_matrix_id } for saving to profile",
+        "Uses useCallback for all handlers, proper cleanup for debounce timer on unmount",
+        "Import supabase from apps/mobile/src/lib/supabase",
+        "Export from apps/mobile/src/hooks/index.ts barrel",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "This hook is the DRY foundation — used in BOTH ProfileScreen (onboarding) and CareerGoalScreen (settings). Keep it focused: just company matching logic, no profile saving. The Supabase query should be: supabase.from('career_matrices').select('id, company_name').ilike('company_name', `%${text}%`).limit(5). Debounce with setTimeout + clearTimeout pattern. Only search when text is 2+ characters."
+    },
+    {
+      "id": "US-004",
+      "title": "Update onboarding flow with company fields and smart matching",
+      "description": "As a user, I want to optionally enter my company during onboarding so I get personalized career ladder coaching.",
+      "acceptanceCriteria": [
+        "Modify apps/mobile/src/screens/onboarding/ProfileScreen.tsx",
+        "Add company_name TextInput after the target role selector with placeholder 'Your company (optional)' — uses useCompanyMatch hook",
+        "Show autocomplete dropdown below input when suggestions.length > 0: FlatList with bg-gray-800 rounded-xl, each item shows company name, tapping sets selection",
+        "When company is matched, show green banner below input: bg-green-500/10 border-green-500/20 rounded-xl with Ionicons checkmark-circle and text 'We have [Company]'s career framework!'",
+        "Add company_size selector after company name: use 5 horizontal chips (Pressable with bg-gray-800 rounded-lg) for '<50', '50-200', '200-1000', '1000-5000', '5000+'",
+        "Company fields are visually marked as optional with '(optional)' label text in text-gray-500",
+        "Update OnboardingStackParamList in apps/mobile/src/navigation/OnboardingNavigator.tsx: add companyName?, companySize?, careerMatrixId? to ReminderSetup and Ready params",
+        "Pass company fields through navigation.navigate('ReminderSetup', { ...existing, companyName, companySize, careerMatrixId })",
+        "Modify apps/mobile/src/screens/onboarding/ReadyScreen.tsx: extract company params from route.params, include in the supabase profile .update() call (company_name, company_size, career_matrix_id)",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "Use the useCompanyMatch hook from US-003 — do NOT duplicate the matching logic. The autocomplete dropdown should dismiss when tapping outside (use a Pressable overlay). Company size chips should highlight the selected one with bg-primary-600/20 border-primary-500. Keep the existing ProfileScreen layout intact — company fields go AFTER the target role selector, BEFORE the Continue button. All company fields are optional — the Continue button should work with or without them. The ReadyScreen already saves profile data on line 48-57 — just add the company fields to that .update() call."
+    },
+    {
+      "id": "US-005",
+      "title": "Update settings screens for company fields",
+      "description": "As a user, I want to update my company information from settings after initial onboarding.",
+      "acceptanceCriteria": [
+        "Modify apps/mobile/src/screens/settings/CareerGoalScreen.tsx",
+        "Add company_name TextInput with useCompanyMatch hook — same autocomplete and match banner as onboarding",
+        "Add company_size chip selector — same 5 options as onboarding",
+        "Pre-fill fields from existing profile data (company_name, company_size from ProfileContext or profile fetch)",
+        "Save button updates profiles table with company_name, company_size, career_matrix_id alongside existing fields",
+        "Modify apps/mobile/src/screens/settings/EditProfileScreen.tsx: show company_name and company_size as read-only info if set, with 'Edit in Career Goals' link if user wants to change",
+        "Reuse useCompanyMatch hook — do NOT duplicate matching logic from onboarding",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 5,
+      "passes": false,
+      "notes": "Check the existing CareerGoalScreen.tsx and EditProfileScreen.tsx for their current structure before making changes. The useCompanyMatch hook accepts initial values — pass the current profile's company_name, company_size, career_matrix_id. This story demonstrates the DRY benefit: same hook, same UX, two screens. Use the existing ProfileContext or useProfile hook to get current profile data for pre-filling."
+    }
+  ]
+}
