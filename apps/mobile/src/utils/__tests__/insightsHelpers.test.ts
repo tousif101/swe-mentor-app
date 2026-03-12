@@ -99,4 +99,20 @@ describe('computeWeeklyCompletionRate', () => {
     // 3 unique days out of 7 = ~43%
     expect(computeWeeklyCompletionRate(checkIns, 7)).toBe(43)
   })
+
+  it('returns 0 for totalDays <= 0', () => {
+    const checkIns = [{ check_in_date: '2026-03-10' }]
+    expect(computeWeeklyCompletionRate(checkIns, 0)).toBe(0)
+    expect(computeWeeklyCompletionRate(checkIns, -1)).toBe(0)
+  })
+
+  it('caps at 100% when unique days exceed totalDays', () => {
+    const checkIns = [
+      { check_in_date: '2026-03-10' },
+      { check_in_date: '2026-03-09' },
+      { check_in_date: '2026-03-08' },
+    ]
+    // 3 unique days out of 2 = capped at 100%
+    expect(computeWeeklyCompletionRate(checkIns, 2)).toBe(100)
+  })
 })

@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native'
-import type { EnergyTrendPoint } from '../../utils/insightsHelpers'
-import { COLORS, ENERGY_COLORS } from '../../constants'
+import type { EnergyTrendPoint } from '../../utils'
+import { COLORS, ENERGY_COLORS, INSIGHTS_ENERGY_DISPLAY_DAYS } from '../../constants'
 
 type Props = {
   data: EnergyTrendPoint[]
@@ -19,7 +19,7 @@ export function EnergyTrendBar({ data }: Props) {
   }
 
   // Show last 7 entries
-  const recent = data.slice(-7)
+  const recent = data.slice(-INSIGHTS_ENERGY_DISPLAY_DAYS)
 
   return (
     <View className="bg-gray-900 rounded-2xl p-4 border border-gray-800">

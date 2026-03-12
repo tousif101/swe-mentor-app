@@ -88,9 +88,9 @@ export function computeFocusAreaBreakdown(checkIns: FocusCheckIn[]): FocusAreaIt
 type DateCheckIn = { check_in_date: string }
 
 export function computeWeeklyCompletionRate(checkIns: DateCheckIn[], totalDays: number): number {
-  if (checkIns.length === 0) return 0
+  if (totalDays <= 0 || checkIns.length === 0) return 0
   const uniqueDays = new Set(checkIns.map((c) => c.check_in_date))
-  return Math.round((uniqueDays.size / totalDays) * 100)
+  return Math.min(Math.round((uniqueDays.size / totalDays) * 100), 100)
 }
 
 // ============================================
@@ -133,7 +133,7 @@ export async function fetchInsightsData(userId: string): Promise<InsightsData> {
 
   if (checkInsResult.error) {
     logger.error('Error fetching check-ins:', checkInsResult.error)
-    throw checkInsResult.error
+    throw new Error('Failed to load insights')
   }
 
   const checkIns = checkInsResult.data || []

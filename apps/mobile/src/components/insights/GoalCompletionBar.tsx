@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native'
 import { COLORS } from '../../constants'
-import type { GoalCompletionStats } from '../../utils/insightsHelpers'
+import type { GoalCompletionStats } from '../../utils'
 
 type Props = {
   stats: GoalCompletionStats

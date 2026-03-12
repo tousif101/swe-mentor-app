@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native'
 import { COLORS } from '../../constants'
-import type { FocusAreaItem } from '../../utils/insightsHelpers'
+import type { FocusAreaItem } from '../../utils'
 
 type Props = {
   areas: FocusAreaItem[]

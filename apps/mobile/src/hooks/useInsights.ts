@@ -1,8 +1,8 @@
 import { useState, useCallback } from 'react'
 import { useFocusEffect } from '@react-navigation/native'
-import { fetchInsightsData, InsightsData } from '../utils/insightsHelpers'
+import { fetchInsightsData, logger } from '../utils'
+import type { InsightsData } from '../utils'
 import { useAuth } from './useAuth'
-import { logger } from '../utils/logger'
 
 export function useInsights() {
   const { user } = useAuth()
