@@ -107,6 +107,7 @@ export const DEFAULT_REMINDER_TIMES = {
 export const INSIGHTS_CHECK_IN_FETCH_LIMIT = 180
 export const INSIGHTS_ENERGY_TREND_DAYS = 14
 export const INSIGHTS_WEEKLY_RATE_DAYS = 7
+export const ENERGY_COLORS = ['#ef4444', '#f59e0b', '#eab308', '#84cc16', '#10b981'] // 1-5: red, amber, yellow, lime, emerald
 
 // Push notification configuration
 export const PUSH_NOTIFICATION_CONFIG = {
