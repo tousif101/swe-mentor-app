@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
   trackBar: {
     height: 6,
     borderRadius: 3,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: COLORS.trackBackground,
     overflow: 'hidden',
   },
   fillBar: {

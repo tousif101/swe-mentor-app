@@ -27,6 +27,9 @@ export const COLORS = {
   success: '#10b981', // emerald-500
   warning: '#f59e0b', // amber-500
   amber400: '#fbbf24', // amber-400 - morning icon
+
+  // UI Elements
+  trackBackground: 'rgba(255, 255, 255, 0.05)', // progress bar/chart tracks
 } as const
 
 // Streak milestones that trigger confetti celebrations

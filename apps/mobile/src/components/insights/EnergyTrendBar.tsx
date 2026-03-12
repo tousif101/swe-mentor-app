@@ -1,6 +1,6 @@
 import { View, Text, StyleSheet } from 'react-native'
 import type { EnergyTrendPoint } from '../../utils/insightsHelpers'
-import { ENERGY_COLORS } from '../../constants'
+import { COLORS, ENERGY_COLORS } from '../../constants'
 
 type Props = {
   data: EnergyTrendPoint[]
@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
     height: BAR_MAX_HEIGHT,
     width: 20,
     borderRadius: 10,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: COLORS.trackBackground,
     justifyContent: 'flex-end',
     overflow: 'hidden',
   },

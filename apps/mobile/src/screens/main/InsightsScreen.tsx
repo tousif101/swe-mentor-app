@@ -27,7 +27,7 @@ export function InsightsScreen() {
         </Text>
         <Pressable
           onPress={refresh}
-          className="mt-6 bg-primary-600 rounded-xl px-6 py-3"
+          className="mt-6 bg-primary-600 rounded-2xl px-6 py-3"
         >
           <Text className="text-white font-semibold">Try Again</Text>
         </Pressable>
@@ -50,8 +50,8 @@ export function InsightsScreen() {
     >
       {/* Header */}
       <View className="px-6 pb-6" style={{ paddingTop: insets.top + 16 }}>
-        <Text className="text-white text-3xl font-bold">Insights</Text>
-        <Text className="text-gray-400 text-base mt-1">
+        <Text className="text-white text-2xl font-bold">Insights</Text>
+        <Text className="text-gray-400 text-sm mt-1">
           Your check-in analytics
         </Text>
       </View>
@@ -70,7 +70,7 @@ export function InsightsScreen() {
           value={`${data.currentStreak} days`}
           subtitle={`Longest: ${data.longestStreak} days`}
           icon="flame"
-          iconColor="#f59e0b"
+          iconColor={COLORS.warning}
         />
         <StatCard
           label="Weekly Rate"
@@ -84,7 +84,7 @@ export function InsightsScreen() {
           value={data.averageEnergy > 0 ? `${data.averageEnergy}/5` : '—'}
           subtitle="From evening check-ins"
           icon="battery-charging"
-          iconColor="#10b981"
+          iconColor={COLORS.success}
         />
       </View>
 
