@@ -1,0 +1,38 @@
+import { useState, useCallback } from 'react'
+import { useFocusEffect } from '@react-navigation/native'
+import { fetchInsightsData, InsightsData } from '../utils/insightsHelpers'
+import { useAuth } from './useAuth'
+import { logger } from '../utils/logger'
+
+export function useInsights() {
+  const { user } = useAuth()
+  const [data, setData] = useState<InsightsData | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<Error | null>(null)
+
+  const refresh = useCallback(async () => {
+    if (!user?.id) return
+
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      const insights = await fetchInsightsData(user.id)
+      setData(insights)
+    } catch (err) {
+      logger.error('Failed to fetch insights:', err)
+      setError(err instanceof Error ? err : new Error('Failed to load insights'))
+    } finally {
+      setIsLoading(false)
+    }
+  }, [user?.id])
+
+  // Re-fetch when tab becomes focused (e.g., after completing a check-in on Home tab)
+  useFocusEffect(
+    useCallback(() => {
+      refresh()
+    }, [refresh])
+  )
+
+  return { data, isLoading, error, refresh }
+}
