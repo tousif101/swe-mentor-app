@@ -8,10 +8,11 @@ ALTER TABLE public.profiles
   ADD COLUMN IF NOT EXISTS company_size TEXT,
   ADD COLUMN IF NOT EXISTS career_matrix_id UUID;
 
--- Add CHECK constraint on company_size
+-- Add CHECK constraint on company_size (idempotent)
+ALTER TABLE public.profiles DROP CONSTRAINT IF EXISTS profiles_company_size_check;
 ALTER TABLE public.profiles
   ADD CONSTRAINT profiles_company_size_check
-  CHECK (company_size IN ('<50', '50-200', '200-1000', '1000-5000', '5000+'));
+  CHECK (company_size IS NULL OR company_size IN ('<50', '50-200', '200-1000', '1000-5000', '5000+'));
 
 -- Add FK from career_matrix_id to career_matrices
 ALTER TABLE public.profiles

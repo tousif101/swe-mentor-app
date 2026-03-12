@@ -73,6 +73,39 @@ describe('getFocusAreas', () => {
     expect(areas).toContain('Industry Leadership')
   })
 
+  it('returns focus areas for Intern -> SE1', () => {
+    const areas = getFocusAreas('intern', 'software_engineer_1')
+    expect(areas).toContain('Code Fluency')
+    expect(areas).toContain('Software Design')
+    expect(areas).toContain('Ownership')
+  })
+
+  it('returns focus areas for Intern -> SE2', () => {
+    const areas = getFocusAreas('intern', 'software_engineer_2')
+    expect(areas).toContain('Code Fluency')
+    expect(areas).toContain('Software Design')
+    expect(areas).toContain('Ownership')
+    expect(areas).toContain('Impact')
+  })
+
+  it('returns focus areas for Intern -> Senior', () => {
+    const areas = getFocusAreas('intern', 'senior_engineer')
+    expect(areas).toContain('Code Fluency')
+    expect(areas).toContain('Impact')
+  })
+
+  it('returns focus areas for Intern -> Staff', () => {
+    const areas = getFocusAreas('intern', 'staff_engineer')
+    expect(areas).toContain('Architecture')
+    expect(areas).toContain('Impact')
+  })
+
+  it('returns focus areas for Intern -> Principal', () => {
+    const areas = getFocusAreas('intern', 'principal_engineer')
+    expect(areas).toContain('Technical Vision')
+    expect(areas).toContain('Impact')
+  })
+
   it('returns default areas for undefined transition', () => {
     // Same role (no transition defined)
     const areas = getFocusAreas('software_engineer_1', 'software_engineer_1')

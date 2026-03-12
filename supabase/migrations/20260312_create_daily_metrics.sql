@@ -7,6 +7,7 @@ CREATE TABLE public.daily_metrics (
   mentor_messages INT DEFAULT 0,
   tags_used TEXT[] DEFAULT '{}',
   created_at TIMESTAMPTZ DEFAULT now(),
+  updated_at TIMESTAMPTZ DEFAULT now(),
   UNIQUE (user_id, date)
 );
 
@@ -32,3 +33,8 @@ CREATE POLICY "Users can update their own daily metrics"
 CREATE POLICY "Users can delete their own daily metrics"
   ON public.daily_metrics FOR DELETE
   USING (auth.uid() = user_id);
+
+-- Apply updated_at trigger (reuses existing function from profiles migration)
+CREATE TRIGGER daily_metrics_updated_at
+  BEFORE UPDATE ON public.daily_metrics
+  FOR EACH ROW EXECUTE PROCEDURE public.update_updated_at();

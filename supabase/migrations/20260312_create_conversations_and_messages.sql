@@ -54,6 +54,12 @@ CREATE POLICY "Users can insert messages in their conversations"
     SELECT id FROM public.conversations WHERE user_id = auth.uid()
   ));
 
+CREATE POLICY "Users can update messages in their conversations"
+  ON public.messages FOR UPDATE
+  USING (conversation_id IN (
+    SELECT id FROM public.conversations WHERE user_id = auth.uid()
+  ));
+
 CREATE POLICY "Users can delete messages in their conversations"
   ON public.messages FOR DELETE
   USING (conversation_id IN (

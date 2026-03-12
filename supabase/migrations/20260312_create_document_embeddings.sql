@@ -17,8 +17,9 @@ CREATE TABLE public.document_embeddings (
 -- Indexes
 CREATE INDEX idx_document_embeddings_user ON public.document_embeddings(user_id);
 CREATE INDEX idx_document_embeddings_source ON public.document_embeddings(source_type, source_id);
+-- HNSW index: works well on empty tables (unlike IVFFLAT which needs pre-populated data)
 CREATE INDEX idx_document_embeddings_vector ON public.document_embeddings
-  USING ivfflat (embedding vector_cosine_ops) WITH (lists = 100);
+  USING hnsw (embedding vector_cosine_ops);
 
 -- Enable RLS
 ALTER TABLE public.document_embeddings ENABLE ROW LEVEL SECURITY;

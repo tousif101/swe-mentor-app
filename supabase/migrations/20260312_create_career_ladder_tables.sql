@@ -28,6 +28,10 @@ CREATE TABLE public.level_definitions (
 CREATE INDEX idx_career_matrices_company_name ON public.career_matrices (company_name);
 CREATE INDEX idx_level_definitions_matrix_order ON public.level_definitions (matrix_id, level_order);
 
+-- Unique constraint: no duplicate level codes within a matrix
+ALTER TABLE public.level_definitions
+  ADD CONSTRAINT level_definitions_matrix_level_code_unique UNIQUE (matrix_id, level_code);
+
 -- Enable RLS
 ALTER TABLE public.career_matrices ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.level_definitions ENABLE ROW LEVEL SECURITY;
