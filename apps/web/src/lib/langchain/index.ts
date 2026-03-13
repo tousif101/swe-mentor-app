@@ -11,3 +11,13 @@ export {
   COACHING_MODES,
 } from "./prompts";
 export type { CoachingMode } from "./prompts";
+export { RateLimitError } from "./errors";
+export {
+  mentorMiddleware,
+  summarizationHook,
+  createDynamicPrompt,
+  checkRateLimit,
+  wrapToolExecution,
+  MODEL_CALL_LIMIT,
+  TOOL_CALL_LIMIT,
+} from "./middleware";
