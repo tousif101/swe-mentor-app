@@ -1,0 +1,79 @@
+# 05-home-screen.yaml — Verify home screen elements
+# Maps to: e2e/home-page-cards.test.ts
+# Prerequisite: App already running in simulator (loaded via xcrun simctl openurl)
+appId: host.exp.Exponent
+---
+# Dismiss Expo Go dev menu if it appears (native sheet - use coordinate tap)
+- runFlow:
+    when:
+      visible: "SDK version"
+    commands:
+      - tapOn:
+          point: "50%,93%"
+      - runFlow:
+          when:
+            visible: "Reload"
+          commands:
+            - tapOn:
+                point: "50%,20%"
+# Re-open app from Expo Go home screen if needed
+- runFlow:
+    when:
+      visible: "Recently opened"
+    commands:
+      - tapOn: "SWE Mentor"
+      - waitForAnimationToEnd
+# Dismiss dev menu again after re-open
+- runFlow:
+    when:
+      visible: "SDK version"
+    commands:
+      - tapOn:
+          point: "50%,93%"
+      - runFlow:
+          when:
+            visible: "Reload"
+          commands:
+            - tapOn:
+                point: "50%,20%"
+# Login
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 30000
+- tapOn:
+    id: "sign-in-link"
+- extendedWaitUntil:
+    visible: "Welcome back"
+    timeout: 5000
+- tapOn:
+    id: "email-input"
+- inputText: ${TEST_EMAIL}
+- tapOn:
+    id: "password-input"
+- inputText: ${TEST_PASSWORD}
+- hideKeyboard
+- tapOn:
+    id: "sign-in-button"
+# Dismiss iOS "Save Password?" dialog if it appears
+- runFlow:
+    when:
+      visible: "Not Now"
+    commands:
+      - tapOn: "Not Now"
+- extendedWaitUntil:
+    visible:
+      id: "home-screen"
+    timeout: 15000
+- takeScreenshot: home-screen-top
+# Check greeting
+- assertVisible:
+    id: "home-greeting"
+# Check header buttons
+- assertVisible:
+    id: "header-notification-button"
+- assertVisible:
+    id: "header-settings-button"
+# Scroll down to see more content
+- scroll
+- takeScreenshot: home-screen-scrolled

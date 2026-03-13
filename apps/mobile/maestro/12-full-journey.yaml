@@ -1,0 +1,154 @@
+# 12-full-journey.yaml — Complete end-to-end user journey
+# Maps to: e2e/full-user-journey.test.ts
+# This is the comprehensive smoke test covering all major flows
+# Prerequisite: App already running in simulator (loaded via xcrun simctl openurl)
+appId: host.exp.Exponent
+---
+# Dismiss Expo Go dev menu if it appears (native sheet - use coordinate tap)
+- runFlow:
+    when:
+      visible: "SDK version"
+    commands:
+      - tapOn:
+          point: "50%,93%"
+      - runFlow:
+          when:
+            visible: "Reload"
+          commands:
+            - tapOn:
+                point: "50%,20%"
+# Re-open app from Expo Go home screen if needed
+- runFlow:
+    when:
+      visible: "Recently opened"
+    commands:
+      - tapOn: "SWE Mentor"
+      - waitForAnimationToEnd
+# Dismiss dev menu again after re-open
+- runFlow:
+    when:
+      visible: "SDK version"
+    commands:
+      - tapOn:
+          point: "50%,93%"
+      - runFlow:
+          when:
+            visible: "Reload"
+          commands:
+            - tapOn:
+                point: "50%,20%"
+
+# ============ LOGIN ============
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 30000
+- tapOn:
+    id: "sign-in-link"
+- extendedWaitUntil:
+    visible: "Welcome back"
+    timeout: 5000
+- tapOn:
+    id: "email-input"
+- inputText: ${TEST_EMAIL}
+- tapOn:
+    id: "password-input"
+- inputText: ${TEST_PASSWORD}
+- hideKeyboard
+- tapOn:
+    id: "sign-in-button"
+# Dismiss iOS "Save Password?" dialog if it appears
+- runFlow:
+    when:
+      visible: "Not Now"
+    commands:
+      - tapOn: "Not Now"
+- extendedWaitUntil:
+    visible:
+      id: "home-screen"
+    timeout: 15000
+- takeScreenshot: journey-01-home
+
+# ============ MORNING CHECK-IN ============
+- tapOn:
+    id: "hero-card-button"
+- extendedWaitUntil:
+    visible:
+      id: "morning-checkin-screen"
+    timeout: 5000
+- tapOn: "System Design"
+- tapOn:
+    id: "daily-goal-input"
+- inputText: "Full journey E2E test"
+- tapOn:
+    id: "morning-save-button"
+- extendedWaitUntil:
+    visible:
+      id: "home-screen"
+    timeout: 5000
+- takeScreenshot: journey-02-morning-done
+
+# ============ EVENING CHECK-IN ============
+- tapOn:
+    id: "hero-card-button"
+- extendedWaitUntil:
+    visible:
+      id: "evening-checkin-screen"
+    timeout: 5000
+- tapOn:
+    id: "goal-completion-partially"
+- tapOn:
+    id: "quick-win-input"
+- inputText: "Completed full E2E journey"
+- tapOn:
+    id: "energy-level-4"
+- tapOn:
+    id: "tomorrow-carry-input"
+- inputText: "Continue improving"
+- tapOn:
+    id: "evening-save-button"
+- takeScreenshot: journey-03-evening-done
+
+# ============ JOURNAL ============
+- tapOn:
+    id: "journal-tab"
+- extendedWaitUntil:
+    visible:
+      id: "journal-screen"
+    timeout: 5000
+- takeScreenshot: journey-04-journal
+
+# ============ INSIGHTS ============
+- tapOn:
+    id: "insights-tab"
+- extendedWaitUntil:
+    visible:
+      id: "insights-screen"
+    timeout: 5000
+- takeScreenshot: journey-05-insights
+
+# ============ PROFILE SETTINGS ============
+- tapOn:
+    id: "profile-tab"
+- extendedWaitUntil:
+    visible:
+      id: "profile-screen"
+    timeout: 3000
+- tapOn:
+    id: "edit-profile-row"
+- extendedWaitUntil:
+    visible:
+      id: "edit-profile-screen"
+    timeout: 3000
+- takeScreenshot: journey-06-edit-profile
+- tapOn:
+    id: "back-button"
+
+# ============ LOGOUT ============
+- tapOn:
+    id: "sign-out-button"
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 10000
+- takeScreenshot: journey-07-logout

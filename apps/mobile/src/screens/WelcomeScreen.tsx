@@ -10,7 +10,7 @@ type Props = {
 
 export function WelcomeScreen({ navigation }: Props) {
   return (
-    <View className="flex-1 bg-gray-950 items-center justify-center px-6">
+    <View testID="welcome-screen" className="flex-1 bg-gray-950 items-center justify-center px-6">
       {/* Logo */}
       <LinearGradient
         colors={['#4c1d95', '#7c3aed', '#8b5cf6', '#a78bfa']}
@@ -35,6 +35,7 @@ export function WelcomeScreen({ navigation }: Props) {
 
       {/* Get Started Button */}
       <Pressable
+        testID="get-started-button"
         onPress={() => navigation.navigate('Signup')}
         style={{ width: '100%', marginBottom: 16 }}
       >
@@ -54,6 +55,7 @@ export function WelcomeScreen({ navigation }: Props) {
 
       {/* Already have account Button */}
       <Pressable
+        testID="sign-in-link"
         onPress={() => navigation.navigate('Login')}
         className="w-full py-4 rounded-2xl border border-gray-700 items-center"
       >

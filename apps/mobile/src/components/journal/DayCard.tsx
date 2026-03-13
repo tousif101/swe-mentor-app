@@ -9,6 +9,7 @@ import { formatFocusAreaTag } from '../../utils/formatters'
 type IoniconsName = keyof typeof Ionicons.glyphMap
 
 type DayCardProps = {
+  testID?: string
   dayGroup: DayGroup
   onHashtagPress: (tag: string) => void
   onEditPress?: (dayGroup: DayGroup) => void
@@ -22,7 +23,7 @@ const statusConfig: Record<DayStatus, { icon: string; color: string }> = {
   pending: { icon: 'remove', color: '#6b7280' },
 }
 
-export function DayCard({ dayGroup, onHashtagPress, onEditPress, defaultExpanded = false }: DayCardProps) {
+export function DayCard({ testID, dayGroup, onHashtagPress, onEditPress, defaultExpanded = false }: DayCardProps) {
   const [expanded, setExpanded] = useState(defaultExpanded)
   const status = getDayStatus(dayGroup)
   const config = statusConfig[status]
@@ -48,7 +49,7 @@ export function DayCard({ dayGroup, onHashtagPress, onEditPress, defaultExpanded
   }, [onEditPress, dayGroup])
 
   return (
-    <Pressable onPress={handlePress} style={styles.container}>
+    <Pressable onPress={handlePress} style={styles.container} testID={testID}>
       {/* Header Row */}
       <View style={styles.header}>
         <Text style={styles.dateText}>{formatJournalDate(dayGroup.date)}</Text>
@@ -61,6 +62,7 @@ export function DayCard({ dayGroup, onHashtagPress, onEditPress, defaultExpanded
               accessibilityLabel="Edit check-in"
               accessibilityRole="button"
               accessibilityHint="Opens the check-in editor"
+              testID={`edit-button-${dayGroup.date}`}
             >
               <Ionicons name="pencil" size={16} color="#9CA3AF" />
             </Pressable>

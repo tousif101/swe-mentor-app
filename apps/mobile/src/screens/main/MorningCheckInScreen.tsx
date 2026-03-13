@@ -169,6 +169,7 @@ export function MorningCheckInScreen({ navigation }: MorningCheckInScreenProps) 
 
   return (
     <KeyboardAvoidingView
+      testID="morning-checkin-screen"
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       className="flex-1 bg-gray-950"
     >
@@ -231,6 +232,7 @@ export function MorningCheckInScreen({ navigation }: MorningCheckInScreenProps) 
             </Text>
           </View>
           <TextInput
+            testID="daily-goal-input"
             value={dailyGoal}
             onChangeText={(text) => {
               setDailyGoal(text)
@@ -270,6 +272,7 @@ export function MorningCheckInScreen({ navigation }: MorningCheckInScreenProps) 
 
         {/* Submit Button */}
         <Pressable
+          testID="morning-save-button"
           onPress={handleSubmit}
           disabled={isLoading}
           style={{ width: '100%' }}

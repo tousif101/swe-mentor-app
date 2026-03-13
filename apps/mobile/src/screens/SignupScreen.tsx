@@ -96,6 +96,7 @@ export function SignupScreen({ navigation }: Props) {
 
   return (
     <KeyboardAvoidingView
+      testID="signup-screen"
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       className="flex-1 bg-gray-950"
     >
@@ -124,6 +125,7 @@ export function SignupScreen({ navigation }: Props) {
         {/* Email Input */}
         <View className="mb-4">
           <TextInput
+            testID="signup-email-input"
             value={email}
             onChangeText={setEmail}
             placeholder="Enter your email"
@@ -146,6 +148,7 @@ export function SignupScreen({ navigation }: Props) {
         <View className="mb-4">
           <View className="flex-row items-center bg-gray-800 border border-gray-700 rounded-xl">
             <TextInput
+              testID="signup-password-input"
               ref={passwordRef}
               value={password}
               onChangeText={setPassword}
@@ -180,6 +183,7 @@ export function SignupScreen({ navigation }: Props) {
         <View className="mb-4">
           <View className="flex-row items-center bg-gray-800 border border-gray-700 rounded-xl">
             <TextInput
+              testID="confirm-password-input"
               ref={confirmPasswordRef}
               value={confirmPassword}
               onChangeText={setConfirmPassword}
@@ -219,6 +223,7 @@ export function SignupScreen({ navigation }: Props) {
 
         {/* Submit Button */}
         <Pressable
+          testID="create-account-button"
           onPress={handleSignup}
           disabled={isLoading}
           className="w-full py-3.5 rounded-xl items-center mb-4"

@@ -25,6 +25,7 @@ export function JournalSearch({
       <View style={styles.searchContainer}>
         <Ionicons name="search" size={18} color="#6b7280" style={styles.searchIcon} />
         <TextInput
+          testID="journal-search-input"
           style={styles.searchInput}
           placeholder="Search entries..."
           placeholderTextColor="#6b7280"
@@ -56,6 +57,7 @@ export function JournalSearch({
         {availableTags.map((tag) => (
           <Pressable
             key={tag}
+            testID={`filter-chip-${tag}`}
             style={[styles.chip, selectedTag === tag && styles.chipActive]}
             onPress={() => onTagSelect(selectedTag === tag ? null : tag)}
           >

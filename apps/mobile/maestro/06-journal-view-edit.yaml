@@ -1,0 +1,85 @@
+# 06-journal-view-edit.yaml — View journal entries and edit one
+# Maps to: e2e/journal-edit-flow.test.ts
+# Prerequisite: App already running in simulator (loaded via xcrun simctl openurl)
+appId: host.exp.Exponent
+---
+# Dismiss Expo Go dev menu if it appears (native sheet - use coordinate tap)
+- runFlow:
+    when:
+      visible: "SDK version"
+    commands:
+      - tapOn:
+          point: "50%,93%"
+      - runFlow:
+          when:
+            visible: "Reload"
+          commands:
+            - tapOn:
+                point: "50%,20%"
+# Re-open app from Expo Go home screen if needed
+- runFlow:
+    when:
+      visible: "Recently opened"
+    commands:
+      - tapOn: "SWE Mentor"
+      - waitForAnimationToEnd
+# Dismiss dev menu again after re-open
+- runFlow:
+    when:
+      visible: "SDK version"
+    commands:
+      - tapOn:
+          point: "50%,93%"
+      - runFlow:
+          when:
+            visible: "Reload"
+          commands:
+            - tapOn:
+                point: "50%,20%"
+# Login
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 30000
+- tapOn:
+    id: "sign-in-link"
+- extendedWaitUntil:
+    visible: "Welcome back"
+    timeout: 5000
+- tapOn:
+    id: "email-input"
+- inputText: ${TEST_EMAIL}
+- tapOn:
+    id: "password-input"
+- inputText: ${TEST_PASSWORD}
+- hideKeyboard
+- tapOn:
+    id: "sign-in-button"
+# Dismiss iOS "Save Password?" dialog if it appears
+- runFlow:
+    when:
+      visible: "Not Now"
+    commands:
+      - tapOn: "Not Now"
+- extendedWaitUntil:
+    visible:
+      id: "home-screen"
+    timeout: 15000
+# Navigate to Journal tab
+- tapOn:
+    id: "journal-tab"
+- extendedWaitUntil:
+    visible:
+      id: "journal-screen"
+    timeout: 5000
+- takeScreenshot: journal-list
+# Tap edit on first entry
+- tapOn:
+    id: "edit-button-0"
+- takeScreenshot: journal-edit-screen
+# Modify text and save
+- tapOn:
+    id: "daily-goal-input"
+- inputText: " - EDITED"
+- tapOn: "Save Changes"
+- takeScreenshot: journal-after-edit

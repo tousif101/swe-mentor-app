@@ -78,6 +78,7 @@ export function ReminderSetupScreen({ navigation, route }: Props) {
 
   return (
     <KeyboardAvoidingView
+      testID="reminder-setup-screen"
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       className="flex-1 bg-gray-950"
     >
@@ -145,7 +146,7 @@ export function ReminderSetupScreen({ navigation, route }: Props) {
         {/* Buttons */}
         <View className="gap-3 mt-6">
           {/* Continue Button */}
-          <Pressable onPress={handleContinue} style={{ width: '100%' }}>
+          <Pressable testID="reminder-continue-button" onPress={handleContinue} style={{ width: '100%' }}>
             <LinearGradient
               colors={['#4c1d95', '#7c3aed', '#8b5cf6', '#a78bfa']}
               start={{ x: 0, y: 0.5 }}

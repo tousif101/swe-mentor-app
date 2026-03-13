@@ -225,7 +225,7 @@ export function JournalScreen() {
   }, [navigation])
 
   const renderItem = useCallback(({ item }: { item: DayGroup }) => (
-    <DayCard dayGroup={item} onHashtagPress={handleHashtagPress} onEditPress={handleEditPress} />
+    <DayCard testID={`day-card-${item.date}`} dayGroup={item} onHashtagPress={handleHashtagPress} onEditPress={handleEditPress} />
   ), [handleHashtagPress, handleEditPress])
 
   const renderEmpty = () => {
@@ -275,8 +275,9 @@ export function JournalScreen() {
   }
 
   return (
-    <View style={styles.container}>
+    <View style={styles.container} testID="journal-screen">
       <FlatList
+        testID="journal-entries-list"
         data={dayGroups}
         renderItem={renderItem}
         keyExtractor={(item) => item.date}

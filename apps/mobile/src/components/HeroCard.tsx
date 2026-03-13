@@ -87,6 +87,7 @@ export function HeroCard({ state, onPress, disabled }: HeroCardProps) {
   return (
     <View style={styles.container}>
       <TouchableOpacity
+        testID="hero-card-button"
         activeOpacity={1}
         onPress={onPress}
         onPressIn={handlePressIn}
