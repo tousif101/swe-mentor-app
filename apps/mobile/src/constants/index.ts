@@ -118,7 +118,9 @@ export type CompanySize = (typeof COMPANY_SIZES)[number]
 
 // Maps company size to the seeded career matrix template name
 // In the future, users can upload their own ladders
-export const COMPANY_SIZE_TO_TEMPLATE: Record<string, string> = {
+// <50 and 50-200 both map to Startup; 1000-5000 and 5000+ both map to FAANG
+// Generic Intern template is seeded but mapped by role (not size) — future feature
+export const COMPANY_SIZE_TO_TEMPLATE: Record<CompanySize, string> = {
   '<50': 'Generic Startup',
   '50-200': 'Generic Startup',
   '200-1000': 'Generic Midsize',

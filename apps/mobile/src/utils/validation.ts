@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { ROLE_CONFIG, ROLES_ORDERED } from '../lib/roleMapping'
+import { COMPANY_SIZES } from '../constants'
 
 export const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -38,14 +39,12 @@ const roleIndexMap: Record<string, number> = Object.fromEntries(
   Object.entries(ROLE_CONFIG).map(([k, v]) => [k, v.index])
 )
 
-const companySizes = ['<50', '50-200', '200-1000', '1000-5000', '5000+'] as const
-
 export const profileSchema = z
   .object({
     name: z.string().min(2, 'Name must be at least 2 characters'),
     role: z.enum(userRoles, { message: 'Please select your current role' }),
     targetRole: z.enum(userRoles, { message: 'Please select your target role' }),
-    company_size: z.enum(companySizes).optional(),
+    company_size: z.enum(COMPANY_SIZES as unknown as readonly [string, ...string[]]).optional(),
     career_matrix_id: z.string().uuid().optional(),
   })
   .refine(

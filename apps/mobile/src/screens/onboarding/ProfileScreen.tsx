@@ -7,7 +7,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  ActivityIndicator,
   Modal,
 } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -121,7 +120,6 @@ export function ProfileScreen({ navigation }: Props) {
   const [name, setName] = useState('')
   const [role, setRole] = useState<DbRole | null>(null)
   const [targetRole, setTargetRole] = useState<DbRole | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<FormErrors>({})
 
   const [showRolePicker, setShowRolePicker] = useState(false)
@@ -131,6 +129,7 @@ export function ProfileScreen({ navigation }: Props) {
     companySize,
     careerMatrixId,
     matchedTemplate,
+    isMatching,
     setCompanySize,
   } = useCompanyMatch()
 
@@ -326,8 +325,8 @@ export function ProfileScreen({ navigation }: Props) {
         {/* Continue Button */}
         <Pressable
           onPress={handleContinue}
-          disabled={isLoading}
-          style={{ width: '100%' }}
+          disabled={isMatching}
+          style={{ width: '100%', opacity: isMatching ? 0.5 : 1 }}
         >
           <LinearGradient
             colors={['#4c1d95', '#7c3aed', '#8b5cf6', '#a78bfa']}
@@ -339,11 +338,7 @@ export function ProfileScreen({ navigation }: Props) {
               alignItems: 'center',
             }}
           >
-            {isLoading ? (
-              <ActivityIndicator color="white" />
-            ) : (
-              <Text className="text-white font-semibold text-lg">Continue</Text>
-            )}
+            <Text className="text-white font-semibold text-lg">Continue</Text>
           </LinearGradient>
         </Pressable>
       </ScrollView>

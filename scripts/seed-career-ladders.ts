@@ -276,6 +276,8 @@ async function seedMatrix(config: MatrixConfig) {
 
   if (levelsError) {
     console.error(`Failed to insert levels for ${config.companyName}:`, levelsError)
+    // Rollback: remove orphaned matrix row so re-run can retry
+    await supabase.from('career_matrices').delete().eq('id', matrix.id)
     return
   }
 
