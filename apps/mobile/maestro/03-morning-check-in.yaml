@@ -1,0 +1,43 @@
+# 03-morning-check-in.yaml — Complete a morning check-in
+# Maps to: e2e/morning-check-in.test.ts
+appId: host.exp.Exponent
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    id: "welcome-screen"
+    timeout: 15000
+# Login
+- tapOn:
+    id: "sign-in-link"
+- tapOn:
+    id: "email-input"
+- inputText: ${TEST_EMAIL}
+- tapOn:
+    id: "password-input"
+- inputText: ${TEST_PASSWORD}
+- tapOn:
+    id: "sign-in-button"
+- assertVisible:
+    id: "home-screen"
+    timeout: 10000
+# Start morning check-in
+- tapOn:
+    id: "hero-card-button"
+- assertVisible:
+    id: "morning-checkin-screen"
+    timeout: 5000
+- takeScreenshot: morning-checkin-start
+# Select focus area
+- tapOn: "System Design"
+# Enter daily goal
+- tapOn:
+    id: "daily-goal-input"
+- inputText: "Maestro E2E test goal"
+# Save
+- tapOn:
+    id: "morning-save-button"
+- assertVisible:
+    id: "home-screen"
+    timeout: 5000
+- takeScreenshot: morning-checkin-complete

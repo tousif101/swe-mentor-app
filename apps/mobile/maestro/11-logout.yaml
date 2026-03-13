@@ -1,0 +1,37 @@
+# 11-logout.yaml — Sign out and verify return to welcome
+# Maps to: e2e/logout.test.ts
+appId: host.exp.Exponent
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    id: "welcome-screen"
+    timeout: 15000
+# Login
+- tapOn:
+    id: "sign-in-link"
+- tapOn:
+    id: "email-input"
+- inputText: ${TEST_EMAIL}
+- tapOn:
+    id: "password-input"
+- inputText: ${TEST_PASSWORD}
+- tapOn:
+    id: "sign-in-button"
+- assertVisible:
+    id: "home-screen"
+    timeout: 10000
+# Navigate to Profile tab
+- tapOn:
+    id: "profile-tab"
+- assertVisible:
+    id: "profile-screen"
+    timeout: 3000
+# Tap sign out
+- tapOn:
+    id: "sign-out-button"
+# Should return to welcome screen
+- assertVisible:
+    id: "welcome-screen"
+    timeout: 10000
+- takeScreenshot: logout-success

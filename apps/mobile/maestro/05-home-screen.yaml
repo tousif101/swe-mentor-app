@@ -1,0 +1,35 @@
+# 05-home-screen.yaml — Verify home screen elements
+# Maps to: e2e/home-page-cards.test.ts
+appId: host.exp.Exponent
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    id: "welcome-screen"
+    timeout: 15000
+# Login
+- tapOn:
+    id: "sign-in-link"
+- tapOn:
+    id: "email-input"
+- inputText: ${TEST_EMAIL}
+- tapOn:
+    id: "password-input"
+- inputText: ${TEST_PASSWORD}
+- tapOn:
+    id: "sign-in-button"
+- assertVisible:
+    id: "home-screen"
+    timeout: 10000
+- takeScreenshot: home-screen-top
+# Check greeting
+- assertVisible:
+    id: "home-greeting"
+# Check header buttons
+- assertVisible:
+    id: "header-notification-button"
+- assertVisible:
+    id: "header-settings-button"
+# Scroll down to see more content
+- scroll
+- takeScreenshot: home-screen-scrolled

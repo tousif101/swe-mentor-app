@@ -1,0 +1,53 @@
+# 09-navigation-tabs.yaml — Verify tab navigation works
+# Maps to: e2e/navigation-tabs.test.ts
+appId: host.exp.Exponent
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    id: "welcome-screen"
+    timeout: 15000
+# Login
+- tapOn:
+    id: "sign-in-link"
+- tapOn:
+    id: "email-input"
+- inputText: ${TEST_EMAIL}
+- tapOn:
+    id: "password-input"
+- inputText: ${TEST_PASSWORD}
+- tapOn:
+    id: "sign-in-button"
+- assertVisible:
+    id: "home-screen"
+    timeout: 10000
+# Home tab (already here)
+- takeScreenshot: nav-home-tab
+# Journal tab
+- tapOn:
+    id: "journal-tab"
+- assertVisible:
+    id: "journal-screen"
+    timeout: 3000
+- takeScreenshot: nav-journal-tab
+# Insights tab
+- tapOn:
+    id: "insights-tab"
+- assertVisible:
+    id: "insights-screen"
+    timeout: 3000
+- takeScreenshot: nav-insights-tab
+# Profile tab
+- tapOn:
+    id: "profile-tab"
+- assertVisible:
+    id: "profile-screen"
+    timeout: 3000
+- takeScreenshot: nav-profile-tab
+# Back to Home
+- tapOn:
+    id: "home-tab"
+- assertVisible:
+    id: "home-screen"
+    timeout: 3000
+- takeScreenshot: nav-back-to-home

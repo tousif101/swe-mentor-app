@@ -1,0 +1,45 @@
+# 10-insights.yaml — Verify Insights screen content
+# No Detox counterpart — new coverage
+appId: host.exp.Exponent
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    id: "welcome-screen"
+    timeout: 15000
+# Login
+- tapOn:
+    id: "sign-in-link"
+- tapOn:
+    id: "email-input"
+- inputText: ${TEST_EMAIL}
+- tapOn:
+    id: "password-input"
+- inputText: ${TEST_PASSWORD}
+- tapOn:
+    id: "sign-in-button"
+- assertVisible:
+    id: "home-screen"
+    timeout: 10000
+# Navigate to Insights tab
+- tapOn:
+    id: "insights-tab"
+- assertVisible:
+    id: "insights-screen"
+    timeout: 5000
+- takeScreenshot: insights-top
+# Verify stat cards
+- assertVisible:
+    id: "total-checkins-card"
+- assertVisible:
+    id: "streak-display"
+# Scroll to see charts
+- scroll
+- takeScreenshot: insights-charts
+- assertVisible:
+    id: "energy-chart"
+# Scroll more
+- scroll
+- takeScreenshot: insights-bottom
+- assertVisible:
+    id: "focus-areas-section"

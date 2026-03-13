@@ -1,0 +1,43 @@
+# 07-journal-search-filter.yaml — Search and filter journal entries
+# Maps to: e2e/journal-filter-search.test.ts
+appId: host.exp.Exponent
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    id: "welcome-screen"
+    timeout: 15000
+# Login
+- tapOn:
+    id: "sign-in-link"
+- tapOn:
+    id: "email-input"
+- inputText: ${TEST_EMAIL}
+- tapOn:
+    id: "password-input"
+- inputText: ${TEST_PASSWORD}
+- tapOn:
+    id: "sign-in-button"
+- assertVisible:
+    id: "home-screen"
+    timeout: 10000
+# Navigate to Journal tab
+- tapOn:
+    id: "journal-tab"
+- assertVisible:
+    id: "journal-screen"
+    timeout: 5000
+# Search
+- tapOn:
+    id: "journal-search-input"
+- inputText: "test"
+- takeScreenshot: journal-search-results
+# Clear search
+- clearInput:
+    id: "journal-search-input"
+# Filter by tag
+- tapOn: "#system-design"
+- takeScreenshot: journal-filtered-by-tag
+# Clear filter
+- tapOn: "All"
+- takeScreenshot: journal-filter-cleared

@@ -1,0 +1,49 @@
+# 04-evening-check-in.yaml — Complete an evening check-in
+# Maps to: e2e/evening-check-in.test.ts
+# Prerequisite: Morning check-in should exist for the day
+appId: host.exp.Exponent
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    id: "welcome-screen"
+    timeout: 15000
+# Login
+- tapOn:
+    id: "sign-in-link"
+- tapOn:
+    id: "email-input"
+- inputText: ${TEST_EMAIL}
+- tapOn:
+    id: "password-input"
+- inputText: ${TEST_PASSWORD}
+- tapOn:
+    id: "sign-in-button"
+- assertVisible:
+    id: "home-screen"
+    timeout: 10000
+# Start evening check-in
+- tapOn:
+    id: "hero-card-button"
+- assertVisible:
+    id: "evening-checkin-screen"
+    timeout: 5000
+- takeScreenshot: evening-checkin-start
+# Answer goal completion (use "partially" so energy level widget is visible)
+- tapOn:
+    id: "goal-completion-partially"
+# Quick win
+- tapOn:
+    id: "quick-win-input"
+- inputText: "Completed Maestro E2E test"
+# Energy level (only visible when goal is not "yes")
+- tapOn:
+    id: "energy-level-4"
+# Tomorrow carry
+- tapOn:
+    id: "tomorrow-carry-input"
+- inputText: "Continue test coverage"
+# Save
+- tapOn:
+    id: "evening-save-button"
+- takeScreenshot: evening-checkin-complete

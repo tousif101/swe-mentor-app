@@ -1,0 +1,57 @@
+# 08-profile-settings.yaml — Navigate profile settings screens
+# Maps to: e2e/profile-settings.test.ts
+appId: host.exp.Exponent
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    id: "welcome-screen"
+    timeout: 15000
+# Login
+- tapOn:
+    id: "sign-in-link"
+- tapOn:
+    id: "email-input"
+- inputText: ${TEST_EMAIL}
+- tapOn:
+    id: "password-input"
+- inputText: ${TEST_PASSWORD}
+- tapOn:
+    id: "sign-in-button"
+- assertVisible:
+    id: "home-screen"
+    timeout: 10000
+# Navigate to Profile tab
+- tapOn:
+    id: "profile-tab"
+- assertVisible:
+    id: "profile-screen"
+    timeout: 5000
+- takeScreenshot: profile-screen
+# Edit Profile
+- tapOn:
+    id: "edit-profile-row"
+- assertVisible:
+    id: "edit-profile-screen"
+    timeout: 3000
+- takeScreenshot: edit-profile-screen
+- tapOn:
+    id: "back-button"
+# Career Goal
+- tapOn:
+    id: "career-goal-row"
+- assertVisible:
+    id: "career-goal-screen"
+    timeout: 3000
+- takeScreenshot: career-goal-screen
+- tapOn:
+    id: "back-button"
+# Reminder Settings
+- tapOn:
+    id: "reminder-settings-row"
+- assertVisible:
+    id: "reminder-settings-screen"
+    timeout: 3000
+- takeScreenshot: reminder-settings-screen
+- tapOn:
+    id: "back-button"

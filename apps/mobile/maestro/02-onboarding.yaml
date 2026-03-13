@@ -1,0 +1,55 @@
+# 02-onboarding.yaml — Signup and complete onboarding
+# Maps to: e2e/authentication.test.ts (signup/onboarding portion)
+# NOTE: This flow creates a new account each run. Pass TEST_NEW_EMAIL via -e flag.
+# After the flow, clean up the test user via Supabase MCP:
+#   DELETE FROM auth.users WHERE email = '<TEST_NEW_EMAIL>';
+appId: host.exp.Exponent
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    id: "welcome-screen"
+    timeout: 15000
+- tapOn:
+    id: "get-started-button"
+- assertVisible: "Create an account"
+- tapOn:
+    id: "signup-email-input"
+- inputText: ${TEST_NEW_EMAIL}
+- tapOn:
+    id: "signup-password-input"
+- inputText: "MaestroTest123!"
+- tapOn:
+    id: "confirm-password-input"
+- inputText: "MaestroTest123!"
+- tapOn:
+    id: "create-account-button"
+- assertVisible:
+    text: "Set up your profile"
+    timeout: 10000
+- takeScreenshot: onboarding-profile-setup
+# Fill profile
+- tapOn:
+    id: "onboarding-name-input"
+- inputText: "Maestro Test"
+- tapOn:
+    id: "role-selector"
+- assertVisible: "Select your current role"
+- tapOn: "Software Engineer 1"
+- tapOn:
+    id: "profile-continue-button"
+- assertVisible:
+    id: "reminder-setup-screen"
+    timeout: 5000
+- takeScreenshot: onboarding-reminders
+- tapOn:
+    id: "reminder-continue-button"
+- assertVisible:
+    id: "ready-screen"
+    timeout: 5000
+- tapOn:
+    id: "start-button"
+- assertVisible:
+    id: "home-screen"
+    timeout: 10000
+- takeScreenshot: onboarding-complete

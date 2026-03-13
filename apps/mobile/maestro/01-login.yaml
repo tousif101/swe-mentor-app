@@ -1,0 +1,24 @@
+# 01-login.yaml — Login with existing test account
+# Maps to: e2e/authentication.test.ts (login portion)
+appId: host.exp.Exponent
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    id: "welcome-screen"
+    timeout: 15000
+- tapOn:
+    id: "sign-in-link"
+- assertVisible: "Welcome back"
+- tapOn:
+    id: "email-input"
+- inputText: ${TEST_EMAIL}
+- tapOn:
+    id: "password-input"
+- inputText: ${TEST_PASSWORD}
+- tapOn:
+    id: "sign-in-button"
+- assertVisible:
+    id: "home-screen"
+    timeout: 10000
+- takeScreenshot: login-success

@@ -1,0 +1,40 @@
+# 06-journal-view-edit.yaml — View journal entries and edit one
+# Maps to: e2e/journal-edit-flow.test.ts
+appId: host.exp.Exponent
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    id: "welcome-screen"
+    timeout: 15000
+# Login
+- tapOn:
+    id: "sign-in-link"
+- tapOn:
+    id: "email-input"
+- inputText: ${TEST_EMAIL}
+- tapOn:
+    id: "password-input"
+- inputText: ${TEST_PASSWORD}
+- tapOn:
+    id: "sign-in-button"
+- assertVisible:
+    id: "home-screen"
+    timeout: 10000
+# Navigate to Journal tab
+- tapOn:
+    id: "journal-tab"
+- assertVisible:
+    id: "journal-screen"
+    timeout: 5000
+- takeScreenshot: journal-list
+# Tap edit on first entry
+- tapOn:
+    id: "edit-button-0"
+- takeScreenshot: journal-edit-screen
+# Modify text and save
+- tapOn:
+    id: "daily-goal-input"
+- inputText: " - EDITED"
+- tapOn: "Save Changes"
+- takeScreenshot: journal-after-edit
