@@ -177,6 +177,7 @@ export function ProfileScreen({ navigation }: Props) {
 
   return (
     <KeyboardAvoidingView
+      testID="profile-setup-screen"
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       className="flex-1 bg-gray-950"
     >
@@ -205,6 +206,7 @@ export function ProfileScreen({ navigation }: Props) {
             What should I call you?
           </Text>
           <TextInput
+            testID="onboarding-name-input"
             value={name}
             onChangeText={(text) => {
               setName(text)
@@ -227,6 +229,7 @@ export function ProfileScreen({ navigation }: Props) {
             What{"'"}s your current role?
           </Text>
           <Pressable
+            testID="role-selector"
             onPress={() => setShowRolePicker(true)}
             className="w-full px-4 py-3.5 rounded-xl bg-gray-800 border border-gray-700 flex-row items-center justify-between"
           >
@@ -253,6 +256,7 @@ export function ProfileScreen({ navigation }: Props) {
             What role are you working toward?
           </Text>
           <Pressable
+            testID="target-role-selector"
             onPress={() => setShowTargetPicker(true)}
             className="w-full px-4 py-3.5 rounded-xl bg-gray-800 border border-gray-700 flex-row items-center justify-between"
             disabled={!role}
@@ -288,6 +292,7 @@ export function ProfileScreen({ navigation }: Props) {
             {COMPANY_SIZES.map((size) => (
               <Pressable
                 key={size}
+                testID={`company-size-${size}`}
                 onPress={() => setCompanySize(size)}
                 className={`px-4 py-2 rounded-lg ${
                   companySize === size
@@ -324,6 +329,7 @@ export function ProfileScreen({ navigation }: Props) {
 
         {/* Continue Button */}
         <Pressable
+          testID="profile-continue-button"
           onPress={handleContinue}
           disabled={isMatching}
           style={{ width: '100%', opacity: isMatching ? 0.5 : 1 }}

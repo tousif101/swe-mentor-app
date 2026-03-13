@@ -9,11 +9,12 @@ type Props = {
   subtitle?: string
   icon: ComponentProps<typeof Ionicons>['name']
   iconColor?: string
+  testID?: string
 }
 
-export function StatCard({ label, value, subtitle, icon, iconColor = COLORS.primary }: Props) {
+export function StatCard({ label, value, subtitle, icon, iconColor = COLORS.primary, testID }: Props) {
   return (
-    <View className="bg-gray-900 rounded-2xl p-4 border border-gray-800 flex-row items-center justify-between">
+    <View testID={testID} className="bg-gray-900 rounded-2xl p-4 border border-gray-800 flex-row items-center justify-between">
       <View className="flex-1">
         <Text className="text-gray-400 text-sm">{label}</Text>
         <Text className="text-white text-2xl font-bold mt-1">{value}</Text>

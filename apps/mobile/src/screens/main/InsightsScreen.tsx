@@ -39,6 +39,7 @@ export function InsightsScreen() {
 
   return (
     <ScrollView
+      testID="insights-screen"
       className="flex-1 bg-gray-950"
       refreshControl={
         <RefreshControl
@@ -59,6 +60,7 @@ export function InsightsScreen() {
       {/* Stats Row */}
       <View className="px-6 gap-3 mb-6">
         <StatCard
+          testID="total-checkins-card"
           label="Total Check-ins"
           value={data.totalCheckIns}
           subtitle={`${data.totalMorningCheckIns} morning · ${data.totalEveningCheckIns} evening`}
@@ -66,6 +68,7 @@ export function InsightsScreen() {
           iconColor={COLORS.success}
         />
         <StatCard
+          testID="streak-display"
           label="Current Streak"
           value={`${data.currentStreak} days`}
           subtitle={`Longest: ${data.longestStreak} days`}
@@ -89,17 +92,17 @@ export function InsightsScreen() {
       </View>
 
       {/* Energy Trend */}
-      <View className="px-6 mb-6">
+      <View testID="energy-chart" className="px-6 mb-6">
         <EnergyTrendBar data={data.energyTrend} />
       </View>
 
       {/* Goal Completion */}
-      <View className="px-6 mb-6">
+      <View testID="goal-completion-chart" className="px-6 mb-6">
         <GoalCompletionBar stats={data.goalCompletion} />
       </View>
 
       {/* Focus Areas */}
-      <View className="px-6 mb-12">
+      <View testID="focus-areas-section" className="px-6 mb-12">
         <FocusAreaList areas={data.focusAreas} />
       </View>
     </ScrollView>

@@ -11,6 +11,7 @@ type ChipSelectorProps = {
   onSelect: (value: string) => void
   multiSelect?: boolean
   selectedValues?: string[]
+  testID?: string
 }
 
 /**
@@ -42,6 +43,7 @@ export function ChipSelector({
         return (
           <Pressable
             key={chip.value}
+            testID={`chip-${chip.value || chip.label}`}
             onPress={() => onSelect(chip.value)}
             className={`px-4 py-2.5 rounded-xl border ${
               selected

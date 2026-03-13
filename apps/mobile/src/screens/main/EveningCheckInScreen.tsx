@@ -190,6 +190,7 @@ export function EveningCheckInScreen({ navigation }: Props) {
 
   return (
     <KeyboardAvoidingView
+      testID="evening-checkin-screen"
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       className="flex-1 bg-gray-950"
     >
@@ -240,6 +241,7 @@ export function EveningCheckInScreen({ navigation }: Props) {
               return (
                 <Pressable
                   key={option.value}
+                  testID={`goal-completion-${option.value}`}
                   onPress={() => {
                     setGoalCompleted(option.value)
                     setErrors((prev) => ({ ...prev, goalCompleted: undefined }))
@@ -276,6 +278,7 @@ export function EveningCheckInScreen({ navigation }: Props) {
             </Text>
           </View>
           <TextInput
+            testID="quick-win-input"
             value={quickWin}
             onChangeText={(text) => {
               setQuickWin(text)
@@ -303,6 +306,7 @@ export function EveningCheckInScreen({ navigation }: Props) {
               </Text>
             </View>
             <TextInput
+              testID="blocker-input"
               value={blocker}
               onChangeText={(text) => {
                 setBlocker(text)
@@ -332,6 +336,7 @@ export function EveningCheckInScreen({ navigation }: Props) {
                   return (
                     <Pressable
                       key={level}
+                      testID={`energy-level-${level}`}
                       onPress={() => {
                         setEnergyLevel(level)
                         setErrors((prev) => ({ ...prev, energyLevel: undefined }))
@@ -372,6 +377,7 @@ export function EveningCheckInScreen({ navigation }: Props) {
             </Text>
           </View>
           <TextInput
+            testID="tomorrow-carry-input"
             value={tomorrowCarry}
             onChangeText={(text) => setTomorrowCarry(text)}
             placeholder="A small action or reminder for tomorrow"
@@ -387,6 +393,7 @@ export function EveningCheckInScreen({ navigation }: Props) {
 
         {/* Submit Button */}
         <Pressable
+          testID="evening-save-button"
           onPress={handleSubmit}
           disabled={isLoading}
           style={{ width: '100%' }}

@@ -96,7 +96,7 @@ export function ReadyScreen({ navigation, route }: Props) {
   }
 
   return (
-    <View className="flex-1 bg-gray-950">
+    <View testID="ready-screen" className="flex-1 bg-gray-950">
       <ProgressBar currentStep={3} totalSteps={3} />
 
       <View className="flex-1 justify-center px-6">
@@ -162,6 +162,7 @@ export function ReadyScreen({ navigation, route }: Props) {
 
         {/* Start Button */}
         <Pressable
+          testID="start-button"
           onPress={handleStart}
           disabled={isLoading}
           style={{ width: '100%' }}
