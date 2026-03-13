@@ -1,38 +1,84 @@
 # 08-profile-settings.yaml — Navigate profile settings screens
 # Maps to: e2e/profile-settings.test.ts
+# Prerequisite: App already running in simulator (loaded via xcrun simctl openurl)
 appId: host.exp.Exponent
 ---
-- launchApp:
-    clearState: true
-- assertVisible:
-    id: "welcome-screen"
-    timeout: 15000
+# Dismiss Expo Go dev menu if it appears (native sheet - use coordinate tap)
+- runFlow:
+    when:
+      visible: "SDK version"
+    commands:
+      - tapOn:
+          point: "50%,93%"
+      - runFlow:
+          when:
+            visible: "Reload"
+          commands:
+            - tapOn:
+                point: "50%,20%"
+# Re-open app from Expo Go home screen if needed
+- runFlow:
+    when:
+      visible: "Recently opened"
+    commands:
+      - tapOn: "SWE Mentor"
+      - waitForAnimationToEnd
+# Dismiss dev menu again after re-open
+- runFlow:
+    when:
+      visible: "SDK version"
+    commands:
+      - tapOn:
+          point: "50%,93%"
+      - runFlow:
+          when:
+            visible: "Reload"
+          commands:
+            - tapOn:
+                point: "50%,20%"
 # Login
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 30000
 - tapOn:
     id: "sign-in-link"
+- extendedWaitUntil:
+    visible: "Welcome back"
+    timeout: 5000
 - tapOn:
     id: "email-input"
 - inputText: ${TEST_EMAIL}
 - tapOn:
     id: "password-input"
 - inputText: ${TEST_PASSWORD}
+- hideKeyboard
 - tapOn:
     id: "sign-in-button"
-- assertVisible:
-    id: "home-screen"
-    timeout: 10000
+# Dismiss iOS "Save Password?" dialog if it appears
+- runFlow:
+    when:
+      visible: "Not Now"
+    commands:
+      - tapOn: "Not Now"
+- extendedWaitUntil:
+    visible:
+      id: "home-screen"
+    timeout: 15000
 # Navigate to Profile tab
 - tapOn:
     id: "profile-tab"
-- assertVisible:
-    id: "profile-screen"
+- extendedWaitUntil:
+    visible:
+      id: "profile-screen"
     timeout: 5000
 - takeScreenshot: profile-screen
 # Edit Profile
 - tapOn:
     id: "edit-profile-row"
-- assertVisible:
-    id: "edit-profile-screen"
+- extendedWaitUntil:
+    visible:
+      id: "edit-profile-screen"
     timeout: 3000
 - takeScreenshot: edit-profile-screen
 - tapOn:
@@ -40,8 +86,9 @@ appId: host.exp.Exponent
 # Career Goal
 - tapOn:
     id: "career-goal-row"
-- assertVisible:
-    id: "career-goal-screen"
+- extendedWaitUntil:
+    visible:
+      id: "career-goal-screen"
     timeout: 3000
 - takeScreenshot: career-goal-screen
 - tapOn:
@@ -49,8 +96,9 @@ appId: host.exp.Exponent
 # Reminder Settings
 - tapOn:
     id: "reminder-settings-row"
-- assertVisible:
-    id: "reminder-settings-screen"
+- extendedWaitUntil:
+    visible:
+      id: "reminder-settings-screen"
     timeout: 3000
 - takeScreenshot: reminder-settings-screen
 - tapOn:

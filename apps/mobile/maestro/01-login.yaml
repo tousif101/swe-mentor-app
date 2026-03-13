@@ -1,24 +1,67 @@
 # 01-login.yaml — Login with existing test account
 # Maps to: e2e/authentication.test.ts (login portion)
+# Prerequisite: App already running in simulator (loaded via xcrun simctl openurl)
 appId: host.exp.Exponent
 ---
-- launchApp:
-    clearState: true
-- assertVisible:
-    id: "welcome-screen"
-    timeout: 15000
+# Dismiss Expo Go dev menu if it appears (native sheet - use coordinate tap)
+- runFlow:
+    when:
+      visible: "SDK version"
+    commands:
+      - tapOn:
+          point: "50%,93%"
+      - runFlow:
+          when:
+            visible: "Reload"
+          commands:
+            - tapOn:
+                point: "50%,20%"
+# Re-open app from Expo Go home screen if needed
+- runFlow:
+    when:
+      visible: "Recently opened"
+    commands:
+      - tapOn: "SWE Mentor"
+      - waitForAnimationToEnd
+# Dismiss dev menu again after re-open
+- runFlow:
+    when:
+      visible: "SDK version"
+    commands:
+      - tapOn:
+          point: "50%,93%"
+      - runFlow:
+          when:
+            visible: "Reload"
+          commands:
+            - tapOn:
+                point: "50%,20%"
+- extendedWaitUntil:
+    visible:
+      id: "welcome-screen"
+    timeout: 30000
 - tapOn:
     id: "sign-in-link"
-- assertVisible: "Welcome back"
+- extendedWaitUntil:
+    visible: "Welcome back"
+    timeout: 5000
 - tapOn:
     id: "email-input"
 - inputText: ${TEST_EMAIL}
 - tapOn:
     id: "password-input"
 - inputText: ${TEST_PASSWORD}
+- hideKeyboard
 - tapOn:
     id: "sign-in-button"
-- assertVisible:
-    id: "home-screen"
-    timeout: 10000
+# Dismiss iOS "Save Password?" dialog if it appears
+- runFlow:
+    when:
+      visible: "Not Now"
+    commands:
+      - tapOn: "Not Now"
+- extendedWaitUntil:
+    visible:
+      id: "home-screen"
+    timeout: 15000
 - takeScreenshot: login-success
