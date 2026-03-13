@@ -25,7 +25,7 @@ type Props = {
 }
 
 export function ReminderSetupScreen({ navigation, route }: Props) {
-  const { name, role, targetRole, companyName, companySize, careerMatrixId } = route.params
+  const { name, role, targetRole, companySize, careerMatrixId } = route.params
 
   // Morning settings
   const [morningEnabled, setMorningEnabled] = useState(true)
@@ -46,7 +46,6 @@ export function ReminderSetupScreen({ navigation, route }: Props) {
       name,
       role,
       targetRole,
-      companyName,
       companySize,
       careerMatrixId,
       reminderSettings: {
@@ -65,7 +64,6 @@ export function ReminderSetupScreen({ navigation, route }: Props) {
       name,
       role,
       targetRole,
-      companyName,
       companySize,
       careerMatrixId,
       reminderSettings: {

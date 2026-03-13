@@ -120,19 +120,12 @@ export function EditProfileScreen({ navigation }: Props) {
           )}
         </View>
 
-        {/* Company Info (read-only) */}
-        {(profile?.company_name || profile?.company_size) && (
+        {/* Company Size (read-only) */}
+        {profile?.company_size && (
           <View className="mb-6">
-            <Text className="text-gray-300 text-sm mb-2 font-medium">Company</Text>
+            <Text className="text-gray-300 text-sm mb-2 font-medium">Company Size</Text>
             <View className="px-4 py-3.5 rounded-xl bg-gray-900 border border-gray-800">
-              {profile?.company_name && (
-                <Text className="text-white">{profile.company_name}</Text>
-              )}
-              {profile?.company_size && (
-                <Text className="text-gray-400 text-sm mt-1">
-                  {profile.company_size} employees
-                </Text>
-              )}
+              <Text className="text-white">{profile.company_size} employees</Text>
             </View>
             <Pressable
               onPress={() => navigation.navigate('CareerGoal')}

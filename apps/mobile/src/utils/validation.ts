@@ -45,7 +45,6 @@ export const profileSchema = z
     name: z.string().min(2, 'Name must be at least 2 characters'),
     role: z.enum(userRoles, { message: 'Please select your current role' }),
     targetRole: z.enum(userRoles, { message: 'Please select your target role' }),
-    company_name: z.string().optional(),
     company_size: z.enum(companySizes).optional(),
     career_matrix_id: z.string().uuid().optional(),
   })

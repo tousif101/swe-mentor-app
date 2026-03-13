@@ -116,6 +116,16 @@ export const ENERGY_COLORS = ['#ef4444', '#f59e0b', '#eab308', '#84cc16', '#10b9
 export const COMPANY_SIZES = ['<50', '50-200', '200-1000', '1000-5000', '5000+'] as const
 export type CompanySize = (typeof COMPANY_SIZES)[number]
 
+// Maps company size to the seeded career matrix template name
+// In the future, users can upload their own ladders
+export const COMPANY_SIZE_TO_TEMPLATE: Record<string, string> = {
+  '<50': 'Generic Startup',
+  '50-200': 'Generic Startup',
+  '200-1000': 'Generic Midsize',
+  '1000-5000': 'Generic FAANG',
+  '5000+': 'Generic FAANG',
+} as const
+
 // Push notification configuration
 export const PUSH_NOTIFICATION_CONFIG = {
   // Android notification channel

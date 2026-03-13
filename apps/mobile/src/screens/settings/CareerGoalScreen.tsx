@@ -2,9 +2,7 @@ import { useState, useMemo, useCallback } from 'react'
 import {
   View,
   Text,
-  TextInput,
   ScrollView,
-  FlatList,
   Pressable,
   ActivityIndicator,
   Platform,
@@ -39,17 +37,12 @@ export function CareerGoalScreen({ navigation }: Props) {
   const [isSaving, setIsSaving] = useState(false)
 
   const {
-    companyName,
     companySize,
     careerMatrixId,
-    matchedCompany,
-    suggestions,
-    setCompanyName,
-    selectCompany,
+    matchedTemplate,
     setCompanySize,
     getCompanyFields,
   } = useCompanyMatch({
-    companyName: profile?.company_name ?? undefined,
     companySize: profile?.company_size ?? undefined,
     careerMatrixId: profile?.career_matrix_id ?? undefined,
   })
@@ -65,11 +58,10 @@ export function CareerGoalScreen({ navigation }: Props) {
     return (
       currentRole !== profile?.role ||
       targetRole !== profile?.target_role ||
-      companyName !== (profile?.company_name ?? '') ||
       companySize !== (profile?.company_size ?? null) ||
       careerMatrixId !== (profile?.career_matrix_id ?? null)
     )
-  }, [currentRole, targetRole, companyName, companySize, careerMatrixId, profile?.role, profile?.target_role, profile?.company_name, profile?.company_size, profile?.career_matrix_id])
+  }, [currentRole, targetRole, companySize, careerMatrixId, profile?.role, profile?.target_role, profile?.company_size, profile?.career_matrix_id])
 
   // Role options for pickers
   const roleOptions = useMemo(
@@ -167,7 +159,6 @@ export function CareerGoalScreen({ navigation }: Props) {
                   role: currentRole,
                   target_role: targetRole,
                   focus_areas: newFocusAreas,
-                  ...(companyFields.company_name !== null ? { company_name: companyFields.company_name } : { company_name: null }),
                   company_size: companyFields.company_size,
                   career_matrix_id: companyFields.career_matrix_id,
                 })
@@ -259,46 +250,6 @@ export function CareerGoalScreen({ navigation }: Props) {
           </Pressable>
         </View>
 
-        {/* Company Name */}
-        <View style={styles.section}>
-          <Text style={styles.label}>
-            Company <Text style={styles.optionalLabel}>(optional)</Text>
-          </Text>
-          <TextInput
-            value={companyName}
-            onChangeText={setCompanyName}
-            placeholder="Your company (optional)"
-            placeholderTextColor={COLORS.textMuted}
-            autoCapitalize="words"
-            style={styles.textInput}
-          />
-          {suggestions.length > 0 && (
-            <View style={styles.suggestionsContainer}>
-              <FlatList
-                data={suggestions}
-                keyExtractor={(item) => item.id}
-                keyboardShouldPersistTaps="handled"
-                renderItem={({ item }) => (
-                  <Pressable
-                    onPress={() => selectCompany(item.company_name, item.id)}
-                    style={styles.suggestionItem}
-                  >
-                    <Text style={styles.suggestionText}>{item.company_name}</Text>
-                  </Pressable>
-                )}
-              />
-            </View>
-          )}
-          {matchedCompany && (
-            <View style={styles.matchBanner}>
-              <Ionicons name="checkmark-circle" size={20} color="#22c55e" style={{ marginRight: 8 }} />
-              <Text style={styles.matchText}>
-                We have {matchedCompany}{"'"}s career framework!
-              </Text>
-            </View>
-          )}
-        </View>
-
         {/* Company Size */}
         <View style={styles.section}>
           <Text style={styles.label}>
@@ -325,6 +276,14 @@ export function CareerGoalScreen({ navigation }: Props) {
               </Pressable>
             ))}
           </View>
+          {matchedTemplate && (
+            <View style={styles.matchBanner}>
+              <Ionicons name="checkmark-circle" size={20} color="#22c55e" style={{ marginRight: 8 }} />
+              <Text style={styles.matchText}>
+                Using {matchedTemplate} career framework
+              </Text>
+            </View>
+          )}
         </View>
 
         {/* Focus Areas Preview */}
@@ -483,29 +442,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.primaryLight,
     fontWeight: '500',
-  },
-  textInput: {
-    backgroundColor: COLORS.surface,
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    color: COLORS.textPrimary,
-  },
-  suggestionsContainer: {
-    marginTop: 4,
-    backgroundColor: COLORS.surfaceLight,
-    borderRadius: 12,
-    overflow: 'hidden',
-  },
-  suggestionItem: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#374151',
-  },
-  suggestionText: {
-    fontSize: 16,
-    color: COLORS.textPrimary,
   },
   matchBanner: {
     marginTop: 8,

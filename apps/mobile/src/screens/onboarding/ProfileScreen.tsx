@@ -9,7 +9,6 @@ import {
   ScrollView,
   ActivityIndicator,
   Modal,
-  FlatList,
 } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
 import { NativeStackNavigationProp } from '@react-navigation/native-stack'
@@ -129,13 +128,9 @@ export function ProfileScreen({ navigation }: Props) {
   const [showTargetPicker, setShowTargetPicker] = useState(false)
 
   const {
-    companyName,
     companySize,
     careerMatrixId,
-    matchedCompany,
-    suggestions,
-    setCompanyName,
-    selectCompany,
+    matchedTemplate,
     setCompanySize,
   } = useCompanyMatch()
 
@@ -155,7 +150,6 @@ export function ProfileScreen({ navigation }: Props) {
       name: name.trim(),
       role,
       targetRole,
-      ...(companyName ? { company_name: companyName } : {}),
       ...(companySize ? { company_size: companySize } : {}),
       ...(careerMatrixId ? { career_matrix_id: careerMatrixId } : {}),
     })
@@ -173,9 +167,8 @@ export function ProfileScreen({ navigation }: Props) {
     // Navigate to ReminderSetup screen with profile data
     navigation.navigate('ReminderSetup', {
       name: parsed.data.name,
-      role: parsed.data.role,
-      targetRole: parsed.data.targetRole,
-      ...(companyName ? { companyName } : {}),
+      role: parsed.data.role as DbRole,
+      targetRole: parsed.data.targetRole as DbRole,
       ...(companySize ? { companySize } : {}),
       ...(careerMatrixId ? { careerMatrixId } : {}),
     })
@@ -232,7 +225,7 @@ export function ProfileScreen({ navigation }: Props) {
         {/* Current Role Selector */}
         <View className="mb-6">
           <Text className="text-gray-300 text-sm mb-2 font-medium">
-            What's your current role?
+            What{"'"}s your current role?
           </Text>
           <Pressable
             onPress={() => setShowRolePicker(true)}
@@ -287,48 +280,6 @@ export function ProfileScreen({ navigation }: Props) {
           )}
         </View>
 
-        {/* Company Name Input */}
-        <View className="mb-6">
-          <Text className="text-gray-300 text-sm mb-2 font-medium">
-            Your company <Text className="text-gray-500">(optional)</Text>
-          </Text>
-          <TextInput
-            value={companyName}
-            onChangeText={setCompanyName}
-            placeholder="Your company (optional)"
-            placeholderTextColor="#6b7280"
-            autoCapitalize="words"
-            className="w-full px-4 py-3.5 rounded-xl bg-gray-800 border border-gray-700 text-white"
-          />
-          {/* Autocomplete Suggestions */}
-          {suggestions.length > 0 && (
-            <View className="mt-1 bg-gray-800 rounded-xl overflow-hidden">
-              <FlatList
-                data={suggestions}
-                keyExtractor={(item) => item.id}
-                keyboardShouldPersistTaps="handled"
-                renderItem={({ item }) => (
-                  <Pressable
-                    onPress={() => selectCompany(item.company_name, item.id)}
-                    className="px-4 py-3 border-b border-gray-700"
-                  >
-                    <Text className="text-white">{item.company_name}</Text>
-                  </Pressable>
-                )}
-              />
-            </View>
-          )}
-          {/* Matched Company Banner */}
-          {matchedCompany && (
-            <View className="mt-2 px-4 py-3 bg-green-500/10 border border-green-500/20 rounded-xl flex-row items-center">
-              <Ionicons name="checkmark-circle" size={20} color="#22c55e" style={{ marginRight: 8 }} />
-              <Text className="text-green-400 text-sm">
-                We have {matchedCompany}{"'"}s career framework!
-              </Text>
-            </View>
-          )}
-        </View>
-
         {/* Company Size Selector */}
         <View className="mb-8">
           <Text className="text-gray-300 text-sm mb-2 font-medium">
@@ -354,6 +305,15 @@ export function ProfileScreen({ navigation }: Props) {
               </Pressable>
             ))}
           </View>
+          {/* Matched template confirmation */}
+          {matchedTemplate && (
+            <View className="mt-2 px-4 py-3 bg-green-500/10 border border-green-500/20 rounded-xl flex-row items-center">
+              <Ionicons name="checkmark-circle" size={20} color="#22c55e" style={{ marginRight: 8 }} />
+              <Text className="text-green-400 text-sm">
+                Using {matchedTemplate} career framework
+              </Text>
+            </View>
+          )}
         </View>
 
         {/* Form Error */}

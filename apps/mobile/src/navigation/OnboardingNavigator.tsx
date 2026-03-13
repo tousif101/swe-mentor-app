@@ -16,7 +16,6 @@ export type OnboardingStackParamList = {
     name: string
     role: DbRole
     targetRole: DbRole
-    companyName?: string
     companySize?: string
     careerMatrixId?: string
   }
@@ -25,7 +24,6 @@ export type OnboardingStackParamList = {
     role: DbRole
     targetRole: DbRole
     reminderSettings?: ReminderSettings
-    companyName?: string
     companySize?: string
     careerMatrixId?: string
   }
