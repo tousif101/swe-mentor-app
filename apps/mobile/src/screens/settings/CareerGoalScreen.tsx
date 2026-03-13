@@ -16,8 +16,9 @@ import { Ionicons } from '@expo/vector-icons'
 import { useProfileContext } from '../../contexts'
 import { supabase } from '../../lib/supabase'
 import { ROLE_CONFIG, getFocusAreas, type DbRole, getValidTargetRoles, ROLES_ORDERED } from '../../lib/roleMapping'
+import { useCompanyMatch } from '../../hooks'
 import { showFeedback } from '../../utils'
-import { COLORS } from '../../constants'
+import { COLORS, COMPANY_SIZES } from '../../constants'
 import type { ProfileStackParamList } from '../../types'
 
 type Props = {
@@ -35,6 +36,17 @@ export function CareerGoalScreen({ navigation }: Props) {
   )
   const [isSaving, setIsSaving] = useState(false)
 
+  const {
+    companySize,
+    careerMatrixId,
+    matchedTemplate,
+    setCompanySize,
+    getCompanyFields,
+  } = useCompanyMatch({
+    companySize: profile?.company_size ?? undefined,
+    careerMatrixId: profile?.career_matrix_id ?? undefined,
+  })
+
   // Calculate focus areas preview
   const focusAreasPreview = useMemo(() => {
     if (!currentRole || !targetRole) return []
@@ -45,9 +57,11 @@ export function CareerGoalScreen({ navigation }: Props) {
   const hasChanges = useMemo(() => {
     return (
       currentRole !== profile?.role ||
-      targetRole !== profile?.target_role
+      targetRole !== profile?.target_role ||
+      companySize !== (profile?.company_size ?? null) ||
+      careerMatrixId !== (profile?.career_matrix_id ?? null)
     )
-  }, [currentRole, targetRole, profile?.role, profile?.target_role])
+  }, [currentRole, targetRole, companySize, careerMatrixId, profile?.role, profile?.target_role, profile?.company_size, profile?.career_matrix_id])
 
   // Role options for pickers
   const roleOptions = useMemo(
@@ -138,12 +152,15 @@ export function CareerGoalScreen({ navigation }: Props) {
             try {
               const newFocusAreas = getFocusAreas(currentRole, targetRole)
 
+              const companyFields = getCompanyFields()
               const { error } = await supabase
                 .from('profiles')
                 .update({
                   role: currentRole,
                   target_role: targetRole,
                   focus_areas: newFocusAreas,
+                  company_size: companyFields.company_size,
+                  career_matrix_id: companyFields.career_matrix_id,
                 })
                 .eq('id', profile.id)
 
@@ -161,7 +178,7 @@ export function CareerGoalScreen({ navigation }: Props) {
         },
       ]
     )
-  }, [hasChanges, currentRole, targetRole, refetch, navigation, profile])
+  }, [hasChanges, currentRole, targetRole, refetch, navigation, profile, getCompanyFields])
 
   return (
     <ScrollView style={styles.container} testID="career-goal-screen">
@@ -231,6 +248,42 @@ export function CareerGoalScreen({ navigation }: Props) {
             )}
             <Ionicons name="chevron-down" size={20} color={COLORS.textMuted} />
           </Pressable>
+        </View>
+
+        {/* Company Size */}
+        <View style={styles.section}>
+          <Text style={styles.label}>
+            Company size <Text style={styles.optionalLabel}>(optional)</Text>
+          </Text>
+          <View style={styles.sizeChipContainer}>
+            {COMPANY_SIZES.map((size) => (
+              <Pressable
+                key={size}
+                onPress={() => setCompanySize(size)}
+                style={[
+                  styles.sizeChip,
+                  companySize === size && styles.sizeChipSelected,
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.sizeChipText,
+                    companySize === size && styles.sizeChipTextSelected,
+                  ]}
+                >
+                  {size}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+          {matchedTemplate && (
+            <View style={styles.matchBanner}>
+              <Ionicons name="checkmark-circle" size={20} color="#22c55e" style={{ marginRight: 8 }} />
+              <Text style={styles.matchText}>
+                Using {matchedTemplate} career framework
+              </Text>
+            </View>
+          )}
         </View>
 
         {/* Focus Areas Preview */}
@@ -389,6 +442,48 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: COLORS.primaryLight,
     fontWeight: '500',
+  },
+  matchBanner: {
+    marginTop: 8,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(34, 197, 94, 0.2)',
+    borderRadius: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  matchText: {
+    fontSize: 14,
+    color: '#4ade80',
+  },
+  optionalLabel: {
+    color: COLORS.textMuted,
+  },
+  sizeChipContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  sizeChip: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: COLORS.surface,
+    borderWidth: 1,
+    borderColor: COLORS.surfaceLight,
+  },
+  sizeChipSelected: {
+    backgroundColor: `${COLORS.primaryDark}33`,
+    borderColor: COLORS.primary,
+  },
+  sizeChipText: {
+    fontSize: 14,
+    color: COLORS.textSecondary,
+  },
+  sizeChipTextSelected: {
+    color: COLORS.primaryLight,
   },
   saveButton: {
     backgroundColor: COLORS.primary,

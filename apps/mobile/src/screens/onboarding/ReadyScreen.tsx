@@ -22,7 +22,7 @@ type Props = {
 }
 
 export function ReadyScreen({ navigation, route }: Props) {
-  const { name, role, targetRole, reminderSettings } = route.params
+  const { name, role, targetRole, reminderSettings, companySize, careerMatrixId } = route.params
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const { refetch } = useProfileContext()
@@ -53,6 +53,8 @@ export function ReadyScreen({ navigation, route }: Props) {
           target_role: targetRole,
           focus_areas: focusAreas,
           onboarding_completed: true,
+          ...(companySize ? { company_size: companySize } : {}),
+          ...(careerMatrixId ? { career_matrix_id: careerMatrixId } : {}),
         })
         .eq('id', user.id)
 

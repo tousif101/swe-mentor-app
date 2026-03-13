@@ -7,7 +7,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  ActivityIndicator,
   Modal,
 } from 'react-native'
 import { LinearGradient } from 'expo-linear-gradient'
@@ -22,6 +21,8 @@ import {
   getValidTargetRoles,
   type DbRole,
 } from '../../lib/roleMapping'
+import { useCompanyMatch } from '../../hooks'
+import { COMPANY_SIZES } from '../../constants'
 import type { OnboardingStackParamList } from '../../navigation/OnboardingNavigator'
 
 type Props = {
@@ -119,11 +120,18 @@ export function ProfileScreen({ navigation }: Props) {
   const [name, setName] = useState('')
   const [role, setRole] = useState<DbRole | null>(null)
   const [targetRole, setTargetRole] = useState<DbRole | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
   const [errors, setErrors] = useState<FormErrors>({})
 
   const [showRolePicker, setShowRolePicker] = useState(false)
   const [showTargetPicker, setShowTargetPicker] = useState(false)
+
+  const {
+    companySize,
+    careerMatrixId,
+    matchedTemplate,
+    isMatching,
+    setCompanySize,
+  } = useCompanyMatch()
 
   // When current role changes, update target role default
   const handleRoleChange = (newRole: DbRole) => {
@@ -141,6 +149,8 @@ export function ProfileScreen({ navigation }: Props) {
       name: name.trim(),
       role,
       targetRole,
+      ...(companySize ? { company_size: companySize } : {}),
+      ...(careerMatrixId ? { career_matrix_id: careerMatrixId } : {}),
     })
 
     if (!parsed.success) {
@@ -156,8 +166,10 @@ export function ProfileScreen({ navigation }: Props) {
     // Navigate to ReminderSetup screen with profile data
     navigation.navigate('ReminderSetup', {
       name: parsed.data.name,
-      role: parsed.data.role,
-      targetRole: parsed.data.targetRole,
+      role: parsed.data.role as DbRole,
+      targetRole: parsed.data.targetRole as DbRole,
+      ...(companySize ? { companySize } : {}),
+      ...(careerMatrixId ? { careerMatrixId } : {}),
     })
   }
 
@@ -212,7 +224,7 @@ export function ProfileScreen({ navigation }: Props) {
         {/* Current Role Selector */}
         <View className="mb-6">
           <Text className="text-gray-300 text-sm mb-2 font-medium">
-            What's your current role?
+            What{"'"}s your current role?
           </Text>
           <Pressable
             onPress={() => setShowRolePicker(true)}
@@ -267,6 +279,42 @@ export function ProfileScreen({ navigation }: Props) {
           )}
         </View>
 
+        {/* Company Size Selector */}
+        <View className="mb-8">
+          <Text className="text-gray-300 text-sm mb-2 font-medium">
+            Company size <Text className="text-gray-500">(optional)</Text>
+          </Text>
+          <View className="flex-row flex-wrap gap-2">
+            {COMPANY_SIZES.map((size) => (
+              <Pressable
+                key={size}
+                onPress={() => setCompanySize(size)}
+                className={`px-4 py-2 rounded-lg ${
+                  companySize === size
+                    ? 'bg-primary-600/20 border border-primary-500'
+                    : 'bg-gray-800 border border-gray-700'
+                }`}
+              >
+                <Text
+                  className={companySize === size ? 'text-primary-400' : 'text-gray-300'}
+                  style={companySize === size ? { color: '#a78bfa' } : undefined}
+                >
+                  {size}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+          {/* Matched template confirmation */}
+          {matchedTemplate && (
+            <View className="mt-2 px-4 py-3 bg-green-500/10 border border-green-500/20 rounded-xl flex-row items-center">
+              <Ionicons name="checkmark-circle" size={20} color="#22c55e" style={{ marginRight: 8 }} />
+              <Text className="text-green-400 text-sm">
+                Using {matchedTemplate} career framework
+              </Text>
+            </View>
+          )}
+        </View>
+
         {/* Form Error */}
         {errors.form && (
           <View className="mb-4 py-3 px-4 rounded-xl bg-red-500/10 border border-red-500/20">
@@ -277,8 +325,8 @@ export function ProfileScreen({ navigation }: Props) {
         {/* Continue Button */}
         <Pressable
           onPress={handleContinue}
-          disabled={isLoading}
-          style={{ width: '100%' }}
+          disabled={isMatching}
+          style={{ width: '100%', opacity: isMatching ? 0.5 : 1 }}
         >
           <LinearGradient
             colors={['#4c1d95', '#7c3aed', '#8b5cf6', '#a78bfa']}
@@ -290,11 +338,7 @@ export function ProfileScreen({ navigation }: Props) {
               alignItems: 'center',
             }}
           >
-            {isLoading ? (
-              <ActivityIndicator color="white" />
-            ) : (
-              <Text className="text-white font-semibold text-lg">Continue</Text>
-            )}
+            <Text className="text-white font-semibold text-lg">Continue</Text>
           </LinearGradient>
         </Pressable>
       </ScrollView>

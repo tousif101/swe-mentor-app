@@ -112,6 +112,22 @@ export const INSIGHTS_ENERGY_DISPLAY_DAYS = 7
 export const INSIGHTS_WEEKLY_RATE_DAYS = 7
 export const ENERGY_COLORS = ['#ef4444', '#f59e0b', '#eab308', '#84cc16', '#10b981'] as const // 1-5: red, amber, yellow, lime, emerald
 
+// Company size options for onboarding and settings
+export const COMPANY_SIZES = ['<50', '50-200', '200-1000', '1000-5000', '5000+'] as const
+export type CompanySize = (typeof COMPANY_SIZES)[number]
+
+// Maps company size to the seeded career matrix template name
+// In the future, users can upload their own ladders
+// <50 and 50-200 both map to Startup; 1000-5000 and 5000+ both map to FAANG
+// Generic Intern template is seeded but mapped by role (not size) — future feature
+export const COMPANY_SIZE_TO_TEMPLATE: Record<CompanySize, string> = {
+  '<50': 'Generic Startup',
+  '50-200': 'Generic Startup',
+  '200-1000': 'Generic Midsize',
+  '1000-5000': 'Generic FAANG',
+  '5000+': 'Generic FAANG',
+} as const
+
 // Push notification configuration
 export const PUSH_NOTIFICATION_CONFIG = {
   // Android notification channel

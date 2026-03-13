@@ -16,12 +16,16 @@ export type OnboardingStackParamList = {
     name: string
     role: DbRole
     targetRole: DbRole
+    companySize?: string
+    careerMatrixId?: string
   }
   Ready: {
     name: string
     role: DbRole
     targetRole: DbRole
     reminderSettings?: ReminderSettings
+    companySize?: string
+    careerMatrixId?: string
   }
 }
 

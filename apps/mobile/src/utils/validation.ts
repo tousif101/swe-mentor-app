@@ -1,4 +1,6 @@
 import { z } from 'zod'
+import { ROLE_CONFIG, ROLES_ORDERED } from '../lib/roleMapping'
+import { COMPANY_SIZES } from '../constants'
 
 export const loginSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -30,28 +32,20 @@ export type LoginInput = z.infer<typeof loginSchema>
 export type MagicLinkInput = z.infer<typeof magicLinkSchema>
 export type SignupInput = z.infer<typeof signupSchema>
 
-// Onboarding validation
-const userRoles = [
-  'software_engineer_1',
-  'software_engineer_2',
-  'senior_engineer',
-  'staff_engineer',
-  'principal_engineer',
-] as const
+// Onboarding validation — roles derived from ROLE_CONFIG to prevent drift
+const userRoles = ROLES_ORDERED as unknown as readonly [string, ...string[]]
 
-const roleIndexMap: Record<string, number> = {
-  software_engineer_1: 0,
-  software_engineer_2: 1,
-  senior_engineer: 2,
-  staff_engineer: 3,
-  principal_engineer: 4,
-}
+const roleIndexMap: Record<string, number> = Object.fromEntries(
+  Object.entries(ROLE_CONFIG).map(([k, v]) => [k, v.index])
+)
 
 export const profileSchema = z
   .object({
     name: z.string().min(2, 'Name must be at least 2 characters'),
     role: z.enum(userRoles, { message: 'Please select your current role' }),
     targetRole: z.enum(userRoles, { message: 'Please select your target role' }),
+    company_size: z.enum(COMPANY_SIZES as unknown as readonly [string, ...string[]]).optional(),
+    career_matrix_id: z.string().uuid().optional(),
   })
   .refine(
     (data) => roleIndexMap[data.targetRole] >= roleIndexMap[data.role],
