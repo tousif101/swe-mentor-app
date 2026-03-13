@@ -12,6 +12,7 @@ export {
 } from "./prompts";
 export type { CoachingMode } from "./prompts";
 export { RateLimitError } from "./errors";
+export { validateAuth, AuthError } from "./auth";
 export {
   mentorMiddleware,
   summarizationHook,
