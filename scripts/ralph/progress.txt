@@ -11,6 +11,14 @@ Started: Fri Mar 13 04:15:53 EDT 2026
 - Use `tool()` from `@langchain/core/tools` (not `DynamicStructuredTool`) — it passes `RunnableConfig` as 2nd arg to func
 - Access userId/supabaseClient via `config.configurable` in tool functions
 - check_ins table column is `check_in_type` (not `type`), no `reflection` column exists
+- Shared package import is `@swe-mentor/shared` (not `@repo/shared`); `Profile` type is pre-exported
+- `createReactAgent` supports `prompt` (async function), `preModelHook`, `postModelHook` — no middleware array
+- `check_and_increment_chat_usage` RPC returns array — access as `data[0].allowed`, `data[0].remaining`
+- Use `m.getType()` (not `_getType()`) on BaseMessage to check message type ("human", "ai", "tool")
+- For JWT-based auth in API routes, use `createClient` from `@supabase/supabase-js` (not the cookie-based `@supabase/ssr` server client)
+- Use `crypto.randomUUID()` instead of `uuid` package — available in Node.js, no extra dependency
+- `createReactAgent` accepts `prompt` (async function) and `preModelHook` — pass these in `createMentorAgent` factory
+- `agent.stream()` with `streamMode: "messages"` yields tuples — check `msg instanceof AIMessageChunk && typeof msg.content === "string"` before emitting
 
 ---
 
@@ -42,4 +50,61 @@ Started: Fri Mar 13 04:15:53 EDT 2026
   - `config.configurable` is typed loosely — cast through `Record<string, unknown>` for type-safe access
   - check_ins table uses `check_in_type` column (not `type`) and has no `reflection` column
   - ESLint runs via `npx eslint <path>` (not `next lint --dir`)
+---
+
+## 2026-03-13 - US-003
+- Created apps/web/src/lib/langchain/prompts.ts with full 3-layer prompt system and 4 coaching modes
+- Layer 1: BASE_COACHING_PROMPT with 7 coaching principles and user context placeholders
+- Layer 2: LEVEL_PLAYBOOKS for 5 transitions (intern→SE1, SE1→SE2, SE2→senior, senior→staff, staff→principal)
+- Layer 3: TACTICAL_GUIDES with 5 templates (PR descriptions, blocker escalation, impact communication, design docs, brag doc entries)
+- 4 coaching modes: supportive (energy ≤ 2), socratic (default), direct (blocker signals), exploratory (open-ended)
+- detectCoachingMode() analyzes message content + energy level to select mode
+- buildSystemPrompt() assembles all 3 layers + coaching mode with user-specific variable injection
+- DRY: replacePlaceholders() utility for {{placeholder}} substitution
+- Updated index.ts barrel exports with all prompts exports
+- Files changed: apps/web/src/lib/langchain/prompts.ts (new), apps/web/src/lib/langchain/index.ts
+- **Learnings for future iterations:**
+  - Shared package is `@swe-mentor/shared` (not `@repo/shared`) — check existing imports in utils.ts/server.ts
+  - `Profile` type is pre-exported from `@swe-mentor/shared` — no need to use `Tables<'profiles'>` directly
+  - ESLint config lives in apps/web/ — run from that directory
+---
+
+## 2026-03-13 - US-004
+- Created apps/web/src/lib/langchain/errors.ts with RateLimitError class (includes remaining count + resetAt)
+- Created apps/web/src/lib/langchain/middleware.ts with full middleware stack:
+  - summarizationHook: preModelHook that uses claude-haiku-4-5 to summarize older messages when count exceeds threshold, keeps last 10
+  - createDynamicPrompt: returns async prompt function that fetches profile, detects coaching mode, builds personalized system prompt
+  - checkRateLimit: calls check_and_increment_chat_usage RPC via JWT-bearing Supabase client, throws RateLimitError
+  - wrapToolExecution: wraps tool functions to catch errors and return graceful JSON error instead of crashing
+  - MODEL_CALL_LIMIT (10) and TOOL_CALL_LIMIT (15) constants
+  - mentorMiddleware assembled config object for API route consumption
+- Updated index.ts barrel exports with all middleware + error exports
+- Files changed: apps/web/src/lib/langchain/errors.ts (new), apps/web/src/lib/langchain/middleware.ts (new), apps/web/src/lib/langchain/index.ts
+- **Learnings for future iterations:**
+  - `createReactAgent` has `prompt`, `preModelHook`, `postModelHook` params — no middleware array
+  - `preModelHook` receives `{ messages, llmInputMessages }` state — return `{ llmInputMessages }` to modify LLM input
+  - `prompt` as async function `(state, config) => BaseMessageLike[]` is the best way to inject dynamic system prompts
+  - RPC returns TABLE type — must cast `data` as array and access `[0]` (TypeScript types it loosely)
+  - `BaseMessage.getType()` returns "human" | "ai" | "tool" | "system" — use this instead of `_getType()`
+---
+
+## 2026-03-13 - US-005
+- Created apps/web/src/lib/langchain/auth.ts with validateAuth() helper and AuthError class
+  - Extracts Bearer token from Authorization header
+  - Verifies with Supabase auth.getUser(token)
+  - Returns both user object AND JWT-initialized Supabase client
+- Created apps/web/src/app/api/mentor/chat/route.ts with POST and GET handlers
+  - POST: receives { message, conversationId }, creates conversation if needed, saves user message, streams agent response as SSE, saves assistant response
+  - GET: returns { remaining, limit, resetAt } for authenticated user
+  - Error handling: 401 for auth, 429 for rate limit (with remaining/resetAt), 400 for bad request, 500 for other
+- Extended createMentorAgent in config.ts to accept prompt and preModelHook params
+- Updated index.ts barrel exports with auth module
+- Agent is created at module level with dynamic prompt + summarization hook wired in
+- Files changed: apps/web/src/lib/langchain/auth.ts (new), apps/web/src/app/api/mentor/chat/route.ts (new), apps/web/src/lib/langchain/config.ts, apps/web/src/lib/langchain/index.ts
+- **Learnings for future iterations:**
+  - Use `createClient` from `@supabase/supabase-js` for JWT auth (not `@supabase/ssr` cookie-based client)
+  - `crypto.randomUUID()` is available in Node.js — no need for `uuid` package
+  - SSE streaming: AIMessageChunk content can be string or array (tool-use) — always check `typeof msg.content === "string"`
+  - `agent.stream()` with `streamMode: "messages"` yields `[message, metadata]` tuples
+  - Next.js App Router route handlers use `NextRequest`/`NextResponse` from `next/server`
 ---

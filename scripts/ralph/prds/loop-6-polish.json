@@ -1,0 +1,67 @@
+{
+  "project": "SWE Mentor App - Polish & Enhanced Features",
+  "branchName": "ralph/ai-mentor-polish",
+  "description": "Polish the AI mentor experience: conversation history with navigation stack, markdown rendering in chat bubbles, and haptic feedback using existing feedback utility.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Create MentorStackNavigator and conversation history screen",
+      "description": "As a user, I want to see my past conversations and continue them so I can maintain ongoing coaching threads.",
+      "acceptanceCriteria": [
+        "Create apps/mobile/src/navigation/MentorStackNavigator.tsx wrapping MentorScreen and ConversationsScreen — MainTabNavigator's MentorTab should render MentorStackNavigator instead of MentorScreen directly",
+        "Create apps/mobile/src/screens/main/ConversationsScreen.tsx",
+        "FlatList of conversation cards: each shows title (or 'New conversation'), last message preview (truncated to 80 chars), relative timestamp (e.g. '2h ago'), message count badge",
+        "Fetch conversations with last message using a subquery: supabase.from('conversations').select('*, messages(content, created_at)').eq('user_id', userId).order('updated_at', { ascending: false }).limit(1, { foreignTable: 'messages' }) — or use a manual query with .order on messages.created_at DESC .limit(1)",
+        "Card styling: bg-gray-900 rounded-2xl p-4 with gap-3 between cards",
+        "Tap navigates to MentorScreen with conversationId param to resume thread",
+        "Swipe-to-delete using Swipeable from react-native-gesture-handler (already installed as React Navigation dependency) with red bg and trash icon, confirmation dialog via Alert.alert before delete",
+        "Pull-to-refresh to reload conversation list",
+        "Empty state: 'No conversations yet — start chatting with your mentor!' with centered Ionicons chatbubbles-outline icon",
+        "Add history button (Ionicons time-outline) to ChatHeader in MentorScreen that navigates to ConversationsScreen",
+        "Add relative timestamp helper to apps/mobile/src/utils/formatters.ts (check if one exists first): < 1h -> 'Xm ago', < 24h -> 'Xh ago', else formatted date",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": "CRITICAL: MentorScreen is currently a direct tab screen in MainTabNavigator. To support push navigation to ConversationsScreen, wrap both in a MentorStackNavigator (same pattern as other stack-in-tab navigators if they exist). Update the MentorTab in MainTabNavigator to render MentorStackNavigator. The stack type should export MentorStackParamList with MentorChat: { conversationId?: string } and ConversationHistory: undefined."
+    },
+    {
+      "id": "US-002",
+      "title": "Add markdown rendering to chat bubbles",
+      "description": "As a user, I want AI responses to render markdown properly so code blocks, bold text, and lists display correctly.",
+      "acceptanceCriteria": [
+        "Install react-native-markdown-display in apps/mobile/",
+        "Modify apps/mobile/src/components/chat/ChatBubble.tsx",
+        "Assistant messages render content as markdown, user messages render as plain text",
+        "Markdown styles match dark theme: code blocks bg-gray-900 with rounded-lg p-2, inline code bg-gray-700 rounded, bold text text-white, links text-primary-400, list bullets text-gray-400, headers text-white font-bold",
+        "Code blocks use monospace font",
+        "Long code blocks are horizontally scrollable",
+        "Create markdown style object OUTSIDE the component using StyleSheet.create — no inline styles",
+        "Confirm the library works with Expo before committing — if it requires native rebuild, note in TECH-DEBT.md",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "react-native-markdown-display accepts a style prop for customizing markdown elements. Test with various markdown: **bold**, *italic*, `inline code`, ```code blocks```, - lists, ## headers, [links](url). If react-native-markdown-display has issues with Expo, consider react-native-marked as an alternative."
+    },
+    {
+      "id": "US-003",
+      "title": "Add haptic feedback and micro-interactions",
+      "description": "As a user, I want subtle haptic feedback when sending messages and receiving responses for a polished native feel.",
+      "acceptanceCriteria": [
+        "Modify apps/mobile/src/components/chat/ChatInput.tsx: light impact haptic on send button press",
+        "Modify apps/mobile/src/components/chat/RateLimitBanner.tsx: warning notification haptic when banner appears",
+        "Modify apps/mobile/src/screens/main/MentorScreen.tsx: subtle success haptic when assistant finishes streaming response",
+        "Use the EXISTING triggerHaptic() utility from apps/mobile/src/utils/feedback.ts — do NOT import expo-haptics directly",
+        "triggerHaptic('light') for send, triggerHaptic('warning') for rate limit, triggerHaptic('medium') for response complete",
+        "expo-haptics is already installed — do NOT re-install",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "The existing feedback.ts utility wraps expo-haptics with a triggerHaptic(type) function. Import from the utils barrel: import { triggerHaptic } from '../utils'. This maintains consistency with existing haptic patterns in check-in flows. Keep haptics subtle — they should enhance, not overwhelm."
+    }
+  ]
+}

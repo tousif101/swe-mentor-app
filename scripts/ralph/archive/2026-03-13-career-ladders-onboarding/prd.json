@@ -17,7 +17,7 @@
         "Typecheck passes"
       ],
       "priority": 1,
-      "passes": true,
+      "passes": false,
       "notes": "Follow existing patterns in apps/web/src/lib/ (see supabase client setup). The web app uses Next.js 16 with App Router. Use MemorySaver for dev — document PostgresSaver path for prod in a code comment. Reference docs/ai-mentor-langchain-reference.md section 'Agent Factory Pattern' for createReactAgent usage."
     },
     {
@@ -38,7 +38,7 @@
         "Typecheck passes"
       ],
       "priority": 2,
-      "passes": true,
+      "passes": false,
       "notes": "CRITICAL AUTH PATTERN: Do NOT use createClient from apps/web/src/lib/supabase/server.ts — that uses cookies() from next/headers which won't work inside LangChain tools. Instead, each tool receives userId via config.configurable.userId AND a pre-authenticated Supabase client via config.configurable.supabaseClient. The API route (US-005) creates this client from the Bearer JWT token using createClient(url, anonKey, { global: { headers: { Authorization: `Bearer ${jwt}` } } }) and passes it down. DRY: create a shared getSupabaseClient(config) helper in apps/web/src/lib/langchain/utils.ts that extracts the client from config.configurable and throws if missing. All 5 tools use this helper — NEVER construct their own client. The check_ins table has columns: id, user_id, type (morning/evening), energy_level, focus_area, daily_goal, quick_win, blocker, reflection, created_at. user_streaks has: user_id, current_streak, longest_streak, last_check_in_date. career_matrices has: id, company_name, source. level_definitions has: matrix_id, level_code, level_name, technical_expectations, leadership_expectations, etc."
     },
     {
@@ -56,7 +56,7 @@
         "Typecheck passes"
       ],
       "priority": 3,
-      "passes": true,
+      "passes": false,
       "notes": "See docs/ai-mentor-langchain-reference.md sections '3-Layer Prompt System' and '4 Adaptive Coaching Modes' for detailed content. The prompt should use {{placeholder}} style variables that buildSystemPrompt replaces. Profile type comes from packages/shared/src/database.types.ts (Tables<'profiles'>). The intern playbook should focus on: learning velocity, asking good questions, seeking feedback, return offer positioning. Energy level comes from the user's most recent check-in. DRY: create a replacePlaceholders(template, vars) utility used across all prompt assembly."
     },
     {
@@ -76,7 +76,7 @@
         "Typecheck passes"
       ],
       "priority": 4,
-      "passes": true,
+      "passes": false,
       "notes": "MIDDLEWARE PATTERN: @langchain/langgraph createReactAgent does NOT have a built-in 'middleware array' parameter. Implement middleware as wrapper functions around agent invocation in the API route, or use createReactAgent's messageModifier for system prompt injection. The middleware functions should be composable: each returns a function that wraps the next. CRITICAL AUTH: The rate limit middleware must call check_and_increment_chat_usage RPC using the JWT-bearing Supabase client (passed via config.configurable.supabaseClient from the API route), NOT a service role client. The RPC has an auth.uid() guard that will THROW if auth.uid() is NULL (which happens with service role). The RPC returns a TABLE — access as data[0].allowed, data[0].current_count, data[0].remaining (it's an array, not a single object). DRY: the RateLimitError class should be in apps/web/src/lib/langchain/errors.ts, reused by both middleware and API route. Include remaining count and resetAt (compute as midnight UTC of current day + 1 day)."
     },
     {
@@ -99,7 +99,7 @@
         "Typecheck passes"
       ],
       "priority": 5,
-      "passes": true,
+      "passes": false,
       "notes": "This is a Next.js App Router route handler (not pages API). Use NextRequest/NextResponse. CRITICAL AUTH PATTERN: The validateAuth(request) helper in apps/web/src/lib/langchain/auth.ts must: (1) extract Bearer token from Authorization header, (2) verify with Supabase auth.getUser(token), (3) return BOTH the user object AND a JWT-initialized Supabase client: createClient(url, anonKey, { global: { headers: { Authorization: `Bearer ${token}` } } }). This client is passed to agent via config.configurable.supabaseClient. Do NOT use the cookie-based server.ts client. SSE STREAMING: The agent.stream() with streamMode 'messages' yields [message, metadata] tuples. IMPORTANT: check `message instanceof AIMessageChunk && typeof message.content === 'string'` before emitting — tool-use messages have content as an array, not a string. Skip non-string content blocks. RPC ARRAY: When querying daily_metrics for the GET handler, the RPC returns an array — use data[0]. Compute resetAt as midnight UTC of current day + 1."
     }
   ]

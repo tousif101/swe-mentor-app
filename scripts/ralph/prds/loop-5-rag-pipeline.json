@@ -1,0 +1,60 @@
+{
+  "project": "SWE Mentor App - RAG Pipeline",
+  "branchName": "ralph/ai-mentor-rag",
+  "description": "Build the RAG (Retrieval Augmented Generation) pipeline: embedding utility, check-in indexing pipeline, and wire up the search_user_context tool for semantic search over user data.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Create embedding utility with OpenAI text-embedding-3-small",
+      "description": "As a developer, I need an embedding utility so text can be converted to vectors for similarity search.",
+      "acceptanceCriteria": [
+        "Install @langchain/openai in apps/web/",
+        "Create apps/web/src/lib/langchain/embeddings.ts",
+        "Initialize OpenAIEmbeddings with model 'text-embedding-3-small' (1536 dimensions)",
+        "Export embedText(text: string): Promise<number[]> — embeds a single string",
+        "Export embedTexts(texts: string[]): Promise<number[][]> — batch embeds multiple strings",
+        "Add OPENAI_API_KEY to apps/web/.env.example",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": "text-embedding-3-small produces 1536-dimensional vectors which matches our document_embeddings table column vector(1536). This is the cheapest OpenAI embedding model with good quality. The embeddings util will be used by both the indexing pipeline (US-002) and the search tool (US-003)."
+    },
+    {
+      "id": "US-002",
+      "title": "Create check-in indexing pipeline",
+      "description": "As a developer, I need to embed and index check-in data so the AI mentor can search user history by semantic similarity.",
+      "acceptanceCriteria": [
+        "Create apps/web/src/lib/langchain/indexing.ts",
+        "formatCheckInForEmbedding(checkIn) function: combines focus_area, daily_goal, quick_win, blocker, reflection, energy_level into a readable text string with clear labels",
+        "indexCheckIn(checkIn, userId) function: formats check-in, splits with RecursiveCharacterTextSplitter (chunkSize 500, overlap 50), embeds each chunk, upserts to document_embeddings with source_type='check_in', source_id=check_in.id, metadata={date, type, energy_level}",
+        "Upsert by deleting existing embeddings for (source_type, source_id) before inserting new ones",
+        "indexAllCheckIns(userId) function: fetches all check-ins for user, indexes each one (batch backfill)",
+        "Create API route apps/web/src/app/api/mentor/index/route.ts: POST handler that accepts { checkInId? } — userId is ALWAYS derived from the authenticated user's JWT via validateAuth() from apps/web/src/lib/langchain/auth.ts (NEVER accept userId from request body — IDOR vulnerability)",
+        "Auth validation: reuse validateAuth(request) helper from Loop 3 which extracts user and JWT-initialized Supabase client from Bearer token",
+        "Use the JWT-initialized Supabase client for all DB operations (delete + insert) so RLS auth.uid() checks pass",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "The check_ins table has columns: id, user_id, type (morning/evening), energy_level (1-5), focus_area, daily_goal, quick_win, blocker, reflection, created_at. Use RecursiveCharacterTextSplitter from @langchain/textsplitters (@langchain/textsplitters was installed in Loop 3). CRITICAL: Use the JWT-initialized Supabase client from validateAuth(), NOT the cookie-based server.ts client or service role client. For upsert, wrap the delete+insert in a transaction to avoid a window where data is missing for concurrent RAG queries. Add OPENAI_API_KEY to apps/web/.env.example — APPEND to the existing file which already has ANTHROPIC_API_KEY from Loop 3, do NOT replace it."
+    },
+    {
+      "id": "US-003",
+      "title": "Wire up search_user_context tool with real vector search",
+      "description": "As a developer, I need to replace the search_user_context stub with real RAG search so the mentor can find relevant user data.",
+      "acceptanceCriteria": [
+        "Modify apps/web/src/lib/langchain/tools.ts: replace search_user_context stub with real implementation",
+        "Tool accepts query string parameter",
+        "Embeds query using embedText() from embeddings utility",
+        "Calls match_documents Supabase RPC with: query_embedding, match_count=5, filter_user_id=userId from config",
+        "Returns formatted results with similarity scores and source metadata (date, type, energy level)",
+        "Graceful fallback: if no embeddings exist for user, returns helpful message 'No historical data indexed yet — check-in data will become searchable after your first few check-ins'",
+        "Typecheck passes"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "The match_documents RPC returns: id, content, metadata (JSONB), similarity (FLOAT). Format the results clearly for the LLM: include similarity score, source date, and content snippet. The RPC already filters by auth.uid() by default if filter_user_id is NULL, but we pass it explicitly for clarity. Import embedText from the embeddings module created in US-001."
+    }
+  ]
+}
