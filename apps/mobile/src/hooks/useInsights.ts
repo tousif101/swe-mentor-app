@@ -28,7 +28,11 @@ export function useInsights() {
   }, [user?.id])
 
   // Re-fetch when tab becomes focused (e.g., after completing a check-in on Home tab)
-  useFocusEffect(refresh)
+  useFocusEffect(
+    useCallback(() => {
+      refresh()
+    }, [refresh])
+  )
 
   return { data, isLoading, error, refresh }
 }

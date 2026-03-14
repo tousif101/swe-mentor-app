@@ -88,6 +88,7 @@ appId: host.exp.Exponent
 - tapOn:
     id: "tomorrow-carry-input"
 - inputText: "Continue test coverage"
+- hideKeyboard
 # Save
 - tapOn:
     id: "evening-save-button"
