@@ -4,12 +4,17 @@ import type { Profile } from "@swe-mentor/shared";
 // Utility
 // ---------------------------------------------------------------------------
 
+/** Strip newlines and control characters to prevent prompt injection via user-controlled fields. */
+function sanitizeForPrompt(value: string): string {
+  return value.replace(/[\n\r\t]/g, " ").replace(/[^\x20-\x7E\u00A0-\uFFFF]/g, "");
+}
+
 function replacePlaceholders(
   template: string,
   vars: Record<string, string>
 ): string {
   return Object.entries(vars).reduce(
-    (result, [key, value]) => result.replaceAll(`{{${key}}}`, value),
+    (result, [key, value]) => result.replaceAll(`{{${key}}}`, sanitizeForPrompt(value)),
     template
   );
 }

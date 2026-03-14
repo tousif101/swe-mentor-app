@@ -18,10 +18,16 @@ export async function validateAuth(request: Request): Promise<{
 
   const token = authHeader.slice(7);
 
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!supabaseUrl || !supabaseAnonKey) {
+    throw new Error("Missing required Supabase environment variables");
+  }
+
   // Create a Supabase client initialized with the user's JWT
   const supabaseClient = createClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    supabaseUrl,
+    supabaseAnonKey,
     {
       global: {
         headers: { Authorization: `Bearer ${token}` },

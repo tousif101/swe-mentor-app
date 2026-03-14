@@ -1,9 +1,31 @@
 import { tool } from "@langchain/core/tools";
 import { z } from "zod";
+import type { RunnableConfig } from "@langchain/core/runnables";
 import { getSupabaseClient, getUserId } from "./utils";
 
+/**
+ * Wraps a tool function so that unexpected errors return a graceful JSON
+ * error message instead of crashing the agent.
+ */
+function safeFn(
+  fn: (input: never, config: RunnableConfig) => Promise<string>
+) {
+  return async (input: never, config: RunnableConfig): Promise<string> => {
+    try {
+      return await fn(input, config);
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "An unknown error occurred";
+      return JSON.stringify({
+        error: true,
+        message: `Tool execution failed: ${message}. Please try a different approach.`,
+      });
+    }
+  };
+}
+
 const getCareerGoals = tool(
-  async (_input, config) => {
+  safeFn(async (_input, config) => {
     const supabase = getSupabaseClient(config);
     const userId = getUserId(config);
 
@@ -18,7 +40,7 @@ const getCareerGoals = tool(
     }
 
     return JSON.stringify(data);
-  },
+  }),
   {
     name: "get_career_goals",
     description:
@@ -28,7 +50,7 @@ const getCareerGoals = tool(
 );
 
 const getProgressSummary = tool(
-  async (_input, config) => {
+  safeFn(async (_input, config) => {
     const supabase = getSupabaseClient(config);
     const userId = getUserId(config);
 
@@ -55,7 +77,7 @@ const getProgressSummary = tool(
       dailyMetrics: metricsResult.data,
       dailyMetricsError: metricsResult.error?.message,
     });
-  },
+  }),
   {
     name: "get_progress_summary",
     description:
@@ -65,7 +87,7 @@ const getProgressSummary = tool(
 );
 
 const getRecentCheckins = tool(
-  async ({ count }, config) => {
+  safeFn(async ({ count }, config) => {
     const supabase = getSupabaseClient(config);
     const userId = getUserId(config);
 
@@ -83,7 +105,7 @@ const getRecentCheckins = tool(
     }
 
     return JSON.stringify(data);
-  },
+  }),
   {
     name: "get_recent_checkins",
     description:
@@ -91,19 +113,22 @@ const getRecentCheckins = tool(
     schema: z.object({
       count: z
         .number()
+        .int()
+        .min(1)
+        .max(50)
         .optional()
         .default(7)
-        .describe("Number of recent check-ins to retrieve (default 7)"),
+        .describe("Number of recent check-ins to retrieve (default 7, max 50)"),
     }),
   }
 );
 
 const searchUserContext = tool(
-  async () => {
+  safeFn(async () => {
     return JSON.stringify({
       message: "RAG not yet configured — will be wired in a future update",
     });
-  },
+  }),
   {
     name: "search_user_context",
     description:
@@ -117,7 +142,7 @@ const searchUserContext = tool(
 );
 
 const getCareerLadder = tool(
-  async (_input, config) => {
+  safeFn(async (_input, config) => {
     const supabase = getSupabaseClient(config);
     const userId = getUserId(config);
 
@@ -134,11 +159,15 @@ const getCareerLadder = tool(
       });
     }
 
-    // Try fuzzy match on company name
+    // Try fuzzy match on company name (escape ILIKE metacharacters)
+    const escapedName = profile.company_name
+      .replace(/\\/g, "\\\\")
+      .replace(/%/g, "\\%")
+      .replace(/_/g, "\\_");
     const { data: matrix } = await supabase
       .from("career_matrices")
       .select("id, company_name, source, is_verified")
-      .ilike("company_name", `%${profile.company_name}%`)
+      .ilike("company_name", `%${escapedName}%`)
       .limit(1)
       .single();
 
@@ -183,7 +212,7 @@ const getCareerLadder = tool(
     return JSON.stringify({
       error: "No career ladder data available for this company or as template",
     });
-  },
+  }),
   {
     name: "get_career_ladder",
     description:

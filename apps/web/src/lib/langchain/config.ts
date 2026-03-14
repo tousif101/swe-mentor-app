@@ -14,7 +14,13 @@ const model = new ChatAnthropic({
   anthropicApiKey: process.env.ANTHROPIC_API_KEY,
 });
 
-// Dev: MemorySaver (in-memory). Prod: use PostgresSaver from @langchain/langgraph-checkpoint-postgres
+// WARNING: MemorySaver stores all conversation state in RAM — suitable for local dev only.
+// For production, wire up PostgresSaver from @langchain/langgraph-checkpoint-postgres.
+if (process.env.NODE_ENV === "production") {
+  console.warn(
+    "[langchain/config] MemorySaver is in use — conversation state will not persist across restarts. Configure PostgresSaver for production."
+  );
+}
 const defaultCheckpointer = new MemorySaver();
 
 type ToolInput = StructuredToolInterface | RunnableToolLike;

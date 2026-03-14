@@ -29,32 +29,62 @@ export async function POST(request: NextRequest) {
       conversationId?: string;
     };
 
-    if (!message || typeof message !== "string") {
+    if (!message || typeof message !== "string" || message.trim().length === 0) {
       return NextResponse.json(
         { error: "message is required" },
         { status: 400 }
       );
     }
 
+    const MAX_MESSAGE_LENGTH = 4000;
+    if (message.length > MAX_MESSAGE_LENGTH) {
+      return NextResponse.json(
+        { error: `message exceeds maximum length of ${MAX_MESSAGE_LENGTH} characters` },
+        { status: 400 }
+      );
+    }
+
     // Rate limit check (before agent invocation)
-    await checkRateLimit(supabaseClient);
+    await checkRateLimit(supabaseClient, user.id);
 
     // Resolve or create conversation
     let conversationId = providedConversationId;
-    if (!conversationId) {
+    if (conversationId) {
+      // Verify the conversation belongs to the authenticated user
+      const { data: conv, error: convErr } = await supabaseClient
+        .from("conversations")
+        .select("id")
+        .eq("id", conversationId)
+        .eq("user_id", user.id)
+        .single();
+      if (convErr || !conv) {
+        return NextResponse.json(
+          { error: "Conversation not found" },
+          { status: 404 }
+        );
+      }
+    } else {
       conversationId = crypto.randomUUID();
-      await supabaseClient.from("conversations").insert({
-        id: conversationId,
-        user_id: user.id,
-      });
+      const { error: convErr } = await supabaseClient
+        .from("conversations")
+        .insert({
+          id: conversationId,
+          user_id: user.id,
+        });
+      if (convErr) {
+        throw new Error(`Failed to create conversation: ${convErr.message}`);
+      }
     }
 
     // Save user message
-    await supabaseClient.from("messages").insert({
+    const { error: msgErr } = await supabaseClient.from("messages").insert({
       conversation_id: conversationId,
       role: "user",
       content: message,
     });
+    if (msgErr) {
+      throw new Error(`Failed to save message: ${msgErr.message}`);
+    }
 
     // Stream the response as SSE
     const encoder = new TextEncoder();
@@ -108,11 +138,10 @@ export async function POST(request: NextRequest) {
 
           controller.close();
         } catch (err) {
-          const errorMsg =
-            err instanceof Error ? err.message : "Stream error";
+          console.error("[mentor/chat stream error]", err);
           controller.enqueue(
             encoder.encode(
-              `data: ${JSON.stringify({ error: errorMsg })}\n\n`
+              `data: ${JSON.stringify({ error: "An error occurred. Please try again." })}\n\n`
             )
           );
           controller.close();
@@ -141,9 +170,11 @@ export async function POST(request: NextRequest) {
         { status: 429 }
       );
     }
-    const message =
-      err instanceof Error ? err.message : "Internal server error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("[mentor/chat POST]", err);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }
 
@@ -179,8 +210,10 @@ export async function GET(request: NextRequest) {
     if (err instanceof AuthError) {
       return NextResponse.json({ error: err.message }, { status: 401 });
     }
-    const message =
-      err instanceof Error ? err.message : "Internal server error";
-    return NextResponse.json({ error: message }, { status: 500 });
+    console.error("[mentor/chat GET]", err);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
   }
 }

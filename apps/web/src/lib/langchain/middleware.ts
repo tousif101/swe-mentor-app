@@ -66,8 +66,16 @@ export async function summarizationHook(
     new HumanMessage(conversationText),
   ]);
 
+  const summaryText =
+    typeof summaryResponse.content === "string"
+      ? summaryResponse.content
+      : summaryResponse.content
+          .filter((c): c is { type: "text"; text: string } => typeof c === "object" && "type" in c && c.type === "text")
+          .map((c) => c.text)
+          .join("");
+
   const summaryMessage = new SystemMessage(
-    `[Conversation summary of earlier messages]\n${summaryResponse.content}`
+    `[Conversation summary of earlier messages]\n${summaryText}`
   );
 
   return { llmInputMessages: [summaryMessage, ...toKeep] };
@@ -83,6 +91,28 @@ export async function summarizationHook(
  * system prompt on every model call.
  */
 export function createDynamicPrompt() {
+  // Cache profile and energy per invocation to avoid N+1 fetches during tool-calling turns
+  let cachedUserId: string | null = null;
+  let cachedProfile: Awaited<ReturnType<typeof fetchProfileAndEnergy>> | null = null;
+
+  async function fetchProfileAndEnergy(supabase: SupabaseClient<Database>, userId: string) {
+    const [profileResult, checkInResult] = await Promise.all([
+      supabase
+        .from("profiles")
+        .select("name, role, target_role, focus_areas, company_name, company_size")
+        .eq("id", userId)
+        .single(),
+      supabase
+        .from("check_ins")
+        .select("energy_level")
+        .eq("user_id", userId)
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .single(),
+    ]);
+    return { profile: profileResult.data, lastCheckIn: checkInResult.data };
+  }
+
   return async (
     state: { messages: BaseMessage[] },
     config: LangGraphRunnableConfig
@@ -90,21 +120,13 @@ export function createDynamicPrompt() {
     const supabase = getSupabaseClient(config);
     const userId = getUserId(config);
 
-    // Fetch profile
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("name, role, target_role, focus_areas, company_name, company_size")
-      .eq("id", userId)
-      .single();
+    // Reuse cached data within the same invocation (same userId)
+    if (cachedUserId !== userId || !cachedProfile) {
+      cachedProfile = await fetchProfileAndEnergy(supabase, userId);
+      cachedUserId = userId;
+    }
 
-    // Get latest energy level from most recent check-in
-    const { data: lastCheckIn } = await supabase
-      .from("check_ins")
-      .select("energy_level")
-      .eq("user_id", userId)
-      .order("created_at", { ascending: false })
-      .limit(1)
-      .single();
+    const { profile, lastCheckIn } = cachedProfile;
 
     // Detect coaching mode from the last user message
     const lastUserMessage = [...state.messages]
@@ -158,10 +180,12 @@ function getNextMidnightUTC(): Date {
  * Called once before agent invocation (not on every model call).
  */
 export async function checkRateLimit(
-  supabaseClient: SupabaseClient<Database>
+  supabaseClient: SupabaseClient<Database>,
+  userId: string
 ): Promise<{ remaining: number; currentCount: number }> {
   const { data, error } = await supabaseClient.rpc(
-    "check_and_increment_chat_usage"
+    "check_and_increment_chat_usage",
+    { p_user_id: userId }
   );
 
   if (error) {
@@ -194,12 +218,13 @@ export async function checkRateLimit(
  * Wraps a tool call function so that failures return a graceful error
  * ToolMessage instead of crashing the agent.
  */
-export function wrapToolExecution<T>(
-  fn: (input: T, config: LangGraphRunnableConfig) => Promise<string>
-): (input: T, config: LangGraphRunnableConfig) => Promise<string> {
-  return async (input: T, config: LangGraphRunnableConfig): Promise<string> => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function wrapToolExecution<T extends (...args: any[]) => Promise<string>>(
+  fn: T
+): T {
+  const wrapped = async (...args: Parameters<T>): Promise<string> => {
     try {
-      return await fn(input, config);
+      return await fn(...args);
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "An unknown error occurred";
@@ -209,6 +234,7 @@ export function wrapToolExecution<T>(
       });
     }
   };
+  return wrapped as T;
 }
 
 // ---------------------------------------------------------------------------
