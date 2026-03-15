@@ -80,6 +80,7 @@ appId: host.exp.Exponent
 - tapOn:
     id: "daily-goal-input"
 - inputText: "Full journey E2E test"
+- hideKeyboard
 - tapOn:
     id: "morning-save-button"
 - extendedWaitUntil:
@@ -105,6 +106,7 @@ appId: host.exp.Exponent
 - tapOn:
     id: "tomorrow-carry-input"
 - inputText: "Continue improving"
+- hideKeyboard
 - tapOn:
     id: "evening-save-button"
 - takeScreenshot: journey-03-evening-done

@@ -1,0 +1,97 @@
+{
+  "project": "SWE Mentor App - Mobile Chat UI",
+  "branchName": "ralph/ai-mentor-mobile-chat",
+  "description": "Build the mobile chat experience: types, API client, useMentor hook with streaming, chat components (bubbles, input, typing indicator, suggested prompts, rate limit banner), and the MentorScreen with navigation integration.",
+  "userStories": [
+    {
+      "id": "US-001",
+      "title": "Create chat types and SSE streaming API client",
+      "description": "As a developer, I need TypeScript types and an API client that connects to the mentor backend via SSE streaming.",
+      "acceptanceCriteria": [
+        "Create apps/mobile/src/types/chat.ts with types: Message (id, conversationId, content, role, createdAt), Conversation (id, title, createdAt, updatedAt, lastMessage), ChatStreamEvent (token, conversationId), RateLimitInfo (remaining, limit, resetAt)",
+        "Create apps/mobile/src/lib/mentorApi.ts",
+        "sendMessageStream(message, conversationId?) function: POSTs to /api/mentor/chat, returns async generator that yields tokens from SSE stream",
+        "SSE parsing: reads response.body with getReader(), decodes chunks, parses 'data:' lines, yields tokens until [DONE]",
+        "getRemainingChats() function: GETs /api/mentor/chat, returns RateLimitInfo",
+        "getConversationHistory(conversationId) function: queries messages table via Supabase client",
+        "getConversations() function: queries conversations table ordered by updated_at DESC",
+        "Auth: all requests include Authorization Bearer token from supabase.auth.getSession()",
+        "sendMessageStream accepts optional signal?: AbortSignal parameter and passes it to the underlying fetch() call for cancellation support",
+        "Create RateLimitError class that extends Error with remaining and resetAt properties",
+        "Add EXPO_PUBLIC_API_URL to apps/mobile/.env.example with value http://localhost:3000",
+        "Export from apps/mobile/src/types/index.ts barrel",
+        "Typecheck passes"
+      ],
+      "priority": 1,
+      "passes": false,
+      "notes": "Use the existing supabase client from apps/mobile/src/lib/supabase.ts for auth token and direct DB queries. The API base URL comes from EXPO_PUBLIC_API_URL env var. For SSE parsing, use TextDecoder on ReadableStream chunks. Handle partial chunks that split across 'data:' lines by buffering incomplete lines. IMPORTANT: Do NOT wrap sendMessageStream with withRetry — retry on streaming creates duplicate conversations. Import from barrel files: import { withRetry } from '../utils' (only for non-streaming calls like getRemainingChats). See docs/plans/2025-12-20-mobile-ai-chat-roadmap.md sections 2.1 and 2.2 for reference designs."
+    },
+    {
+      "id": "US-002",
+      "title": "Create useMentor hook with streaming support",
+      "description": "As a developer, I need a React hook that manages chat state, streaming responses, and rate limiting.",
+      "acceptanceCriteria": [
+        "Create apps/mobile/src/hooks/useMentor.ts",
+        "State: messages (Message[]), isLoading (boolean), isSending (boolean), error (Error|null), rateLimitInfo (RateLimitInfo|null), conversationId (string|null)",
+        "sendMessage(text) function: adds optimistic user message, calls sendMessageStream, builds assistant message token-by-token, handles errors by removing optimistic message",
+        "loadHistory(conversationId) function: fetches existing messages for a conversation",
+        "refreshRateLimit() function: fetches current usage via getRemainingChats()",
+        "useEffect on mount: calls refreshRateLimit()",
+        "useEffect on conversationId change: calls loadHistory() if conversationId is set",
+        "Cleanup: AbortController to cancel in-flight streams on unmount — pass controller.signal to sendMessageStream's signal parameter",
+        "All handlers wrapped in useCallback with proper dependencies",
+        "Export from apps/mobile/src/hooks/index.ts barrel",
+        "Typecheck passes"
+      ],
+      "priority": 2,
+      "passes": false,
+      "notes": "Follow existing hook patterns in apps/mobile/src/hooks/ (useAuth, useProfile). Use logger from apps/mobile/src/utils/ for errors, not console.log. The streaming loop should update state on each token for real-time display. Use AbortController to cancel the fetch if component unmounts mid-stream. See docs/plans/2025-12-20-mobile-ai-chat-roadmap.md section 2.3 for full hook design."
+    },
+    {
+      "id": "US-003",
+      "title": "Create chat UI components (ChatBubble, ChatInput, TypingIndicator, SuggestedPrompts, RateLimitBanner, ChatHeader)",
+      "description": "As a developer, I need polished chat components following the dark theme design system.",
+      "acceptanceCriteria": [
+        "Create apps/mobile/src/components/chat/ directory with all components",
+        "ChatBubble.tsx: user messages right-aligned with bg-primary-600 rounded-2xl, assistant messages left-aligned with bg-gray-800 rounded-2xl, max-width 80%, timestamp in text-xs text-gray-500",
+        "ChatInput.tsx: TextInput with bg-gray-800 rounded-2xl, multiline support, animated send button using react-native-reanimated (scales up when text present), disabled state when isSending",
+        "TypingIndicator.tsx: 3 animated dots with sequential delay (200ms apart) using react-native-reanimated, gray-400 color",
+        "SuggestedPrompts.tsx: horizontal ScrollView with prompt chips (bg-gray-800/50 rounded-xl px-4 py-2), prompts: 'How was my week?', 'Career advice', 'Help with a blocker', 'Review my goals'",
+        "RateLimitBanner.tsx: amber/yellow warning banner with Ionicons warning icon, shows remaining count and time until reset, hidden when remaining > 5",
+        "ChatHeader.tsx: 'Mentor' title in text-xl font-bold, remaining chats badge (bg-primary-600 rounded-full px-2)",
+        "Create apps/mobile/src/components/chat/index.ts barrel export",
+        "All components use NativeWind className prop for styling",
+        "All components use Ionicons from @expo/vector-icons for icons",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 3,
+      "passes": false,
+      "notes": "Follow STYLE_GUIDE.md and apps/mobile/CLAUDE.md strictly. Dark theme: bg-gray-950 main background, bg-gray-900 card background, primary purple #8b5cf6, text-white primary text, text-gray-400 secondary. Use StyleSheet.create outside components for non-NativeWind styles. Use useCallback for handlers passed to children. Put the suggested prompt strings in apps/mobile/src/constants/ as SUGGESTED_PROMPTS constant — do NOT use magic strings inline. See docs/plans/2025-12-20-mobile-ai-chat-roadmap.md sections 3.2-3.6 for exact component specs."
+    },
+    {
+      "id": "US-004",
+      "title": "Create MentorScreen and integrate into tab navigation",
+      "description": "As a developer, I need the MentorScreen wired into the tab navigator so users can access the AI mentor.",
+      "acceptanceCriteria": [
+        "Create apps/mobile/src/screens/main/MentorScreen.tsx",
+        "Screen layout: SafeAreaView + KeyboardAvoidingView (behavior='padding' on iOS)",
+        "ChatHeader at top with remaining chats badge from useMentor",
+        "RateLimitBanner conditionally shown below header",
+        "FlatList with inverted={false} rendering ChatBubble components, TypingIndicator as ListFooterComponent when isSending",
+        "Empty state: centered Ionicons chatbubbles-outline icon (size 64, gray-600) + 'Start a conversation with your AI mentor' text + SuggestedPrompts component",
+        "ChatInput fixed at bottom with KeyboardAvoidingView",
+        "Auto-scroll to bottom on new messages via FlatList ref and onContentSizeChange",
+        "SuggestedPrompts shown above ChatInput when messages array is empty",
+        "Update apps/mobile/src/navigation/MainTabNavigator.tsx: add MentorTab alongside existing tabs",
+        "Update apps/mobile/src/components/CustomTabBar.tsx: add Mentor tab with chatbubbles icon (Ionicons)",
+        "Update BOTH MainTabParamList in apps/mobile/src/types/navigation.ts AND the local MainTabParamList in MainTabNavigator.tsx to add MentorTab: { conversationId?: string } — or delete the local redefinition and import the shared type",
+        "Typecheck passes",
+        "Verify in browser using dev-browser skill"
+      ],
+      "priority": 4,
+      "passes": false,
+      "notes": "Do NOT replace InsightsScreen — add MentorTab as a new tab. Check the existing MainTabNavigator.tsx and CustomTabBar.tsx for patterns. The tab icon should be 'chatbubbles' (filled) / 'chatbubbles-outline' (unfilled) from Ionicons. Follow existing screen patterns for SafeAreaView usage. Use the existing ProfileContext if you need user profile data. See docs/plans/2025-12-20-mobile-ai-chat-roadmap.md section 4.1 for full screen spec."
+    }
+  ]
+}

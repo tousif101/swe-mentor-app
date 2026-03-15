@@ -1,0 +1,24 @@
+# Ralph Progress Log
+Started: Loop 2 - Career Ladders & Onboarding
+
+## Codebase Patterns
+- Profiles table uses `name` column (not `display_name`)
+- Reuse `public.update_updated_at()` trigger function for updated_at triggers
+- Follow RLS pattern: separate policies for SELECT, INSERT, UPDATE, DELETE per table
+- Use `gen_random_uuid()` for default UUIDs on primary keys
+- Migration files go in `supabase/migrations/` with date prefix
+- Regenerate types with `mcp__supabase__generate_typescript_types` → save to `packages/shared/src/database.types.ts`
+- Typecheck only runs on `@swe-mentor/shared` workspace (npm run typecheck from root)
+- Mobile app uses NativeWind className for styling — follow apps/mobile/CLAUDE.md
+- Use Ionicons from @expo/vector-icons for icons
+- Use useCallback for handlers passed to children
+- Use logger from apps/mobile/src/utils/ — never console.log
+- Supabase client at apps/mobile/src/lib/supabase.ts
+- OnboardingNavigator passes params through Profile → ReminderSetup → Ready screens
+- ReadyScreen saves profile data to Supabase on line 48-57
+- validation.ts has profileSchema with Zod — BUG: missing 'intern' role, needs fixing
+- career_matrices table has UNIQUE(matrix_id, level_code) on level_definitions
+- career-ladder-research.json at docs/ has Dropbox (IC1-IC7), Etsy (8 levels), and 75+ progression.fyi URLs
+- DRY principle: shared hooks go in apps/mobile/src/hooks/ with barrel export at index.ts
+
+---

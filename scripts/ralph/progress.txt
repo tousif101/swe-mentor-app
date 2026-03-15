@@ -1,88 +1,110 @@
 # Ralph Progress Log
-Started: Thu Mar 12 05:16:01 EDT 2026
+Started: Fri Mar 13 04:15:53 EDT 2026
 ---
 
 ## Codebase Patterns
-- Validation schemas live in `apps/mobile/src/utils/validation.ts`, tests in `__tests__/validation.test.ts`
-- Use `ROLE_CONFIG` and `ROLES_ORDERED` from `lib/roleMapping.ts` as single source of truth for roles — never duplicate role lists
-- Vitest is the test runner for mobile app: `npx vitest run` from `apps/mobile/`
-- Pre-existing typecheck errors in App.tsx and e2e/ are unrelated — only check for errors in modified files
-- Zod enum requires a non-empty tuple type — use `as unknown as readonly [string, ...string[]]` when converting arrays
-- Seed scripts go in `scripts/` at project root; use service role key from `npx supabase status --output json`
-- `career_matrices` and `level_definitions` tables: use `mapToLevelDefinition()` pattern for consistent level insertion
-- Custom hooks live in `apps/mobile/src/hooks/` with barrel export in `index.ts`; `useCompanyMatch` is the shared hook for company autocomplete
-- Settings screens have mixed styling: CareerGoalScreen uses `StyleSheet.create()`, EditProfileScreen uses NativeWind `className` — match the existing approach per file
+- LangChain packages are hoisted to root node_modules (monorepo); imports resolve from there
+- apps/web/.gitignore has `.env*` — must add `!.env.example` to track example env files
+- Use `createReactAgent` from `@langchain/langgraph/prebuilt` (not from `langchain` package directly)
+- `createReactAgent` param is `llm` (not `model`), accepts `checkpointer` directly
+- Supabase server client uses cookies() — do NOT use inside LangChain tools (use JWT-initialized client instead)
+- Use `tool()` from `@langchain/core/tools` (not `DynamicStructuredTool`) — it passes `RunnableConfig` as 2nd arg to func
+- Access userId/supabaseClient via `config.configurable` in tool functions
+- check_ins table column is `check_in_type` (not `type`), no `reflection` column exists
+- Shared package import is `@swe-mentor/shared` (not `@repo/shared`); `Profile` type is pre-exported
+- `createReactAgent` supports `prompt` (async function), `preModelHook`, `postModelHook` — no middleware array
+- `check_and_increment_chat_usage` RPC returns array — access as `data[0].allowed`, `data[0].remaining`
+- Use `m.getType()` (not `_getType()`) on BaseMessage to check message type ("human", "ai", "tool")
+- For JWT-based auth in API routes, use `createClient` from `@supabase/supabase-js` (not the cookie-based `@supabase/ssr` server client)
+- Use `crypto.randomUUID()` instead of `uuid` package — available in Node.js, no extra dependency
+- `createReactAgent` accepts `prompt` (async function) and `preModelHook` — pass these in `createMentorAgent` factory
+- `agent.stream()` with `streamMode: "messages"` yields tuples — check `msg instanceof AIMessageChunk && typeof msg.content === "string"` before emitting
 
 ---
 
-## 2026-03-12 05:17 - US-001
-- Fixed validation schema: added 'intern' role, derived roleIndexMap from ROLE_CONFIG (DRY fix), added optional company fields (company_name, company_size, career_matrix_id)
-- Files changed:
-  - `apps/mobile/src/utils/validation.ts` — rewrote to import from roleMapping.ts, derive roles dynamically, add company fields
-  - `apps/mobile/src/utils/__tests__/validation.test.ts` — added 7 new test cases for intern role and company fields
+## 2026-03-13 - US-001
+- Installed langchain, @langchain/core, @langchain/anthropic, @langchain/langgraph, @langchain/textsplitters
+- Created apps/web/src/lib/langchain/config.ts with ChatAnthropic (claude-sonnet-4-5, temp 0.7, maxTokens 2000) and createMentorAgent() factory
+- Created apps/web/src/lib/langchain/index.ts barrel export
+- Created apps/web/.env.example with ANTHROPIC_API_KEY
+- Updated .gitignore to allow .env.example
+- Files changed: apps/web/package.json, apps/web/.gitignore, apps/web/.env.example, apps/web/src/lib/langchain/config.ts, apps/web/src/lib/langchain/index.ts
 - **Learnings for future iterations:**
-  - `ROLES_ORDERED` is typed as `DbRole[]` not a tuple, so needs double cast for `z.enum()`
-  - Pre-existing TS errors in App.tsx and e2e/ — don't block on those
-  - All 30 validation tests pass
+  - `createReactAgent` uses `llm` not `model` as the parameter name
+  - The monorepo hoists @langchain packages to root node_modules
+  - .gitignore needed `!.env.example` exception for the env example file
+  - Typecheck and lint both pass cleanly — no new warnings introduced
 ---
 
-## 2026-03-12 - US-002
-- Created career ladder seed script at `scripts/seed-career-ladders.ts`
-- Parses Dropbox (7 IC levels) and Etsy (8 levels) from `docs/career-ladder-research.json`
-- Creates 4 generic templates: FAANG (5 levels), Startup (4 levels), Midsize (5 levels), Intern (2 levels)
-- Idempotent: checks `company_name` existence before inserting
-- DRY: shared `mapToLevelDefinition()` helper used by all parsers
-- Files changed:
-  - `scripts/seed-career-ladders.ts` — new seed script
+## 2026-03-13 - US-002
+- Created apps/web/src/lib/langchain/utils.ts with getSupabaseClient() and getUserId() helpers
+- Created apps/web/src/lib/langchain/tools.ts with 5 tools: get_career_goals, get_progress_summary, get_recent_checkins, search_user_context (stub), get_career_ladder
+- Updated apps/web/src/lib/langchain/index.ts barrel export with mentorTools, getSupabaseClient, getUserId
+- All tools use `tool()` from @langchain/core/tools with Zod schemas
+- All tools extract supabaseClient and userId from config.configurable (DRY via utils.ts)
+- get_career_ladder does fuzzy ILIKE match, falls back to Generic FAANG/Startup template
+- search_user_context returns stub message for future RAG wiring
+- Files changed: apps/web/src/lib/langchain/utils.ts (new), apps/web/src/lib/langchain/tools.ts (new), apps/web/src/lib/langchain/index.ts
 - **Learnings for future iterations:**
-  - Local Supabase service role key available via `npx supabase status --output json` → `SERVICE_ROLE_KEY`
-  - `career_matrices` table has UNIQUE on `company_name` implicitly via idempotency check
-  - `level_definitions` has UNIQUE constraint on `(matrix_id, level_code)` — level codes must be unique per matrix
-  - Dropbox pillar mapping: craft→technical, talent→leadership, culture→collaboration, direction→visibility, results→technical (appended)
-  - Etsy mapping: delivery+domain_expertise+problem_solving→technical, leadership→leadership, communication→collaboration
-  - Script runnable with: `SUPABASE_URL=... SUPABASE_SERVICE_ROLE_KEY=... npx tsx scripts/seed-career-ladders.ts`
+  - `DynamicStructuredTool` func receives `(input, runManager?)` — runManager is NOT RunnableConfig. Use `tool()` helper instead which passes RunnableConfig as 2nd arg.
+  - `config.configurable` is typed loosely — cast through `Record<string, unknown>` for type-safe access
+  - check_ins table uses `check_in_type` column (not `type`) and has no `reflection` column
+  - ESLint runs via `npx eslint <path>` (not `next lint --dir`)
 ---
 
-## 2026-03-12 - US-003
-- Created reusable `useCompanyMatch` hook for company name autocomplete and career matrix matching
-- Debounces Supabase ILIKE queries (300ms, 2+ chars), returns `CompanySuggestion[]` with id and company_name
-- All handlers wrapped in `useCallback`, debounce timer cleaned up on unmount
-- Files changed:
-  - `apps/mobile/src/hooks/useCompanyMatch.ts` — new hook
-  - `apps/mobile/src/hooks/index.ts` — added barrel export for hook and `CompanySuggestion` type
+## 2026-03-13 - US-003
+- Created apps/web/src/lib/langchain/prompts.ts with full 3-layer prompt system and 4 coaching modes
+- Layer 1: BASE_COACHING_PROMPT with 7 coaching principles and user context placeholders
+- Layer 2: LEVEL_PLAYBOOKS for 5 transitions (intern→SE1, SE1→SE2, SE2→senior, senior→staff, staff→principal)
+- Layer 3: TACTICAL_GUIDES with 5 templates (PR descriptions, blocker escalation, impact communication, design docs, brag doc entries)
+- 4 coaching modes: supportive (energy ≤ 2), socratic (default), direct (blocker signals), exploratory (open-ended)
+- detectCoachingMode() analyzes message content + energy level to select mode
+- buildSystemPrompt() assembles all 3 layers + coaching mode with user-specific variable injection
+- DRY: replacePlaceholders() utility for {{placeholder}} substitution
+- Updated index.ts barrel exports with all prompts exports
+- Files changed: apps/web/src/lib/langchain/prompts.ts (new), apps/web/src/lib/langchain/index.ts
 - **Learnings for future iterations:**
-  - Hooks directory already existed with useAuth, useProfile, useCheckInAutoSave, usePushNotifications, useInsights
-  - Suggestions should include matrix `id` (not just company name strings) so `selectCompany(name, matrixId)` can be called from the UI
-  - The `getCompanyFields()` returns `null` for empty company_name to avoid saving empty strings to DB
+  - Shared package is `@swe-mentor/shared` (not `@repo/shared`) — check existing imports in utils.ts/server.ts
+  - `Profile` type is pre-exported from `@swe-mentor/shared` — no need to use `Tables<'profiles'>` directly
+  - ESLint config lives in apps/web/ — run from that directory
 ---
 
-## 2026-03-12 - US-004
-- Updated onboarding flow with optional company name (autocomplete via useCompanyMatch hook), company size chips, and matched company banner
-- Company fields passed through navigation: ProfileScreen → ReminderSetupScreen → ReadyScreen → Supabase profile update
-- Files changed:
-  - `apps/mobile/src/navigation/OnboardingNavigator.tsx` — added companyName?, companySize?, careerMatrixId? to ReminderSetup and Ready params
-  - `apps/mobile/src/screens/onboarding/ProfileScreen.tsx` — added useCompanyMatch hook, company name TextInput with autocomplete FlatList, matched company green banner, company size horizontal chips
-  - `apps/mobile/src/screens/onboarding/ReminderSetupScreen.tsx` — destructured and forwarded company params to Ready screen
-  - `apps/mobile/src/screens/onboarding/ReadyScreen.tsx` — added company fields to Supabase profile .update() call
+## 2026-03-13 - US-004
+- Created apps/web/src/lib/langchain/errors.ts with RateLimitError class (includes remaining count + resetAt)
+- Created apps/web/src/lib/langchain/middleware.ts with full middleware stack:
+  - summarizationHook: preModelHook that uses claude-haiku-4-5 to summarize older messages when count exceeds threshold, keeps last 10
+  - createDynamicPrompt: returns async prompt function that fetches profile, detects coaching mode, builds personalized system prompt
+  - checkRateLimit: calls check_and_increment_chat_usage RPC via JWT-bearing Supabase client, throws RateLimitError
+  - wrapToolExecution: wraps tool functions to catch errors and return graceful JSON error instead of crashing
+  - MODEL_CALL_LIMIT (10) and TOOL_CALL_LIMIT (15) constants
+  - mentorMiddleware assembled config object for API route consumption
+- Updated index.ts barrel exports with all middleware + error exports
+- Files changed: apps/web/src/lib/langchain/errors.ts (new), apps/web/src/lib/langchain/middleware.ts (new), apps/web/src/lib/langchain/index.ts
 - **Learnings for future iterations:**
-  - Navigation params must be threaded through all screens in the stack — ReminderSetupScreen acts as passthrough for company fields
-  - Use conditional spread (`...(value ? { key: value } : {})`) to avoid saving undefined/null to Supabase
-  - FlatList with `keyboardShouldPersistTaps="handled"` is needed for autocomplete to work without dismissing keyboard
-  - All 105 tests pass, typecheck clean (pre-existing App.tsx/e2e errors only)
+  - `createReactAgent` has `prompt`, `preModelHook`, `postModelHook` params — no middleware array
+  - `preModelHook` receives `{ messages, llmInputMessages }` state — return `{ llmInputMessages }` to modify LLM input
+  - `prompt` as async function `(state, config) => BaseMessageLike[]` is the best way to inject dynamic system prompts
+  - RPC returns TABLE type — must cast `data` as array and access `[0]` (TypeScript types it loosely)
+  - `BaseMessage.getType()` returns "human" | "ai" | "tool" | "system" — use this instead of `_getType()`
 ---
 
-## 2026-03-12 - US-005
-- Updated CareerGoalScreen with company name TextInput (autocomplete via useCompanyMatch hook), matched company green banner, and company size chip selector
-- Updated EditProfileScreen to show company info as read-only with "Edit in Career Goals" navigation link
-- Company fields (company_name, company_size, career_matrix_id) saved alongside role updates in CareerGoalScreen
-- hasChanges detection updated to include company field diffs
-- Files changed:
-  - `apps/mobile/src/screens/settings/CareerGoalScreen.tsx` — added useCompanyMatch hook, company name input with autocomplete, matched banner, size chips, updated save handler
-  - `apps/mobile/src/screens/settings/EditProfileScreen.tsx` — added read-only company info section with "Edit in Career Goals" link
+## 2026-03-13 - US-005
+- Created apps/web/src/lib/langchain/auth.ts with validateAuth() helper and AuthError class
+  - Extracts Bearer token from Authorization header
+  - Verifies with Supabase auth.getUser(token)
+  - Returns both user object AND JWT-initialized Supabase client
+- Created apps/web/src/app/api/mentor/chat/route.ts with POST and GET handlers
+  - POST: receives { message, conversationId }, creates conversation if needed, saves user message, streams agent response as SSE, saves assistant response
+  - GET: returns { remaining, limit, resetAt } for authenticated user
+  - Error handling: 401 for auth, 429 for rate limit (with remaining/resetAt), 400 for bad request, 500 for other
+- Extended createMentorAgent in config.ts to accept prompt and preModelHook params
+- Updated index.ts barrel exports with auth module
+- Agent is created at module level with dynamic prompt + summarization hook wired in
+- Files changed: apps/web/src/lib/langchain/auth.ts (new), apps/web/src/app/api/mentor/chat/route.ts (new), apps/web/src/lib/langchain/config.ts, apps/web/src/lib/langchain/index.ts
 - **Learnings for future iterations:**
-  - CareerGoalScreen uses StyleSheet.create() throughout (not Tailwind classes like onboarding) — match existing style approach
-  - EditProfileScreen uses className (Tailwind/NativeWind) — mixed approaches across settings screens
-  - Profile context provides `company_name`, `company_size`, `career_matrix_id` directly since Profile type is `Tables<'profiles'>`
-  - useCompanyMatch accepts initial values via options object — pass `?? undefined` for nullable profile fields
-  - All 105 tests pass, typecheck clean (pre-existing App.tsx/e2e errors only)
+  - Use `createClient` from `@supabase/supabase-js` for JWT auth (not `@supabase/ssr` cookie-based client)
+  - `crypto.randomUUID()` is available in Node.js — no need for `uuid` package
+  - SSE streaming: AIMessageChunk content can be string or array (tool-use) — always check `typeof msg.content === "string"`
+  - `agent.stream()` with `streamMode: "messages"` yields `[message, metadata]` tuples
+  - Next.js App Router route handlers use `NextRequest`/`NextResponse` from `next/server`
 ---

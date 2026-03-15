@@ -1,0 +1,14 @@
+# Ralph Progress Log
+Started: Thu Mar 13 2026
+---
+
+## Codebase Patterns
+- (carried from Loop 2) Validation schemas live in `apps/mobile/src/utils/validation.ts`, tests in `__tests__/validation.test.ts`
+- (carried from Loop 2) Use `ROLE_CONFIG` and `ROLES_ORDERED` from `lib/roleMapping.ts` as single source of truth for roles
+- (carried from Loop 2) Vitest is the test runner for mobile app: `npx vitest run` from `apps/mobile/`
+- (carried from Loop 2) Pre-existing typecheck errors in App.tsx and e2e/ are unrelated — only check for errors in modified files
+- Web app (Next.js) lives in `apps/web/` — check its tsconfig and package.json for build/type commands
+- DB migrations already applied: conversations, messages, daily_metrics, document_embeddings (pgvector), career_matrices, level_definitions, journal_entries, profiles (company fields)
+- Career ladder data already seeded via `scripts/seed-career-ladders.ts` (Dropbox, Etsy, 4 generic templates)
+
+---
