@@ -6,9 +6,10 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Database } from "@swe-mentor/shared";
 
 import { getSupabaseClient, getUserId } from "./utils";
-import { buildSystemPrompt, detectCoachingMode } from "./prompts";
+import { buildSystemPrompt, detectCoachingMode, augmentForSuspiciousInput } from "./prompts";
 import type { CoachingMode } from "./prompts";
 import { RateLimitError } from "./errors";
+import { detectInjectionPatterns } from "./safety";
 
 // ---------------------------------------------------------------------------
 // 1. Summarization middleware config
@@ -142,7 +143,7 @@ export function createDynamicPrompt() {
     const mode: CoachingMode = detectCoachingMode(lastMessageContent, energyLevel);
 
     // Build system prompt (falls back gracefully if profile is null)
-    const systemPrompt = buildSystemPrompt(
+    let systemPrompt = buildSystemPrompt(
       {
         name: profile?.name ?? null,
         role: profile?.role ?? null,
@@ -154,7 +155,27 @@ export function createDynamicPrompt() {
       mode
     );
 
-    return [new SystemMessage(systemPrompt), ...state.messages];
+    // Detect injection patterns and harden if suspicious
+    const { suspicious } = detectInjectionPatterns(lastMessageContent);
+    if (suspicious) {
+      systemPrompt = augmentForSuspiciousInput(systemPrompt);
+    }
+
+    // Wrap only the last human message in <user_message> tags to establish trust boundary.
+    // Only the newest message needs wrapping — historical messages were already processed.
+    const lastHumanIdx = state.messages.map((m, i) => ({ m, i }))
+      .reverse()
+      .find(({ m }) => m.getType() === "human")?.i;
+    const wrappedMessages = state.messages.map((m, i) => {
+      if (i === lastHumanIdx && typeof m.content === "string") {
+        // Strip any user-injected tag markers to prevent boundary escape
+        const safeContent = m.content.replace(/<\/?user_message>/gi, "");
+        return new HumanMessage(`<user_message>${safeContent}</user_message>`);
+      }
+      return m;
+    });
+
+    return [new SystemMessage(systemPrompt), ...wrappedMessages];
   };
 }
 

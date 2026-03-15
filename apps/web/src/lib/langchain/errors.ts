@@ -14,3 +14,16 @@ export class RateLimitError extends Error {
     this.resetAt = resetAt;
   }
 }
+
+/**
+ * Thrown when a user sends messages too rapidly.
+ */
+export class ThrottleError extends Error {
+  readonly retryAfterMs: number;
+
+  constructor(retryAfterMs: number) {
+    super(`Too many requests. Retry after ${retryAfterMs}ms`);
+    this.name = "ThrottleError";
+    this.retryAfterMs = retryAfterMs;
+  }
+}
